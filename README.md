@@ -259,14 +259,14 @@ We also draw inspiration and adapt patterns from these open-source projects:
 
 | Project | What We Borrowed | License |
 |---------|-----------------|---------|
-| [slop-X](https://github.com/jfc-mit/slop-X) | Original framework concept and phase-based analysis architecture | — |
+| [slop-X](https://github.com/jfc-mit/slop-X) | Original framework concept and phase-based analysis architecture | GPL-3.0 |
 | [ACG Protocol](https://github.com/acg-team/acg_protocol) | UGVP fact grounding (IGM/SSR/VAR audit structures) | — |
-| [Graphiti](https://github.com/getzep/graphiti) | Temporal EntityEdge validity model for knowledge graphs | Apache 2.0 |
+| [Graphiti](https://github.com/getzep/graphiti) | Temporal EntityEdge validity model for knowledge graphs | Apache-2.0 |
 | [OpenViking](https://github.com/AIsmart-Team/OpenViking) | Memory lifecycle hotness scoring (`sigmoid × recency`) | — |
 | [Causica](https://github.com/microsoft/causica) | Graph evaluation metrics patterns | MIT |
 | [causal-learn](https://github.com/py-why/causal-learn) | PC algorithm for causal structure discovery | MIT |
 | [DoWhy](https://github.com/py-why/dowhy) | Causal inference + refutation testing framework | MIT |
-| [DeerFlow](https://github.com/nicepkg/deer-flow) | Multi-agent orchestration patterns | MIT |
+| [DeerFlow](https://github.com/bytedance/deer-flow) | Multi-agent orchestration patterns | MIT |
 
 The development workflow was powered by [Superpowers](https://github.com/cline/superpowers-marketplace) skills for Claude Code — particularly `writing-plans`, `subagent-driven-development`, `test-driven-development`, and `code-reviewer`.
 
