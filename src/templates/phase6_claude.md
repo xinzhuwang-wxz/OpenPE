@@ -132,6 +132,81 @@ analysis phases into a coherent narrative.
 
 **Output:** `exec/REPORT.md` following the outline above.
 
+## Writing Style Guide
+
+The report's core value is rigorous, transparent reasoning. Every causal
+claim, every EP assessment, every refutation test result must be explained
+fully. **Do not sacrifice analytical depth for brevity.** A 30-page report
+that explains every step is better than a 10-page report that hand-waves.
+
+**The dual requirement:** Rigorous reasoning AND polished prose. These are
+not in tension — the best analysis reports are both thorough and well-written.
+The reader should feel guided through a careful argument, not buried in a
+data dump.
+
+**Structure each section as:** conclusion first, then full reasoning chain,
+then caveats and limitations.
+
+**Prose quality checklist (apply before submitting):**
+
+1. **Lead with "so what" — then show your work.** Every section opens with
+   one sentence stating the key takeaway. Then walk through the full
+   reasoning: what data was used, what method was applied, what the result
+   was, what alternative explanations were considered and ruled out.
+   Not "We analyzed X using Y" but "X causes Y — here is how we know,
+   and here is what could make us wrong."
+
+2. **No LLM-speak.** Avoid: "It is important to note that...",
+   "As shown in Figure X...", "We can observe that...",
+   "In this section, we will...". Instead, state the fact directly.
+   But DO keep detailed technical explanations — just write them well.
+
+3. **Use concrete numbers throughout.** Not "adoption increased significantly"
+   but "adoption grew from 12% to 47% in 3 years (a 3.9x increase)."
+   Provide both absolute and relative magnitudes where informative.
+
+4. **Bold key numbers.** Use **bold** for the most important quantitative
+   findings. One or two bold numbers per paragraph, maximum.
+
+5. **Explain statistical concepts inline.** When using terms like "refutation
+   test," "confidence interval," or "Granger causality," add a brief
+   parenthetical: "refutation tests (which check whether the result
+   holds up under different assumptions — for example, what happens if
+   we randomly shuffle the treatment variable)."
+
+6. **Use analogies for scale.** "The broadband divide between rich and
+   poor countries is 800x — equivalent to comparing highway networks
+   with dirt paths." Analogies complement the numbers, not replace them.
+
+7. **Executive Summary is a standalone document.** Someone who reads ONLY
+   the executive summary should know: the question, the answer, the
+   confidence level, and the key caveat. 4 paragraphs maximum. But the
+   rest of the report MUST contain the full reasoning — the executive
+   summary is a preview, not a replacement.
+
+8. **Each scenario gets a name and a narrative.** Not "Scenario 1:
+   parameters (L=104, k=0.19)" but "The 'Smartphone Redux' scenario:
+   agents follow the same explosive growth that smartphones did, reaching
+   80% penetration by 2033." Then explain the full parameter set and
+   why these values were chosen.
+
+9. **Show the causal chain, step by step.** When presenting a causal
+   argument, walk through each edge: "A causes B (EP=0.77, supported by
+   scaling laws literature), B causes C (EP=0.55, theorized based on
+   task-technology fit theory), therefore the chain A→B→C has Joint EP
+   of 0.42." The reader should be able to follow and challenge each link.
+
+10. **Don't fear length — fear incompleteness.** Every DAG edge that was
+    tested deserves its own subsection with method, data, result,
+    refutation outcome, and EP update. Every untestable edge deserves
+    an explanation of WHY it's untestable and what data WOULD be needed.
+
+**Tone:** Authoritative but honest. Confident where evidence supports it,
+explicitly uncertain where it doesn't. Never hedge everything — that
+reads as lack of conviction. Never assert without evidence — that reads
+as overconfidence. The goal is the tone of a senior analyst briefing a
+board: precise, thorough, and clear about what is known vs unknown.
+
 ---
 
 ## Step 6.2 — EP Decay Visualization
