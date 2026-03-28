@@ -1,4 +1,18 @@
+<div align="center">
+
 # OpenPE — Principle to Endgame
+
+**LLM-driven first-principles causal analysis framework**
+
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-green.svg)](https://python.org)
+[![Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-orange.svg)](https://claude.ai/claude-code)
+
+[English](README.md) · [中文](README_zh.md) · [한국어](README_ko.md)
+
+</div>
+
+---
 
 Every event has a cause. Every cause has a cause. This forms a network — not a line, a network. Each node is the center of its own web of causes and consequences.
 
@@ -173,7 +187,7 @@ OpenPE builds on ideas from three notable projects, adapted to fit the first-pri
 
 ### ACG Protocol → Audit Trail (IGM/SSR/VAR)
 
-The [ACG Protocol](https://github.com/acg-team/acg_protocol) introduced Inline Grounding Markers and source verification registries for fact-grounded text generation. OpenPE adapts this into a three-layer audit trail:
+The [ACG Protocol](https://github.com/Kos-M/acg_protocol) introduced Inline Grounding Markers and source verification registries for fact-grounded text generation. OpenPE adapts this into a three-layer audit trail:
 
 - **IGM** (Inline Grounding Markers): `[C1:a1b2c3d4e5:phase3/data.csv:row42]` — every claim embeds a hash linking to its source
 - **SSR** (Structured Source Registry): SHA-256 hashes, source types, verification status per dataset
@@ -185,7 +199,7 @@ The [ACG Protocol](https://github.com/acg-team/acg_protocol) introduced Inline G
 
 ### OpenViking → Memory Hotness Scoring
 
-[OpenViking](https://github.com/AIsmart-Team/OpenViking)'s memory lifecycle system provided the hotness scoring formula: `sigmoid(frequency) × exponential_recency`. OpenPE uses this to distinguish actively-used memories from stale ones, driving the archival and forgetting mechanisms that keep the memory system bounded.
+[OpenViking](https://github.com/volcengine/OpenViking)'s memory lifecycle system provided the hotness scoring formula: `sigmoid(frequency) × exponential_recency`. OpenPE uses this to distinguish actively-used memories from stale ones, driving the archival and forgetting mechanisms that keep the memory system bounded.
 
 ---
 
