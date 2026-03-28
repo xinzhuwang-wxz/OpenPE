@@ -6,5 +6,11 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Tests (run locally, not shipped with analyses)
-tests/
+# Analysis outputs (each analysis has its own git repo)
+analyses/
+
+# Global memory (accumulates per-user, not shared)
+memory/
+
+# Reference repos (read-only, not part of OpenPE)
+_ref/

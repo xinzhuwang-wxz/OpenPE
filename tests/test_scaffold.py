@@ -84,9 +84,9 @@ def test_memory_directory_created():
     scaffold(TEST_DIR, "analysis")
     memory_dir = TEST_DIR / "memory"
     assert memory_dir.is_dir()
-    assert (memory_dir / "L0_universal").is_dir()
-    assert (memory_dir / "L1_domain").is_dir()
-    assert (memory_dir / "L2_detailed").is_dir()
+    assert (memory_dir / "L0").is_dir()
+    assert (memory_dir / "L1").is_dir()
+    assert (memory_dir / "L2").is_dir()
     assert (memory_dir / "causal_graph").is_dir()
 
 

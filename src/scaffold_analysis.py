@@ -10,6 +10,7 @@ from src/templates/, initializes a git repo, and creates the pixi environment.
 """
 
 import argparse
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -132,11 +133,37 @@ def scaffold(analysis_dir: Path, analysis_type: str):
                 dst.write_text(script.read_text())
                 print(f"  copied {dst}")
 
-    # Memory directory for forward compatibility
+    # Memory directory — MemoryStore uses short tier names (L0, L1, L2).
+    # We also create human-readable aliases for discoverability.
     memory_dir = analysis_dir / "memory"
-    for subdir in ["L0_universal", "L1_domain", "L2_detailed", "causal_graph"]:
+    for subdir in ["L0", "L1", "L2", "causal_graph"]:
         (memory_dir / subdir).mkdir(parents=True, exist_ok=True)
     print(f"  created memory/ structure")
+
+    # Copy global memory into analysis-local memory.
+    # Global memory lives at the spec root: <repo>/memory/
+    # Each analysis gets a snapshot so accumulated domain knowledge persists.
+    global_memory = HERE.parent / "memory"
+    if global_memory.exists() and global_memory.is_dir():
+        copied = 0
+        for tier in ["L0", "L1", "L2", "causal_graph"]:
+            src_tier = global_memory / tier
+            dst_tier = memory_dir / tier
+            if not src_tier.exists():
+                continue
+            for entry in src_tier.glob("*.yaml"):
+                dst = dst_tier / entry.name
+                if not dst.exists():
+                    shutil.copy2(str(entry), str(dst))
+                    copied += 1
+            # Also copy graph.json for causal knowledge graph
+            for entry in src_tier.glob("*.json"):
+                dst = dst_tier / entry.name
+                if not dst.exists():
+                    shutil.copy2(str(entry), str(dst))
+                    copied += 1
+        if copied:
+            print(f"  copied {copied} global memory entries into analysis")
 
     # Symlink conventions/, methodology/, and .claude/ into the analysis directory
     # Each analysis gets its own git repo, so Claude Code won't walk up to

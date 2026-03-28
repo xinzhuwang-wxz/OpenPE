@@ -4,11 +4,16 @@ Extracts experiences from completed analysis artifacts and commits
 them to the memory store and causal knowledge graph. Optionally
 grows domain packs from accumulated L1 experiences.
 
+Also supports promoting high-confidence findings to global memory
+(at the spec root) so they persist across analyses.
+
 Reference: OpenPE spec — Memory System Design, Session Commit
 """
 from __future__ import annotations
 
+import json
 import re
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from datetime import datetime
@@ -288,3 +293,86 @@ def grow_domain_pack(
         yaml.dump(pack, f, default_flow_style=False, sort_keys=False)
 
     return pack_path
+
+
+# --- Global Memory Promotion ---
+
+# Only entries with confidence above this threshold are promoted to global.
+GLOBAL_PROMOTION_THRESHOLD = 0.6
+
+
+def promote_to_global(
+    analysis_dir: Path,
+    global_memory_dir: Path,
+    min_confidence: float = GLOBAL_PROMOTION_THRESHOLD,
+) -> dict:
+    """Promote high-confidence findings from analysis-local memory to global.
+
+    This enables cross-analysis learning: domain knowledge, method
+    experiences, and causal relationships persist across separate analyses.
+
+    Args:
+        analysis_dir: analysis root (contains memory/ and memory/causal_graph/)
+        global_memory_dir: spec-root memory/ directory
+        min_confidence: only promote entries above this confidence
+
+    Returns:
+        dict with counts: {"memories_promoted": int, "graph_edges_promoted": int}
+    """
+    analysis_dir = Path(analysis_dir)
+    global_memory_dir = Path(global_memory_dir)
+    stats = {"memories_promoted": 0, "graph_edges_promoted": 0}
+
+    # Promote memory entries (L0 and L1 only — L2 is analysis-specific detail)
+    # MemoryStore uses short tier names: L0, L1, L2
+    for tier in ["L0", "L1"]:
+        src_dir = analysis_dir / "memory" / tier
+        dst_dir = global_memory_dir / tier
+        if not src_dir.exists():
+            continue
+        dst_dir.mkdir(parents=True, exist_ok=True)
+
+        for entry_file in src_dir.glob("*.yaml"):
+            with open(entry_file) as f:
+                data = yaml.safe_load(f)
+            if data and data.get("confidence", 0) >= min_confidence:
+                dst = dst_dir / entry_file.name
+                if dst.exists():
+                    # Merge: keep higher confidence version
+                    with open(dst) as f:
+                        existing = yaml.safe_load(f) or {}
+                    if data.get("confidence", 0) > existing.get("confidence", 0):
+                        shutil.copy2(str(entry_file), str(dst))
+                        stats["memories_promoted"] += 1
+                else:
+                    shutil.copy2(str(entry_file), str(dst))
+                    stats["memories_promoted"] += 1
+
+    # Promote causal graph relationships
+    local_graph_path = analysis_dir / "memory" / "causal_graph" / "graph.json"
+    global_graph_path = global_memory_dir / "causal_graph" / "graph.json"
+
+    if local_graph_path.exists():
+        global_graph_path.parent.mkdir(parents=True, exist_ok=True)
+
+        local_graph = CausalKnowledgeGraph(local_graph_path)
+        local_graph.load()
+
+        global_graph = CausalKnowledgeGraph(global_graph_path)
+        if global_graph_path.exists():
+            global_graph.load()
+
+        for rel in local_graph.relationships.values():
+            if rel.confidence >= min_confidence and rel.is_valid:
+                existing = global_graph.relationships.get(rel.edge_id)
+                if existing:
+                    # Corroborate if already exists
+                    if rel.source_analyses:
+                        existing.corroborate(rel.source_analyses[0])
+                else:
+                    global_graph.relationships[rel.edge_id] = rel
+                stats["graph_edges_promoted"] += 1
+
+        global_graph.save()
+
+    return stats

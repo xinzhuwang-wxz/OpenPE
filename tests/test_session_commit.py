@@ -4,7 +4,7 @@ from pathlib import Path
 from src.templates.scripts.memory_store import MemoryStore
 from src.templates.scripts.causal_knowledge_graph import CausalKnowledgeGraph
 from src.templates.scripts.session_commit import (
-    extract_experiences, commit_session, grow_domain_pack,
+    extract_experiences, commit_session, grow_domain_pack, promote_to_global,
 )
 
 TMP = Path("/tmp/test_session_commit")
@@ -98,3 +98,46 @@ def test_grow_domain_pack():
     assert pack["domain"] == "economics"
     assert "method" in pack["experiences"]
     assert "data_source" in pack["experiences"]
+
+
+def test_promote_to_global():
+    """High-confidence findings should be promoted to global memory."""
+    analysis_dir = TMP / "analysis"
+    _mock_analysis(analysis_dir)
+
+    # Create local memory with entries at varying confidence
+    store = MemoryStore(analysis_dir / "memory")
+    from src.templates.scripts.memory_store import MemoryEntry
+    store.add(MemoryEntry(
+        memory_id="high_conf", content="Reliable finding",
+        domain="economics", memory_type="domain", tier="L1", confidence=0.8,
+    ))
+    store.add(MemoryEntry(
+        memory_id="low_conf", content="Weak finding",
+        domain="economics", memory_type="domain", tier="L1", confidence=0.3,
+    ))
+
+    # Create local causal graph with a high-confidence edge
+    graph = CausalKnowledgeGraph(analysis_dir / "memory" / "causal_graph" / "graph.json")
+    graph.add_relationship("A", "B", "CAUSES", confidence=0.75, analysis_id="test")
+    graph.add_relationship("C", "D", "HYPOTHESIZED", confidence=0.2, analysis_id="test")
+    graph.save()
+
+    # Promote to global
+    global_mem = TMP / "global_memory"
+    stats = promote_to_global(analysis_dir, global_mem, min_confidence=0.6)
+
+    assert stats["memories_promoted"] >= 1
+    assert stats["graph_edges_promoted"] >= 1
+
+    # Verify high_conf was promoted but low_conf was not
+    promoted = global_mem / "L1" / "high_conf.yaml"
+    not_promoted = global_mem / "L1" / "low_conf.yaml"
+    assert promoted.exists()
+    assert not not_promoted.exists()
+
+    # Verify global graph has A→B but not C→D
+    global_graph = CausalKnowledgeGraph(global_mem / "causal_graph" / "graph.json")
+    global_graph.load()
+    assert "A→B" in global_graph.relationships
+    assert "C→D" not in global_graph.relationships
