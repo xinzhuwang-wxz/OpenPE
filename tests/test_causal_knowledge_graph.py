@@ -113,3 +113,61 @@ def test_mermaid_output():
     assert "graph TD" in mermaid
     assert "X" in mermaid
     assert "Y" in mermaid
+
+
+def test_invalidate_edge():
+    graph = CausalKnowledgeGraph(TMP / "graph.json")
+    graph.add_relationship("A", "B", "CAUSES", confidence=0.8, analysis_id="test1")
+    assert graph.relationships["A→B"].is_valid
+    result = graph.invalidate_edge("A", "B", "test2")
+    assert result is True
+    assert not graph.relationships["A→B"].is_valid
+    assert graph.relationships["A→B"].invalid_at != ""
+
+
+def test_invalidate_nonexistent():
+    graph = CausalKnowledgeGraph(TMP / "graph.json")
+    assert graph.invalidate_edge("X", "Y", "test") is False
+
+
+def test_query_only_valid():
+    graph = CausalKnowledgeGraph(TMP / "graph.json")
+    graph.add_relationship("A", "B", "CAUSES", confidence=0.8, analysis_id="t1")
+    graph.add_relationship("C", "D", "CAUSES", confidence=0.7, analysis_id="t1")
+    graph.invalidate_edge("A", "B", "t2")
+    valid = graph.query(only_valid=True)
+    assert len(valid) == 1
+    assert valid[0].source == "C"
+    all_rels = graph.query(only_valid=False)
+    assert len(all_rels) == 2
+
+
+def test_prune_stale():
+    graph = CausalKnowledgeGraph(TMP / "graph.json")
+    graph.add_relationship("A", "B", "HYPOTHESIZED", confidence=0.3, analysis_id="old")
+    graph.relationships["A→B"].updated = "2020-01-01T00:00:00"
+    expired = graph.prune_stale(max_age_days=30)
+    assert "A→B" in expired
+    assert graph.relationships["A→B"].is_expired
+
+
+def test_prune_keeps_confident():
+    graph = CausalKnowledgeGraph(TMP / "graph.json")
+    graph.add_relationship("A", "B", "CAUSES", confidence=0.8, analysis_id="old")
+    graph.relationships["A→B"].updated = "2020-01-01T00:00:00"
+    expired = graph.prune_stale(max_age_days=30)
+    assert "A→B" not in expired
+
+
+def test_temporal_fields_roundtrip():
+    graph = CausalKnowledgeGraph(TMP / "graph.json")
+    graph.add_relationship("A", "B", "CAUSES", confidence=0.8, analysis_id="t1")
+    graph.relationships["A→B"].valid_at = "2024-01-01T00:00:00"
+    graph.relationships["A→B"].episodes = ["t1", "t2"]
+    graph.save()
+    graph2 = CausalKnowledgeGraph(TMP / "graph.json")
+    graph2.load()
+    rel = graph2.relationships["A→B"]
+    assert rel.valid_at == "2024-01-01T00:00:00"
+    assert rel.episodes == ["t1", "t2"]
+    assert rel.is_valid
