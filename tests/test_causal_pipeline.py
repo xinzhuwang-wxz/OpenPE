@@ -4,9 +4,12 @@ Note: Some tests use synthetic data and are slow.
 The pipeline wraps DoWhy — tests verify our wrapper logic,
 not DoWhy internals.
 """
+import importlib.util
 import pytest
 import numpy as np
 import pandas as pd
+
+_dowhy_available = importlib.util.find_spec("dowhy") is not None
 from src.templates.scripts.causal_pipeline import (
     CausalTest,
     RefutationResult,
@@ -49,7 +52,38 @@ def test_classify_insufficient():
     assert classify_refutation_results([]) == "HYPOTHESIZED"
 
 
-@pytest.mark.slow
+def test_classify_contradictory_placebo_vs_subset():
+    """Placebo passes but data_subset fails → DISPUTED."""
+    results = [
+        RefutationResult("placebo", passed=True, p_value=0.85),
+        RefutationResult("random_common_cause", passed=True, p_value=0.72),
+        RefutationResult("data_subset", passed=False, p_value=0.03),
+    ]
+    assert classify_refutation_results(results) == "DISPUTED"
+
+
+def test_classify_contradictory_reverse():
+    """Placebo fails but data_subset passes → DISPUTED."""
+    results = [
+        RefutationResult("placebo", passed=False, p_value=0.02),
+        RefutationResult("random_common_cause", passed=True, p_value=0.65),
+        RefutationResult("data_subset", passed=True, p_value=0.70),
+    ]
+    assert classify_refutation_results(results) == "DISPUTED"
+
+
+def test_classify_non_contradictory_correlation():
+    """Non-contradictory partial failure → CORRELATION (not DISPUTED)."""
+    results = [
+        RefutationResult("placebo", passed=True, p_value=0.80),
+        RefutationResult("random_common_cause", passed=False, p_value=0.03),
+        RefutationResult("data_subset", passed=True, p_value=0.65),
+    ]
+    # placebo passes and data_subset passes — consistent. Only common_cause fails.
+    assert classify_refutation_results(results) == "CORRELATION"
+
+
+@pytest.mark.skipif(not _dowhy_available, reason="DoWhy not installed")
 def test_causal_test_with_synthetic_data():
     """Run full causal test on synthetic data with known causal effect."""
     np.random.seed(42)

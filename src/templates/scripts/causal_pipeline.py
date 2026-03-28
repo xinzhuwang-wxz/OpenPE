@@ -63,13 +63,13 @@ class CausalTestResult:
 def classify_refutation_results(results: list[RefutationResult]) -> str:
     """Classify causal relationship based on refutation test outcomes.
 
-    Decision tree (from spec):
+    Decision tree (from spec Section 3.2 / 4.2):
       All 3 pass           → DATA_SUPPORTED
       2 pass, 1 fail       → CORRELATION
       1 pass, 2 fail       → CORRELATION (weak)
       All 3 fail           → HYPOTHESIZED
       Insufficient data    → HYPOTHESIZED (untestable)
-      Contradictory        → DISPUTED
+      Contradictory        → DISPUTED (flag for human review)
     """
     if not results:
         return "HYPOTHESIZED"
@@ -77,12 +77,53 @@ def classify_refutation_results(results: list[RefutationResult]) -> str:
     passed = sum(1 for r in results if r.passed)
     total = len(results)
 
+    # Detect contradictory results: placebo passes (effect vanishes under
+    # random treatment — good) but data_subset fails (effect not stable
+    # across subsets — bad), or vice versa. This indicates internal
+    # inconsistency in the evidence, not merely weak causation.
+    if total >= 2 and _is_contradictory(results):
+        return "DISPUTED"
+
     if passed == total:
         return "DATA_SUPPORTED"
     elif passed == 0:
         return "HYPOTHESIZED"
     else:
         return "CORRELATION"
+
+
+def _is_contradictory(results: list[RefutationResult]) -> bool:
+    """Detect contradictory refutation patterns.
+
+    Contradictions arise when tests that should agree give opposite signals:
+    - placebo passes (effect is treatment-specific) but data_subset fails
+      (effect not stable) — the treatment matters but inconsistently
+    - data_subset passes (stable effect) but placebo fails (random
+      treatment also produces effect) — stable but not treatment-specific
+
+    Returns True if the pattern is logically contradictory rather than
+    merely inconclusive.
+    """
+    by_name = {r.test_name: r.passed for r in results}
+
+    placebo = by_name.get("placebo")
+    subset = by_name.get("data_subset")
+    common_cause = by_name.get("random_common_cause")
+
+    # Placebo and subset are the strongest contradiction pair:
+    # - Placebo passes → effect is treatment-specific (real)
+    # - Subset fails → effect is not stable across data splits (unreliable)
+    # These directly contradict: the effect is "real" but "unreliable".
+    #
+    # The reverse is also contradictory:
+    # - Placebo fails → random treatment also produces effect (not real)
+    # - Subset passes → effect is perfectly stable (reliable)
+    # A "not real" but "reliable" effect is contradictory.
+    if placebo is not None and subset is not None:
+        if placebo != subset:
+            return True
+
+    return False
 
 
 class CausalTest:
@@ -208,12 +249,27 @@ class CausalTest:
             treatment=self.treatment,
             outcome=self.outcome,
             estimate=primary_value,
-            ci_lower=None,  # TODO: extract from estimate
-            ci_upper=None,
+            ci_lower=self._extract_ci(estimate, 0),
+            ci_upper=self._extract_ci(estimate, 1),
             methods_used=methods_used,
             refutations=refutations,
             classification=classification,
         )
+
+    @staticmethod
+    def _extract_ci(estimate, index: int):
+        """Extract confidence interval bound from DoWhy estimate.
+
+        DoWhy's CausalEstimate uses get_confidence_intervals() method,
+        not a stored attribute. Reference: dowhy/causal_estimator.py
+        """
+        try:
+            ci = estimate.get_confidence_intervals()
+            if ci is not None and len(ci) > index:
+                return ci[index]
+        except Exception:
+            pass
+        return None
 
     def _run_fallback(self) -> CausalTestResult:
         """Fallback: correlation-only analysis when DoWhy is unavailable."""
