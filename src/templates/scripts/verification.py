@@ -125,10 +125,13 @@ def verify_data_provenance(registry_path: Path) -> list[VerificationCheck]:
         checks.append(VerificationCheck(
             f"fields_{sid}", True, "All required fields present"))
 
-        # Check file exists
+        # Check file exists — paths in registry are relative to analysis root
         filepath = Path(entry["file"])
         if not filepath.is_absolute():
-            filepath = registry_path.parent.parent / filepath  # relative to data/
+            # registry.yaml is at phase0_discovery/data/registry.yaml
+            # paths are relative to analysis root (3 levels up)
+            analysis_root = registry_path.parent.parent.parent
+            filepath = analysis_root / filepath
 
         if filepath.exists():
             # Verify hash
