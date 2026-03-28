@@ -68,6 +68,30 @@ def test_classify_truth_hypothesized():
     assert 0.0 <= t <= 0.3
 
 
+def test_classify_truth_disputed():
+    """DISPUTED → truth around 0.30 (pending human review)."""
+    t = classify_truth("DISPUTED")
+    assert 0.2 <= t <= 0.4
+
+
+def test_classify_truth_pre_analysis_labels():
+    """Pre-analysis labels (Phase 0) have correct truth values."""
+    # LITERATURE_SUPPORTED: published academic support → higher confidence
+    lit = classify_truth("LITERATURE_SUPPORTED")
+    assert 0.6 <= lit <= 0.8
+
+    # THEORIZED: domain theory, no empirical citation → moderate
+    theo = classify_truth("THEORIZED")
+    assert 0.3 <= theo <= 0.5
+
+    # SPECULATIVE: novel hypothesis → low
+    spec = classify_truth("SPECULATIVE")
+    assert 0.0 <= spec <= 0.3
+
+    # Ordering: LITERATURE_SUPPORTED > THEORIZED > SPECULATIVE
+    assert lit > theo > spec
+
+
 def test_ep_node():
     """EPNode stores truth, relevance, and computes EP."""
     node = EPNode(event_id="e1", truth=0.85, relevance=0.55, evidence_type="DATA_SUPPORTED")

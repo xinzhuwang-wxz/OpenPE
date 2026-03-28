@@ -51,16 +51,27 @@ def truncation_decision(
 def classify_truth(evidence_type: str) -> float:
     """Map evidence classification to default truth value.
 
-    DATA_SUPPORTED → 0.85 (midpoint of [0.7, 1.0])
-    CORRELATION    → 0.50 (midpoint of [0.3, 0.7])
-    HYPOTHESIZED   → 0.15 (midpoint of [0.0, 0.3])
-    DISPUTED       → 0.30 (treated as weak correlation pending review)
+    Post-analysis labels (Phase 3, after refutation testing):
+        DATA_SUPPORTED → 0.85 (midpoint of [0.7, 1.0])
+        CORRELATION    → 0.50 (midpoint of [0.3, 0.7])
+        HYPOTHESIZED   → 0.15 (midpoint of [0.0, 0.3])
+        DISPUTED       → 0.30 (treated as weak correlation pending review)
+
+    Pre-analysis labels (Phase 0, hypothesis_agent):
+        LITERATURE_SUPPORTED → 0.70 (published academic support)
+        THEORIZED            → 0.40 (domain theory, no direct empirical citation)
+        SPECULATIVE          → 0.15 (novel hypothesis, no basis)
     """
     mapping = {
+        # Post-analysis labels
         "DATA_SUPPORTED": 0.85,
         "CORRELATION": 0.50,
         "HYPOTHESIZED": 0.15,
         "DISPUTED": 0.30,
+        # Pre-analysis labels (spec Section 4.2)
+        "LITERATURE_SUPPORTED": 0.70,
+        "THEORIZED": 0.40,
+        "SPECULATIVE": 0.15,
     }
     return mapping.get(evidence_type, 0.15)
 
