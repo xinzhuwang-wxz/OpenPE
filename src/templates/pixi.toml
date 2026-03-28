@@ -17,38 +17,36 @@ pandoc-crossref = ">=0.3"
 
 # --- Core stack (always needed) ---
 [pypi-dependencies]
-uproot = ">=5.0"
-awkward = ">=2.0"
-hist = ">=2.7"
-boost-histogram = ">=1.4"
 numpy = ">=1.24"
 scipy = ">=1.11"
+pandas = ">=2.0"
 matplotlib = ">=3.8"
-mplhep = ">=0.3.40"
-vector = ">=1.1"
-particle = ">=0.23"
+statsmodels = ">=0.14"
 rich = ">=13.0"
-# --- Uncomment groups below as needed for your analysis ---
-# # Statistical models and fitting
-# pyhf = ">=0.7"
-# cabinetry = ">=0.6"
-# iminuit = ">=2.25"
-# # Unbinned likelihood fits
-# zfit = ">=0.20"
-# # MVA / classification
-# xgboost = ">=2.0"
+pyarrow = ">=14.0"
+pyyaml = ">=6.0"
+
+# --- Data acquisition ---
+requests = ">=2.31"
+wbgapi = ">=1.0"         # World Bank API
+fredapi = ">=0.5"        # FRED API
+openpyxl = ">=3.1"       # Excel reading
+
+# --- Causal inference ---
+dowhy = ">=0.11"
+# causica — install manually if needed for causal discovery
+
+# --- Uncomment as needed ---
 # scikit-learn = ">=1.3"
-# # Columnar event processing at scale
-# coffea = ">=2024.0"
+# xgboost = ">=2.0"
 
 [tasks]
 py = "python"
-build-pdf = "cd phase5_documentation/exec && pandoc ANALYSIS_NOTE.md -o ANALYSIS_NOTE.pdf --pdf-engine=xelatex -V geometry:margin=1in -V documentclass:article -V fontsize:11pt --number-sections --toc --filter pandoc-crossref --citeproc -V header-includes='\\usepackage{graphicx}\\setkeys{Gin}{width=0.45\\linewidth,keepaspectratio}'"
+build-pdf = "cd phase6_documentation/exec && pandoc REPORT.md -o REPORT.pdf --pdf-engine=xelatex -V geometry:margin=1in -V documentclass:article -V fontsize:11pt --number-sections --toc --filter pandoc-crossref --citeproc -V header-includes='\\usepackage{graphicx}\\setkeys{Gin}{width=0.45\\linewidth,keepaspectratio}'"
 # --- Analysis tasks: add as you write scripts ---
 # Each script gets an independently runnable task.
-# The "all" task chains the full sequence — this is the reproducibility contract.
 # Example:
-#   select = "python phase3_selection/scripts/apply_selection.py"
-#   unfold = "python phase4_inference/scripts/unfold.py"
-#   systematics = "python phase4_inference/scripts/run_systematics.py"
-#   all = "python phase3_selection/scripts/apply_selection.py && python phase4_inference/scripts/unfold.py && python phase4_inference/scripts/run_systematics.py"
+#   acquire = "python phase0_discovery/scripts/fetch_worldbank.py --indicator SP.POP.TOTL --country CHN"
+#   analyze = "python phase3_analysis/scripts/causal_test.py"
+#   project = "python phase4_projection/scripts/scenario_sim.py"
+#   all = "python phase0_discovery/scripts/fetch_worldbank.py && python phase3_analysis/scripts/causal_test.py && python phase4_projection/scripts/scenario_sim.py"
