@@ -34,7 +34,7 @@ openpyxl = ">=3.1"       # Excel reading
 
 # --- Causal inference ---
 dowhy = ">=0.11"
-# causica — install manually if needed for causal discovery
+causal-learn = ">=0.1"   # PC algorithm for causal structure discovery
 
 # --- Uncomment as needed ---
 # scikit-learn = ">=1.3"
