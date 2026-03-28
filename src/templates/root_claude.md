@@ -116,9 +116,7 @@ checklists, and output formats live in `.claude/agents/*.md`. When spawning an
 executor or reviewer, instruct it to read its agent profile first. The profile
 contains the deep domain expertise (causal inference methodology, EP
 assessment criteria, data quality standards, etc.) that makes the agent
-effective. The agent roster and phase-to-agent mapping is in
-`methodology/orchestration/agents.md` (or `src/orchestration/agents.md` from
-the spec root).
+effective. The agent roster and phase-to-agent mapping is in the table above.
 
 **Anti-patterns:**
 - Running straight from Phase 1 to Phase 6 with no intermediate artifacts
