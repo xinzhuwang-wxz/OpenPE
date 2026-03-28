@@ -11,7 +11,7 @@ tools:
 model: opus
 ---
 
-**Slopspec artifact conventions:**
+**OpenPE artifact conventions:**
 - Session naming: your outputs are named {ARTIFACT}_{session_name}_{timestamp}.md
 - Experiment log: read experiment_log.md at start, append what you tried and learned
 - No overwrites: create new files alongside previous versions

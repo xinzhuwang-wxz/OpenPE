@@ -16,7 +16,7 @@ Display the current status of the analysis pipeline.
 
 2. Read `STATE.md` in full.
 
-3. Read `analysis_config.yaml` to get the analysis name, channels, and blinding status.
+3. Read `analysis_config.yaml` to get the analysis name, channels, and verification status.
 
 4. Read `regression_log.md` if it exists and is non-empty.
 
@@ -28,7 +28,7 @@ Display the current status of the analysis pipeline.
 Current phase:  {phase number and name}
 Status:         {executing | reviewing | passed | blocked | human_gate | complete}
 Last updated:   {timestamp from STATE.md}
-Blinding:       {active | approved_for_unblinding}
+Verification:   {active | approved_for_verification}
 
 --- Phase History ---
 
@@ -69,8 +69,8 @@ Phase 3: {N} iterations (1-bot)
 
 ```
 >>> HUMAN ACTION REQUIRED <<<
-Phase 4b review has passed. The draft analysis note is ready for human review.
-Run /approve-unblinding to review and approve or reject full unblinding.
+Phase 5 review has passed. The draft analysis note is ready for human review.
+Run /approve-verification to review and approve or reject full verification.
 ```
 
 7. If the status is `blocked`, add:

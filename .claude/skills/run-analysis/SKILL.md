@@ -1,6 +1,6 @@
 ---
 name: run-analysis
-description: Initialize and run the full automated HEP analysis pipeline from physics prompt to final documentation
+description: Initialize and run the full automated analysis pipeline from analysis question to final documentation
 user-invocable: true
 ---
 
@@ -11,22 +11,22 @@ You are the pipeline orchestrator. You manage the analysis by spawning specialis
 **Arguments:** `$ARGUMENTS`
 
 The argument is either:
-- A physics prompt as inline text, OR
-- A path to a `.md` file containing the physics prompt, OR
-- A path to a `.md` prompt followed by a path to a `.yaml` config file
+- An analysis question as inline text, OR
+- A path to a `.md` file containing the analysis question, OR
+- A path to a `.md` question followed by a path to a `.yaml` config file
 
 ## Step 1: Parse Inputs
 
-1. If `$ARGUMENTS` contains a path ending in `.md`, read that file as the physics prompt. Otherwise, treat the full argument text as the prompt.
+1. If `$ARGUMENTS` contains a path ending in `.md`, read that file as the analysis question. Otherwise, treat the full argument text as the question.
 2. If `$ARGUMENTS` contains a path ending in `.yaml`, read that as the analysis config. Otherwise, you will create a default config in Step 4.
-3. Derive a short snake_case `analysis_name` from the physics prompt (e.g., `zh_nunubb_aleph`, `ttbar_dilepton_cms`).
+3. Derive a short snake_case `analysis_name` from the analysis question.
 
 ## Step 2: Read Methodology
 
 Read the following files to understand the phase requirements and orchestration protocol:
 
 - `src/methodology/03-phases.md` -- what each phase must produce
-- `src/methodology/04-blinding.md` -- blinding protocol and human gate
+- `src/methodology/04-verification.md` -- verification protocol and human gate
 - `src/methodology/06-review.md` -- review tiers and iteration rules
 - `orchestration/agents.md` -- agent session definitions
 - `orchestration/automation.md` -- automation pseudocode
@@ -41,11 +41,11 @@ Run the scaffolder to create the analysis directory structure:
 pixi run scaffold analyses/{analysis_name} --type {measurement|search}
 ```
 
-Choose `measurement` or `search` based on the physics prompt (searches involve new particle or signature discovery; measurements quantify known processes).
+Choose `measurement` or `search` based on the analysis question (searches test for new phenomena; measurements quantify known processes).
 
 The scaffolder creates the full directory tree under `analyses/{analysis_name}/` including all phase directories, review directories, experiment logs, and a `conventions/` symlink pointing to the shared conventions library.
 
-Copy the physics prompt into `analyses/{analysis_name}/prompt.md`.
+Copy the analysis question into `analyses/{analysis_name}/prompt.md`.
 
 ## Step 4: Write analysis_config.yaml
 
@@ -57,19 +57,19 @@ physics_prompt_path: prompt.md
 model_tier: auto
 channels: []  # populated during Phase 1
 calibrations: []  # populated during Phase 1
-data_dir: ""  # USER MUST SET THIS -- path to input ROOT files or NTuples
+data_dir: ""  # USER MUST SET THIS -- path to input data files
 cost_controls:
   max_review_iterations: 10
   review_warn_threshold: 3
-blinding:
+verification:
   active: true
-  approved_for_unblinding: false
+  approved_for_unverification: false
 pixi:
   environment: default
   workflow_prefix: "pixi run"
 ```
 
-If a config was provided, copy it to `analyses/{analysis_name}/analysis_config.yaml`, ensuring at minimum the `blinding`, `cost_controls`, and `pixi` sections exist.
+If a config was provided, copy it to `analyses/{analysis_name}/analysis_config.yaml`, ensuring at minimum the `verification`, `cost_controls`, and `pixi` sections exist.
 
 **IMPORTANT:** After writing the config, remind the user:
 > "analysis_config.yaml has been created. Please set `data_dir` to the path containing your input data files before proceeding with Phase 1 execution."
@@ -124,8 +124,8 @@ Now execute the full pipeline. At each phase transition, update STATE.md with th
 1. Update STATE.md: phase=2, status=executing
 2. Spawn three agents **in parallel** via `SendMessage`:
    - `data-explorer`: inventory samples, check data quality
-   - `detector-specialist`: validate detector model, object definitions
-   - `theory-scout`: survey theory predictions, cross-sections, backgrounds
+   - `domain-specialist`: validate domain model, variable definitions
+   - `domain-scout`: survey domain knowledge, expected relationships, baselines
    - All read: `prompt.md`, `phase1_strategy/exec/STRATEGY.md` (latest), `src/methodology/03-phases.md` (Phase 2 section)
    - **Must read:** applicable `conventions/` files
    - All write to: `analyses/{analysis_name}/phase2_exploration/`
@@ -169,7 +169,7 @@ Now execute the full pipeline. At each phase transition, update STATE.md with th
 6. On PASS: update STATE.md (phase=4a, status=passed)
 7. Advance to Phase 4b
 
-### Phase 4b: Partial Unblinding
+### Phase 5: Partial Verification
 
 1. Update STATE.md: phase=4b, status=executing
 2. Spawn `systematics-fitter`:
@@ -178,21 +178,21 @@ Now execute the full pipeline. At each phase transition, update STATE.md with th
    - Must use `pixi run` for execution
 3. Spawn `note-writer`:
    - Produces draft analysis note: `exec/ANALYSIS_NOTE_DRAFT.md`
-   - Produces unblinding checklist: `exec/UNBLINDING_CHECKLIST.md`
+   - Produces verification checklist: `exec/VERIFICATION_CHECKLIST.md`
    - **Must read:** applicable `conventions/` files for document formatting
 4. Update STATE.md: status=reviewing
 5. Run 4-bot review by invoking `/review-phase` with phase "4b" (includes plot-validator)
 6. On PASS: update STATE.md (phase=4b, status=human_gate)
 7. **PAUSE the pipeline.** Report to the user:
-   - "Phase 4b review passed. The draft analysis note, unblinding checklist, and review results are ready for human review."
-   - "Run `/approve-unblinding` to review and approve or reject full unblinding."
+   - "Phase 5 review passed. The draft analysis note, verification checklist, and review results are ready for human review."
+   - "Run `/approve-verification` to review and approve or reject full verification."
    - Do NOT proceed to Phase 4c automatically.
 
 ### After Human Approval (Phase 4c)
 
-When the user runs `/approve-unblinding` and approves:
+When the user runs `/approve-verification` and approves:
 
-1. Confirm `analysis_config.yaml` has `approved_for_unblinding: true`
+1. Confirm `analysis_config.yaml` has `approved_for_unverification: true`
 2. Update STATE.md: phase=4c, status=executing
 3. Spawn `systematics-fitter`:
    - Runs full fit on complete dataset

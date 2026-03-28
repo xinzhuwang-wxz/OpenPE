@@ -38,7 +38,7 @@ Each phase depends on artifacts from prior phases. Locate the latest version of 
 | 3 | `prompt.md`, `STRATEGY*.md`, `phase2_exploration/exec/EXPLORATION*.md` |
 | 4a | `prompt.md`, `STRATEGY*.md`, `SELECTION*.md` (per channel or combined) |
 | 4b | `prompt.md`, `STRATEGY*.md`, `SELECTION*.md`, `phase4_inference/4a_expected/exec/INFERENCE_EXPECTED*.md` |
-| 4c | All of 4b's inputs plus `phase4_inference/4b_partial/exec/INFERENCE_PARTIAL*.md`, and confirmed `approved_for_unblinding: true` in config |
+| 4c | All of 4b's inputs plus `phase4_inference/4b_partial/exec/INFERENCE_PARTIAL*.md`, and confirmed `approved_for_verification: true` in config |
 | 5 | All prior phase artifacts |
 
 ## Step 4: Execute the Phase
@@ -54,15 +54,15 @@ Spawn `lead-analyst` via SendMessage:
 - **Must read:** applicable `conventions/` files for naming and coding standards
 - Working directory: `phase1_strategy/`
 - Expected output: `exec/STRATEGY.md`, updates to `experiment_log.md`
-- The agent should query the experiment corpus, identify signal/backgrounds, propose selection, define blinding, outline systematics
+- The agent should query the data corpus, identify signal/backgrounds, propose selection, define verification strategy, outline systematics
 - All scripts use `pixi run` for execution
 
 ### Phase 2: Exploration
 
 Spawn three agents **in parallel** via SendMessage:
 - `data-explorer`: sample inventory, data quality checks, baseline yields
-- `detector-specialist`: object definitions, data/MC validation
-- `theory-scout`: cross-sections, theory predictions, prior results
+- `domain-specialist`: variable definitions, data validation
+- `domain-scout`: expected relationships, domain predictions, prior results
 
 All read: `prompt.md`, latest `STRATEGY.md`, methodology (Phase 2 section)
 All read: applicable `conventions/` files
@@ -92,19 +92,19 @@ If multi-channel, after all channels complete, spawn `lead-analyst` to produce `
    - Builds statistical model, runs Asimov fits, signal injection tests
    - Output: `exec/INFERENCE_EXPECTED.md`
 
-### Phase 4b: Partial Unblinding
+### Phase 5: Partial Verification
 
 1. Spawn `systematics-fitter`:
    - Runs fit on 10% SR data subsample (fixed random seed)
    - Output: `exec/INFERENCE_PARTIAL.md`
    - Uses `pixi run` for execution
 2. Spawn `note-writer`:
-   - Produces `exec/ANALYSIS_NOTE_DRAFT.md` and `exec/UNBLINDING_CHECKLIST.md`
+   - Produces `exec/ANALYSIS_NOTE_DRAFT.md` and `exec/VERIFICATION_CHECKLIST.md`
    - **Must read:** applicable `conventions/` files for document formatting
 
-### Phase 4c: Full Unblinding
+### Phase 6: Full Verification
 
-1. **Verify** `analysis_config.yaml` has `approved_for_unblinding: true`. If not, STOP and instruct the user to run `/approve-unblinding` first.
+1. **Verify** `analysis_config.yaml` has `approved_for_verification: true`. If not, STOP and instruct the user to run `/approve-verification` first.
 2. Spawn `systematics-fitter`:
    - Runs full fit on complete dataset
    - Output: `exec/INFERENCE_OBSERVED.md`

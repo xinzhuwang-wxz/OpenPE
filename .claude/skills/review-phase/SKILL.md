@@ -88,9 +88,9 @@ Loop until PASS, ESCALATE, or max iterations:
 
    Plot-validator instructions (if figures exist):
    - Read: all figures in this phase's `figures/` directory
-   - Read: `conventions/` plotting standards (axis labels, font sizes, color schemes, legend placement, ratio panels, CMS/ATLAS style requirements)
+   - Read: `conventions/` plotting standards (axis labels, font sizes, color schemes, legend placement, ratio panels, domain style requirements)
    - Validate each figure against the conventions
-   - Check: axis labels and units, legend completeness, ratio panel presence where required, color accessibility, resolution and format, statistical uncertainty display, blinding compliance (no SR data shown before approval)
+   - Check: axis labels and units, legend completeness, ratio panel presence where required, color accessibility, resolution and format, statistical uncertainty display, verification compliance (no signal region data shown before approval)
    - Classify issues as (A) must fix, (B) should fix, (C) cosmetic suggestion
    - Write output to: `review/plot-validation/{REVIEW}.md`
 
@@ -188,7 +188,7 @@ Loop until no Category A issues, ESCALATE, or max iterations:
 After any PASS decision, scan all review outputs for regression triggers. A regression trigger is any statement indicating that work done in a prior phase is now known to be incorrect, incomplete, or based on wrong assumptions. Examples:
 - "The background model in Phase 3 used an incorrect normalization"
 - "The systematic uncertainty source X was overlooked in the strategy"
-- "The detector efficiency correction applied in Phase 2 is outdated"
+- "The efficiency correction applied in Phase 2 is outdated"
 
 If a regression trigger is found:
 1. Update STATE.md: status=regression
@@ -216,5 +216,5 @@ Phase {phase} review: {PASS | ESCALATE}
 
 If this is Phase 4b and the decision is PASS, additionally report:
 ```
-Human gate reached. Run /approve-unblinding to review the draft analysis note and approve or reject full unblinding.
+Human gate reached. Run /approve-verification to review the draft analysis note and approve or reject full verification.
 ```
