@@ -1,17 +1,17 @@
-# SLOP-X BASED ON SLOPSPECv1
+# OpenPE — Principle to Endgame
 
-LLM-driven HEP analysis framework. An orchestrator agent delegates work to
-subagents through five sequential phases, producing a publication-quality
-analysis note.
+Autonomous first-principles analysis framework. An orchestrator agent
+delegates work to specialized subagents through seven sequential phases,
+producing a comprehensive report from any user question.
 
 ## Quick start
 
 ```bash
-pixi run scaffold analyses/my_analysis --type measurement
+pixi run scaffold analyses/my_analysis
 cd analyses/my_analysis
-# Edit .analysis_config → set data_dir=/path/to/data, add allow= lines
+# Edit analysis_config.yaml → set question, domain, input_mode
 pixi install
-claude   # pass your physics prompt
+claude   # starts the orchestrator agent
 ```
 
 ## How it works
@@ -19,30 +19,30 @@ claude   # pass your physics prompt
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     ORCHESTRATOR                             │
-│  Never writes code. Holds: prompt, summaries, verdicts only  │
+│  Never writes code. Holds: question, summaries, verdicts     │
 └─────┬───────────────────────────────────────────────────────┘
       │
       ▼
  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
- │ Phase 1  │──▶│ Phase 2  │──▶│ Phase 3  │──▶│ Phase 4a │──▶│ Phase 4b │──▶│ Phase 4c │──▶│ Phase 5  │
- │ Strategy │   │ Explore  │   │Processing│   │ Expected │   │  10% Val │   │Full Data │   │ Document │
- │ (4-bot)  │   │ (self)   │   │ (1-bot)  │   │ (4-bot)  │   │(4-bot+HG)│   │ (1-bot)  │   │ (5-bot)  │
- └──────────┘   └──────────┘   └──────────┘   └──────────┘   └────┬─────┘   └──────────┘   └──────────┘
-                                                                   │
-                                                             HUMAN GATE
+ │ Phase 0  │──▶│ Phase 1  │──▶│ Phase 2  │──▶│ Phase 3  │──▶│ Phase 4  │──▶│ Phase 5  │──▶│ Phase 6  │
+ │Discovery │   │ Strategy │   │ Explore  │   │ Analysis │   │Projection│   │ Verify   │   │ Document │
+ │ (4-bot)  │   │ (4-bot)  │   │ (self)   │   │ (4-bot)  │   │ (4-bot)  │   │(4-bot+HG)│   │ (5-bot)  │
+ └──────────┘   └──────────┘   └──────────┘   └──────────┘   └──────────┘   └────┬─────┘   └──────────┘
+                                                                                  │
+                                                                            HUMAN GATE
 ```
 
 Each phase runs the same loop:
 
 ```
   1. EXECUTE ── spawn executor subagent (enters plan mode first)
-  2. REVIEW ─── spawn reviewer(s) per review type
+  2. REVIEW ─── spawn reviewer(s) per review tier
   3. CHECK:
        Regression trigger? → Investigator → fix origin + downstream → resume
        A or B items?       → fix agent + fresh reviewer → re-review (loop)
        Only C items?       → PASS, executor applies Cs before commit
   4. COMMIT
-  5. HUMAN GATE (after 4b for both measurements and searches)
+  5. HUMAN GATE (after Phase 5 Verification)
   6. ADVANCE
 ```
 
@@ -50,128 +50,86 @@ Each phase runs the same loop:
 
 | Phase | Review | Key deliverable |
 |-------|--------|-----------------|
-| **1. Strategy** | 4-bot | Technique selection, systematic plan, reference analysis table, conventions enumeration |
-| **2. Exploration** | Self | Sample inventory, data quality, variable ranking, preselection cutflow |
-| **3. Processing** | 1-bot | Event selection, correction chain or background model, closure tests |
-| **4a. Expected** | 4-bot | Systematic completeness table, covariance matrix, reference comparisons |
-| **4b. 10% Validation** | 4-bot | 10% data results, draft AN with full structure, human gate |
-| **4c. Full Data** | 1-bot | Full observed results, post-fit diagnostics |
-| **5. Documentation** | 5-bot | Analysis note (pandoc markdown → PDF, 50-100 pages), machine-readable results |
+| **0. Discovery** | 4-bot | Question decomposition, causal DAG, data acquisition, quality gate |
+| **1. Strategy** | 4-bot | Method selection, EP assessment, chain planning, systematic inventory |
+| **2. Exploration** | Self | Data cleaning, feature engineering, variable ranking by EP |
+| **3. Analysis** | 4-bot | Causal testing (3 refutations), EP propagation, sub-chain expansion |
+| **4. Projection** | 4-bot | Scenario simulation, sensitivity analysis, endgame convergence |
+| **5. Verification** | 4-bot + HG | Independent reproduction, data provenance audit, logic audit, human gate |
+| **6. Documentation** | 5-bot | Complete report (pandoc → PDF), EP decay visualization, audit trail |
 
-Both measurements and searches follow the same 4a → 4b → 4c flow. The
-human gate is between 4b and 4c.
+The human gate is between Phase 5 and Phase 6.
+
+### Core concepts
+
+**Explanatory Power (EP).** Each node in the causal chain carries an EP
+score = f(truth, relevance). Joint EP decays along the chain. When Joint EP
+falls below 0.05, the chain is truncated — this is the natural analytical
+horizon.
+
+**Input modes.** Users can provide:
+- Mode A: Question only (agent acquires data autonomously)
+- Mode B: Question + user data (data still goes through quality gate)
+- Mode C: Question + user hypotheses (hypotheses compete with agent-generated ones)
+
+**Causal testing.** Every causal claim must pass 3 refutation tests (placebo,
+random common cause, data subset). Results are labeled:
+DATA_SUPPORTED / CORRELATION / HYPOTHESIZED / DISPUTED.
+
+**Self-evolution.** The memory system (L0/L1/L2 tiers + causal knowledge
+graph) accumulates experience across analyses. Domain packs grow
+automatically.
 
 ### Review classification
 
 | Cat | Meaning | Action |
 |-----|---------|--------|
-| **A** | Would cause rejection | Fix + re-review + fresh reviewer |
+| **A** | Would invalidate conclusions | Fix + re-review + fresh reviewer |
 | **B** | Weakens the analysis | Same — must be zero before PASS |
 | **C** | Style / clarity | Arbiter PASses; executor applies before commit |
 
-Fresh reviewer added each iteration cycle. Limits: 4/5-bot warn at 3,
-strong warn at 5, hard cap at 10. 1-bot warn at 2, escalate at 3.
-
 ### Phase regression
 
-Any review can trigger regression when a physics issue is traceable to an
-earlier phase. Most common after Phase 4a/4b and Phase 5 reviews.
-
-```
-Reviewer finds physics issue from Phase M < current Phase N
-  → Investigator traces impact → REGRESSION_TICKET.md
-  → Fix cycle: re-run Phase M, re-run affected downstream, skip unaffected
-  → Resume review at Phase N
-```
-
-### Phase 5: 5-bot review
-
-```
-Physics + Critical (referee) + Constructive + Rendering (reads compiled PDF) + Arbiter
-```
-
-The rendering reviewer runs `pixi run build-pdf` and uses the Read tool to
-visually inspect the PDF for figure rendering, math compilation, layout, and
-cross-references.
-
-## Key concepts
-
-**Technique decided at Phase 1, not scaffold time.** The scaffolder only
-takes `--type measurement|search`. The strategy phase selects the technique
-(unfolding, template fit, etc.), which activates technique-specific
-requirements in later phases.
-
-**Conventions.** Domain knowledge in `src/conventions/` (symlinked into each
-analysis). Mandatory reads at Phases 1, 4a, and 5. Updated after analysis
-completion.
-
-**Feasibility evaluation.** When hitting a limitation (missing MC, etc.),
-agents must: state it → evaluate feasibility → estimate cost → decide
-(attempt if it affects the core result, document if minor or infeasible) →
-log the reasoning.
-
-**Isolation.** A PreToolUse hook checks every file access against
-`.analysis_config` (which lists `data_dir` and `allow=` paths). Symlinks
-within the analysis dir (like `conventions/`) are allowed via logical path
-checking.
-
-**Pixi everywhere.** Each analysis has its own `pixi.toml` with deps and
-tasks. `pixi run all` is the reproducibility contract. `pixi run build-pdf`
-compiles the analysis note via pandoc.
+Any review can trigger regression when an issue is traceable to an earlier
+phase. The investigator traces impact, writes a REGRESSION_TICKET.md, then
+the fix cycle re-runs affected phases.
 
 ## Directory structure
 
 ```
-reslop/
+OpenPE/
   src/                        Spec infrastructure
     methodology/              Methodology spec (human reference)
     orchestration/            Session management (human reference)
     conventions/              Domain knowledge (symlinked into analyses)
-    templates/                CLAUDE.md and pixi.toml templates
+    templates/                CLAUDE.md, pixi.toml, and script templates
     scaffold_analysis.py      Scaffolder
   analyses/                   Each is its own git repo
     <name>/
-      CLAUDE.md               ~570 lines — self-contained instructions
+      CLAUDE.md               Self-contained orchestrator instructions
       pixi.toml               Environment + task graph
+      analysis_config.yaml    Question, domain, EP thresholds
       .analysis_config        data_dir + allow paths for isolation hook
       conventions/ → src/conventions/
-      phase{1..5}_*/          Phase dirs with CLAUDE.md, exec/, scripts/, figures/, review/
+      memory/                 L0/L1/L2/causal_graph (per-analysis memory)
+      phase{0..6}_*/          Phase dirs with CLAUDE.md, exec/, scripts/, figures/, review/
 ```
 
 ## How scaffolding works
 
-The scaffolder (`pixi run scaffold`) creates a new analysis directory from
-templates in `src/templates/`:
+The scaffolder (`pixi run scaffold`) creates a new analysis directory:
 
-1. **Template files** (`src/templates/root_claude.md`, `phase*_claude.md`,
-   `pixi.toml`) are copied into the analysis directory with `{{name}}` and
-   `{{analysis_type}}` placeholders replaced.
-2. **Phase directories** (`phase1_strategy/`, `phase2_exploration/`,
-   `phase3_selection/`, `phase4_inference/`, `phase5_documentation/`) are
-   created with `exec/`, `scripts/`, `figures/`, and `review/` subdirs.
-3. **Conventions symlink** — `conventions/` → `../../src/conventions/` is
-   created so agents can read domain knowledge.
-4. **`.analysis_config`** is created with `analysis_type` set. Edit it to
-   add `data_dir=` pointing to the input data.
-5. **Git repo** is initialized in the analysis directory.
-
-6. **Methodology symlink** — `methodology/` → `../../src/methodology/` is
-   created so agents can consult the full methodology spec for detailed
-   protocol definitions.
-
-After scaffolding, the analysis directory is self-contained: its CLAUDE.md
-files carry the essential instructions for execution. The full methodology
-spec (`src/methodology/`) is also available via symlink for agents that need
-detailed protocol definitions (review criteria, blinding protocol, etc.).
-
-**How templates map to methodology:** Each template distills the relevant
-methodology sections into execution-ready instructions:
-- `root_claude.md` — §3 (phases), §6 (review, summary), §10 (scaling), §12 (feasibility)
-- `phase1_claude.md` — §3 Phase 1, §6.4 review focus for strategy
-- `phase2_claude.md` — §3 Phase 2, §5 (artifact format)
-- `phase3_claude.md` — §3 Phase 3, §6.4 review focus for selection
-- `phase4_claude.md` — §3 Phase 4, §4 (blinding), §6.4 review focus for inference
-- `phase5_claude.md` — §3 Phase 5, §6.4.3 (documentation review), Appendix D (plotting)
+1. **Template files** (`root_claude.md`, `phase*_claude.md`, `pixi.toml`)
+   are copied with `{{name}}` and `{{analysis_type}}` placeholders replaced.
+2. **Seven phase directories** (`phase0_discovery/` through
+   `phase6_documentation/`) are created with standard subdirs.
+3. **Helper scripts** (EP engine, causal pipeline, data fetchers, etc.) are
+   copied into `phase0_discovery/scripts/`.
+4. **Memory structure** (`memory/L0_universal/`, `L1_domain/`, `L2_detailed/`,
+   `causal_graph/`) is initialized.
+5. **Symlinks** — `conventions/`, `methodology/`, `.claude/` point back to
+   the parent project.
+6. **Git repo** is initialized in the analysis directory.
 
 ## Requirements
 

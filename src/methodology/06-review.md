@@ -163,9 +163,9 @@ mandatory section of the Phase 4a artifact. This table has two parts:
    ```
    | Source           | Conventions | Ref 1 | Ref 2 | This analysis | Status    |
    |------------------|-------------|-------|-------|---------------|-----------|
-   | Hadronization    | Required    | P+H   | P+H+S | Pythia only   | MISSING   |
-   | Selection cuts   | Required    | yes   | yes   | yes           | OK        |
-   | Luminosity       | Normalized  | —     | —     | N/A (norm.)   | JUSTIFIED |
+   | Model spec       | Required    | P+H   | P+H+S | Method A only | MISSING   |
+   | Variable filter  | Required    | yes   | yes   | yes           | OK        |
+   | Data coverage    | Normalized  | —     | —     | N/A (norm.)   | JUSTIFIED |
    ```
 
    The reviewer must verify this table **row by row**. Any row with status
@@ -191,13 +191,13 @@ must include a mechanical pass over all figures checking the following (see
 Appendix D for the plotting template that prevents most of these). These
 are Category A if wrong:
 
-- [ ] **√s and energy labels** match the actual dataset (not copied from a
-  template for a different collider or energy)
-- [ ] **Experiment name** is correct in all figure text and annotations
+- [ ] **Dataset labels** match the actual dataset (not copied from a
+  template for a different domain or dataset)
+- [ ] **Analysis name** is correct in all figure text and annotations
 - [ ] **No figure titles** — captions in the note replace `ax.set_title()`
 - [ ] **Axis labels** include units in brackets; y-axis label matches the
   normalization actually applied
-- [ ] **Luminosity / event count** annotations match the data sample used
+- [ ] **Data source and sample size** annotations match the data sample used
 - [ ] **Legend entries** match what is actually plotted (no stale labels from
   earlier iterations)
 - [ ] **Aspect ratios and font sizes** are consistent across all figures in
@@ -269,7 +269,7 @@ that do not require visual judgment.
 **Validation categories:**
 
 **A. Code compliance** (from plotting scripts):
-- mplhep style applied
+- matplotlib styling consistent
 - Figure size matches template (10×10 or multiples)
 - No `ax.set_title()` calls
 - No numeric `fontsize=` arguments

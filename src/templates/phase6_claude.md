@@ -269,7 +269,7 @@ the report to its evidence basis.
 
 ## Methodology references
 
-- Architecture design: `docs/superpowers/specs/2026-03-28-slop-fp-architecture-design.md` (Sections 2-5)
+- Architecture design: `docs/superpowers/specs/2026-03-28-openpe-architecture-design.md` (Sections 2-5)
 - Phase requirements: `methodology/03-phases.md` (for gate protocol)
 - Artifacts: `methodology/05-artifacts.md`
 - Review protocol: `methodology/06-review.md` Section 6.2 (5-bot review)

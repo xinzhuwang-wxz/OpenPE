@@ -21,9 +21,10 @@ those CLAUDE.md files.
 | Agent | Model | Primary phases | Description |
 |-------|-------|----------------|-------------|
 | `lead-analyst` | opus | 1, 2 (consolidation) | Strategy development, Phase 2 consolidation |
-| `theory-scout` | sonnet | 2 | Literature, cross-sections, generators |
-| `data-explorer` | haiku | 2 | Fast sample inventory, data quality |
-| `detector-specialist` | sonnet | 2 | Object definitions, calibrations |
+| `hypothesis-agent` | sonnet | 2 | Literature, hypotheses, model generators |
+| `data-acquisition-agent` | haiku | 2 | Fast sample inventory, data quality |
+| `data-quality-agent` | sonnet | 2 | Object definitions, data validation |
+| `projector-agent` | sonnet | 3 | Selection optimization, signal projection |
 | `signal-lead` | sonnet | 3 | Event selection (5-step philosophy) |
 | `ml-specialist` | opus | 3 (if MVA) | BDT/DNN/ME discriminants |
 | `background-estimator` | sonnet | 3 | Background estimation, CR/VR design |
@@ -56,7 +57,7 @@ those CLAUDE.md files.
 | Phase | Executors | Review tier | Review agents |
 |-------|-----------|-------------|---------------|
 | **1: Strategy** | `lead-analyst` | 4-bot | physics + critical + constructive + plot-validator → arbiter |
-| **2: Exploration** | `data-explorer` + `detector-specialist` + `theory-scout` (parallel) → `lead-analyst` (consolidation) | Self-review | (none) |
+| **2: Exploration** | `data-acquisition-agent` + `data-quality-agent` + `hypothesis-agent` (parallel) → `lead-analyst` (consolidation) | Self-review | (none) |
 | **3: Selection** | `signal-lead` + `background-estimator` (per channel); `ml-specialist` if MVA | 1-bot | critical + plot-validator |
 | **4a: Expected** | `systematic-source-evaluator` (×N parallel) → `systematics-fitter` | 4-bot | physics + critical + constructive + plot-validator → arbiter |
 | **4b: Partial** | `systematics-fitter` + `note-writer` | 4-bot → human gate | physics + critical + constructive + plot-validator → arbiter |
@@ -227,7 +228,7 @@ scripts produced by this phase. You do NOT rely on visual inspection —
 you examine the code, the data, and the output programmatically.
 
 Check:
-1. Plotting code compliance (mplhep style, figure size, no titles, etc.)
+1. Plotting code compliance (matplotlib styling, figure size, no titles, etc.)
 2. Physics sanity (yields reasonable, distributions physical, ratios sensible)
 3. Consistency (same yields across plots, cutflow monotonic, normalization correct)
 4. Red flags (negative yields, efficiency > 1, chi2/ndf > 5, NP pull > 3σ)

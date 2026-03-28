@@ -58,17 +58,18 @@ def test_state_md_starts_at_phase_0():
     assert "Current phase**: 0" in state
 
 
-def test_analysis_config_yaml_no_hep():
-    """analysis_config.yaml has no HEP-specific fields."""
+def test_analysis_config_yaml_openpe_fields():
+    """analysis_config.yaml has OpenPE fields, not legacy fields."""
     scaffold(TEST_DIR, "analysis")
     yaml_content = (TEST_DIR / "analysis_config.yaml").read_text()
-    assert "blinding" not in yaml_content
-    assert "channels" not in yaml_content
+    # Verify no legacy fields remain
+    for legacy_field in ["blinding", "channels", "signal_region"]:
+        assert legacy_field not in yaml_content, f"Legacy field '{legacy_field}' found"
     assert "input_mode" in yaml_content
 
 
 def test_old_phase_names_not_present():
-    """No slop-X phase names (phase3_selection, phase4_inference, etc.)."""
+    """Legacy phase names (phase3_selection, phase4_inference, etc.) must not exist."""
     scaffold(TEST_DIR, "analysis")
     for name in ["phase3_selection", "phase4_inference", "phase5_documentation"]:
         assert not (TEST_DIR / name).exists(), f"Old phase dir still exists: {name}"

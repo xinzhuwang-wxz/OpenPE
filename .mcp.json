@@ -1,15 +1,3 @@
 {
-  "mcpServers": {
-    "lep-corpus": {
-      "type": "stdio",
-      "command": "bash",
-      "args": [
-        "-c",
-        "cd /n/home07/anovak/work/slopcorpus && exec /n/home07/anovak/.pixi/bin/pixi run python mcp_servers/rag_server.py"
-      ],
-      "env": {
-        "RAG_MODEL": "small"
-      }
-    }
-  }
+  "mcpServers": {}
 }

@@ -1,11 +1,11 @@
 # Project Rules
 
-This is a HEP (High Energy Physics) analysis project using LLM-driven agents.
+OpenPE (Principle to Endgame) — an autonomous first-principles analysis framework using LLM-driven agents.
 
 ## Project structure
 
 ```
-reslop/
+OpenPE/
   src/                      # Spec infrastructure (do not modify during analysis)
     methodology/              Methodology spec (human reference)
     orchestration/            Session management spec (human reference)
@@ -36,8 +36,7 @@ All code runs through pixi. Never use bare `python`, `pip install`, or `conda`.
 
 **From the project root** (scaffolding):
 ```bash
-pixi run scaffold analyses/my_analysis --type measurement
-pixi run scaffold analyses/my_analysis --type search
+pixi run scaffold analyses/my_analysis
 ```
 
 **From an analysis directory** (all analysis code):
@@ -50,15 +49,15 @@ pixi shell
 ## Scaffolding a new analysis
 
 ```bash
-pixi run scaffold analyses/foo --type measurement
-pixi run scaffold analyses/foo --type search
+pixi run scaffold analyses/foo
 ```
 
 This creates the directory structure, CLAUDE.md files, pixi.toml,
-conventions symlink, .analysis_config, and initializes a git repo.
+conventions symlink, memory structure, .analysis_config, and initializes a git repo.
 
-After scaffolding, edit `.analysis_config` to set `data_dir` to the path
-where input data lives (the isolation hook needs this to allow data access).
+After scaffolding, edit `analysis_config.yaml` to set the user question,
+domain, and input mode. Edit `.analysis_config` to set `data_dir` if
+providing your own data.
 
 ## Running an analysis
 
@@ -72,9 +71,9 @@ claude    # starts the orchestrator agent
 **From this top-level session** (for quick runs or when you want to
 orchestrate directly):
 ```bash
-pixi run scaffold analyses/foo --type measurement
-# Set data path:
-echo "data_dir=/path/to/data" > analyses/foo/.analysis_config
+pixi run scaffold analyses/foo
+# Configure:
+#   edit analyses/foo/analysis_config.yaml (question, domain, input_mode)
 cd analyses/foo
 pixi install
 ```
@@ -87,6 +86,6 @@ orchestrator protocol.
 When working on the spec itself (not running an analysis):
 - Edit templates in `src/templates/`
 - Edit methodology in `src/methodology/`
-- Test scaffolder: `pixi run scaffold /tmp/test --type measurement`
+- Test scaffolder: `pixi run scaffold /tmp/test`
 - The isolation hook only activates inside analysis dirs (where
   `.analysis_config` exists). At repo root, all file access is allowed.
