@@ -1,4 +1,4 @@
-# slop-FP Architecture Design
+# OpenPE Architecture Design
 
 **Date**: 2026-03-28
 **Status**: Under Review
@@ -8,10 +8,10 @@
 
 ## 1. Project Identity
 
-**Name**: slop-FP (First Principles)
+**Name**: OpenPE (Principle to Endgame)
 **Core thesis**: Any real-world event is governed by discoverable first principles. This framework starts from first principles, grows through data-driven analysis to user-specified events, then projects forward to find endgames.
 
-**Relationship to slop-X**: slop-FP is an in-place transformation of the existing slop-X HEP analysis framework. It preserves the phase-based pipeline, multi-agent review mechanism, isolation model, and pixi environment — while generalizing from particle physics to domain-agnostic first-principles reasoning.
+**Relationship to slop-X**: OpenPE is an in-place transformation of the existing slop-X HEP analysis framework. It preserves the phase-based pipeline, multi-agent review mechanism, isolation model, and pixi environment — while generalizing from particle physics to domain-agnostic first-principles reasoning.
 
 **Transformation scope**: This is an in-place modification, not a fork. The `src/` infrastructure (scaffolder, templates, agent profiles, methodology) is modified directly. Existing HEP-specific files are archived to `_archive/` before modification. No backward compatibility with slop-X HEP analyses is maintained — this is a clean transformation.
 
@@ -23,7 +23,7 @@
 
 ### 2.1 The Chain Model
 
-slop-FP's central data structure is the **Explanatory Chain** — a causal reasoning chain from first principles to endgame, passing through the user's event of interest.
+OpenPE's central data structure is the **Explanatory Chain** — a causal reasoning chain from first principles to endgame, passing through the user's event of interest.
 
 ```
          ← Abductive direction (Why?)        → Projective direction (What next?)
@@ -167,9 +167,9 @@ Sub-chain returns:
 
 ## 3. Phase Structure
 
-### 3.1 Phase Mapping (slop-X → slop-FP)
+### 3.1 Phase Mapping (slop-X → OpenPE)
 
-slop-X has 5 phases (with 4a/4b/4c split). slop-FP extends to 7 phases, preserving the review tier system.
+slop-X has 5 phases (with 4a/4b/4c split). OpenPE extends to 7 phases, preserving the review tier system.
 
 | New Phase | Name | Origin | Maps to slop-X | Review Tier |
 |-----------|------|--------|-----------------|-------------|
@@ -392,7 +392,7 @@ Human may: (a) approve and proceed to Phase 6, (b) request re-analysis of specif
 
 slop-X's multi-tier review mechanism is preserved with role generalization:
 
-| slop-X Reviewer | slop-FP Reviewer | Responsibility Change |
+| slop-X Reviewer | OpenPE Reviewer | Responsibility Change |
 |-----------------|------------------|----------------------|
 | Physics Reviewer | Domain Reviewer | "Physics correctness" → "Domain reasonableness" |
 | Critical Reviewer | Logic Reviewer | Preserved + EP propagation logic audit |
@@ -459,7 +459,7 @@ Non-blocking findings (Category B) are noted in the report.
 
 Retired agent prompt files are preserved in `_archive/agents/` for reference.
 
-**Note on regression mechanism**: slop-X's regression protocol (re-running earlier phases when reviews find fundamental issues) is preserved in slop-FP. When a Phase N review identifies a Category A issue originating from Phase M (M < N), the orchestrator rolls back to Phase M and re-executes. The investigator's role (root cause analysis for regressions) is absorbed into the verifier agent.
+**Note on regression mechanism**: slop-X's regression protocol (re-running earlier phases when reviews find fundamental issues) is preserved in OpenPE. When a Phase N review identifies a Category A issue originating from Phase M (M < N), the orchestrator rolls back to Phase M and re-executes. The investigator's role (root cause analysis for regressions) is absorbed into the verifier agent.
 
 ### 4.2 DAG Label Taxonomy
 
@@ -819,7 +819,7 @@ Subsequent analyses in the same domain automatically receive this as L1 context.
 - Build hypothesis_agent, data_acquisition_agent, data_quality_agent profiles in `.claude/agents/`
 - Implement DataAcquisitionLayer (WebSearch + FRED + WorldBank providers)
 - Implement Data Quality Gate
-- Update `pixi.toml` template with slop-FP dependencies (pandas, dowhy, wbgapi, fredapi, etc.)
+- Update `pixi.toml` template with OpenPE dependencies (pandas, dowhy, wbgapi, fredapi, etc.)
 - Archive existing HEP-specific agent profiles to `_archive/agents/`
 - Update `.analysis_config` schema to include `input_mode` field
 - End-to-end test: question → data acquired → quality assessed
