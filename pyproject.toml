@@ -1,7 +1,7 @@
 [project]
-name = "slopspec"
+name = "openpe"
 version = "0.1.0"
-description = "slopspec — LLM-driven HEP analysis specification."
+description = "OpenPE — Principle to Endgame. LLM-driven first-principles analysis framework."
 requires-python = ">=3.11"
 
 [tool.pixi.workspace]
