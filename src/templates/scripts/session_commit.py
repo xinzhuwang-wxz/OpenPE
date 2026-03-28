@@ -1,0 +1,290 @@
+"""Post-analysis session commit for OpenPE.
+
+Extracts experiences from completed analysis artifacts and commits
+them to the memory store and causal knowledge graph. Optionally
+grows domain packs from accumulated L1 experiences.
+
+Reference: OpenPE spec — Memory System Design, Session Commit
+"""
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from pathlib import Path
+from datetime import datetime
+
+import yaml
+
+from memory_store import MemoryEntry, MemoryStore
+from causal_knowledge_graph import CausalKnowledgeGraph
+
+
+@dataclass
+class Experience:
+    """An extracted experience from a completed analysis."""
+
+    experience_type: str  # "domain" | "method" | "data_source" | "failure"
+    content: str
+    domain: str
+    source_phase: str
+    confidence: float = 0.5
+
+
+def extract_experiences(analysis_dir: Path) -> list[Experience]:
+    """Parse phase artifacts and extract reusable experiences.
+
+    Scans DISCOVERY.md, DATA_QUALITY.md, STRATEGY.md, ANALYSIS.md,
+    PROJECTION.md, VERIFICATION.md for extractable lessons.
+    """
+    analysis_dir = Path(analysis_dir)
+    experiences: list[Experience] = []
+
+    # Read analysis config for domain
+    config_path = analysis_dir / "analysis_config.yaml"
+    domain = "general"
+    if config_path.exists():
+        with open(config_path) as f:
+            config = yaml.safe_load(f) or {}
+        domain = config.get("domain", "general")
+
+    # Phase artifact extractors
+    _extract_from_discovery(analysis_dir, domain, experiences)
+    _extract_from_data_quality(analysis_dir, domain, experiences)
+    _extract_from_strategy(analysis_dir, domain, experiences)
+    _extract_from_analysis(analysis_dir, domain, experiences)
+    _extract_from_verification(analysis_dir, domain, experiences)
+
+    return experiences
+
+
+def _find_artifact(analysis_dir: Path, filename: str) -> Path | None:
+    """Search phase directories for an artifact file."""
+    for phase_dir in sorted(analysis_dir.glob("phase*")):
+        candidate = phase_dir / filename
+        if candidate.exists():
+            return candidate
+        exec_dir = phase_dir / "exec"
+        if exec_dir.exists():
+            candidate = exec_dir / filename
+            if candidate.exists():
+                return candidate
+    return None
+
+
+def _extract_from_discovery(analysis_dir: Path, domain: str, out: list[Experience]) -> None:
+    path = _find_artifact(analysis_dir, "DISCOVERY.md")
+    if path is None:
+        return
+    text = path.read_text()
+
+    # Extract data source experiences from discovery
+    if "data" in text.lower() and ("source" in text.lower() or "api" in text.lower()):
+        out.append(Experience(
+            experience_type="data_source",
+            content=f"Data sources identified during discovery phase for {domain} analysis",
+            domain=domain,
+            source_phase="phase0_discovery",
+            confidence=0.5,
+        ))
+
+
+def _extract_from_data_quality(analysis_dir: Path, domain: str, out: list[Experience]) -> None:
+    path = _find_artifact(analysis_dir, "DATA_QUALITY.md")
+    if path is None:
+        return
+    text = path.read_text()
+
+    # Extract quality findings
+    low_quality = "LOW" in text.upper() and "quality" in text.lower()
+    if low_quality:
+        out.append(Experience(
+            experience_type="failure",
+            content=f"Data quality issues encountered in {domain}: some datasets rated LOW quality",
+            domain=domain,
+            source_phase="phase0_discovery",
+            confidence=0.6,
+        ))
+
+
+def _extract_from_strategy(analysis_dir: Path, domain: str, out: list[Experience]) -> None:
+    path = _find_artifact(analysis_dir, "STRATEGY.md")
+    if path is None:
+        return
+    text = path.read_text()
+
+    # Extract method choices
+    methods = []
+    for method in ["propensity_score", "instrumental_variable", "diff_in_diff",
+                   "regression_discontinuity", "synthetic_control", "granger"]:
+        if method.replace("_", " ") in text.lower() or method in text.lower():
+            methods.append(method)
+
+    if methods:
+        out.append(Experience(
+            experience_type="method",
+            content=f"Causal methods used in {domain}: {', '.join(methods)}",
+            domain=domain,
+            source_phase="phase1_strategy",
+            confidence=0.6,
+        ))
+
+
+def _extract_from_analysis(analysis_dir: Path, domain: str, out: list[Experience]) -> None:
+    path = _find_artifact(analysis_dir, "ANALYSIS.md")
+    if path is None:
+        return
+    text = path.read_text()
+
+    # Extract causal findings as domain experiences
+    if "DATA_SUPPORTED" in text:
+        out.append(Experience(
+            experience_type="domain",
+            content=f"Data-supported causal relationships found in {domain} analysis",
+            domain=domain,
+            source_phase="phase3_analysis",
+            confidence=0.7,
+        ))
+
+    if "CORRELATION" in text and "not causal" in text.lower():
+        out.append(Experience(
+            experience_type="domain",
+            content=f"Some hypothesized causal links in {domain} were only correlational",
+            domain=domain,
+            source_phase="phase3_analysis",
+            confidence=0.6,
+        ))
+
+
+def _extract_from_verification(analysis_dir: Path, domain: str, out: list[Experience]) -> None:
+    path = _find_artifact(analysis_dir, "VERIFICATION.md")
+    if path is None:
+        return
+    text = path.read_text()
+
+    if "FAIL" in text.upper():
+        out.append(Experience(
+            experience_type="failure",
+            content=f"Verification failures detected in {domain} analysis — review methodology",
+            domain=domain,
+            source_phase="phase5_verification",
+            confidence=0.7,
+        ))
+
+
+def commit_session(
+    analysis_dir: Path,
+    memory_store: MemoryStore,
+    causal_graph: CausalKnowledgeGraph,
+    analysis_id: str = "",
+) -> list[MemoryEntry]:
+    """Extract experiences and commit to memory store + causal graph.
+
+    Returns the list of newly created memory entries.
+    """
+    if not analysis_id:
+        analysis_id = f"analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+
+    # Apply decay to existing memories
+    memory_store.apply_decay()
+
+    # Extract experiences
+    experiences = extract_experiences(analysis_dir)
+
+    # Commit to memory store
+    new_entries = []
+    for i, exp in enumerate(experiences):
+        tier = "L0" if exp.experience_type == "principle" else "L1"
+        entry = MemoryEntry(
+            memory_id=f"{analysis_id}_{exp.experience_type}_{i}",
+            content=exp.content,
+            domain=exp.domain,
+            memory_type=exp.experience_type,
+            tier=tier,
+            confidence=exp.confidence,
+            source_analysis=analysis_id,
+        )
+        memory_store.add(entry)
+        new_entries.append(entry)
+
+    # Extract causal relationships from ANALYSIS.md artifacts
+    _commit_causal_findings(analysis_dir, causal_graph, analysis_id)
+
+    causal_graph.save()
+    return new_entries
+
+
+def _commit_causal_findings(
+    analysis_dir: Path,
+    graph: CausalKnowledgeGraph,
+    analysis_id: str,
+) -> None:
+    """Extract causal findings from analysis artifacts into the graph."""
+    path = _find_artifact(analysis_dir, "ANALYSIS.md")
+    if path is None:
+        return
+    text = path.read_text()
+
+    # Parse causal relationship patterns:
+    # "X → Y: DATA_SUPPORTED" or "X causes Y (DATA_SUPPORTED)"
+    arrow_pattern = re.compile(
+        r"^(\w[\w ]*?)\s*(?:→|->|-->)+\s*(\w[\w ]*?):\s*(DATA_SUPPORTED|CORRELATION|HYPOTHESIZED)",
+        re.IGNORECASE | re.MULTILINE,
+    )
+    for match in arrow_pattern.finditer(text):
+        source = match.group(1).strip()
+        target = match.group(2).strip()
+        classification = match.group(3).upper()
+
+        rel_type = {
+            "DATA_SUPPORTED": "CAUSES",
+            "CORRELATION": "CORRELATED_WITH",
+            "HYPOTHESIZED": "HYPOTHESIZED",
+        }.get(classification, "HYPOTHESIZED")
+
+        confidence = {"CAUSES": 0.7, "CORRELATED_WITH": 0.4, "HYPOTHESIZED": 0.2}.get(rel_type, 0.2)
+
+        # Check for contradictions before adding
+        graph.detect_contradictions(source, target, rel_type, analysis_id)
+        graph.add_relationship(
+            source=source,
+            target=target,
+            relationship_type=rel_type,
+            confidence=confidence,
+            analysis_id=analysis_id,
+        )
+
+
+def grow_domain_pack(
+    memory_store: MemoryStore,
+    domain: str,
+    output_dir: Path,
+) -> Path:
+    """Generate or update a domain pack YAML from accumulated L1 memories.
+
+    Returns the path to the generated domain pack file.
+    """
+    entries = memory_store.load_for_analysis(domain)
+    domain_entries = [e for e in entries if e.tier == "L1" and e.domain == domain]
+
+    pack = {
+        "domain": domain,
+        "generated": datetime.now().isoformat(),
+        "source_memories": len(domain_entries),
+        "experiences": {},
+    }
+
+    for entry_type in ("domain", "method", "data_source", "failure"):
+        typed = [e for e in domain_entries if e.memory_type == entry_type]
+        if typed:
+            pack["experiences"][entry_type] = [
+                {"content": e.content, "confidence": round(e.confidence, 3)}
+                for e in typed
+            ]
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    pack_path = output_dir / f"{domain}.yaml"
+    with open(pack_path, "w") as f:
+        yaml.dump(pack, f, default_flow_style=False, sort_keys=False)
+
+    return pack_path
