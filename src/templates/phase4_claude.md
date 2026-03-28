@@ -23,7 +23,7 @@ Phase 4 depends on completed Phase 3 artifacts. Before beginning, verify:
    - `DATA_SUPPORTED` — survived refutation testing with quantitative evidence
    - `CORRELATION` — statistical association found but causation not established
    - `HYPOTHESIZED` — not yet testable with available data
-   - `REFUTED` — failed refutation testing (excluded from projection)
+   - `DISPUTED` — contradictory refutation results (excluded from projection)
 3. EP values are post-analysis (not Phase 0 qualitative estimates)
 4. Uncertainty distributions are available for each causal parameter
 

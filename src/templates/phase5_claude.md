@@ -138,9 +138,9 @@ the refutation test results.
    - Were confounders controlled for?
    - Does the effect size justify the causal interpretation?
 
-2. **For each edge labeled REFUTED:** Confirm the refutation evidence is
-   compelling — not a false negative due to insufficient power or data
-   quality issues.
+2. **For each edge labeled DISPUTED:** Confirm the contradictory refutation
+   results are genuine — not a false negative due to insufficient power or
+   data quality issues.
 
 3. **For each edge labeled CORRELATION:** Verify that the analysis correctly
    identified why causation could not be established (confounders,
