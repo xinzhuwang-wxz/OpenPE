@@ -260,7 +260,7 @@ We also draw inspiration and adapt patterns from these open-source projects:
 | Project | What We Borrowed | License |
 |---------|-----------------|---------|
 | [slop-X](https://github.com/jfc-mit/slop-X) | Original framework concept and phase-based analysis architecture | GPL-3.0 |
-| [ACG Protocol](https://github.com/acg-team/acg_protocol) | UGVP fact grounding (IGM/SSR/VAR audit structures) | — |
+| [ACG Protocol](https://github.com/Kos-M/acg_protocol) | UGVP fact grounding (IGM/SSR/VAR audit structures) | — |
 | [Graphiti](https://github.com/getzep/graphiti) | Temporal EntityEdge validity model for knowledge graphs | Apache-2.0 |
 | [OpenViking](https://github.com/AIsmart-Team/OpenViking) | Memory lifecycle hotness scoring (`sigmoid × recency`) | — |
 | [Causica](https://github.com/microsoft/causica) | Graph evaluation metrics patterns | MIT |
