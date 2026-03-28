@@ -1,10 +1,10 @@
 # OpenPE — Principle to Endgame
 
-**An LLM-driven framework that turns any question into a rigorous, first-principles causal analysis — from hypothesis to publication-ready report.**
+Every event has a cause. Every cause has a cause. This forms a network — not a line, a network. Each node is the center of its own web of causes and consequences.
 
-OpenPE is not a chatbot wrapper or a prompt chain. It is a structured analytical engine where an orchestrator agent delegates work to specialized subagents across seven phases, each producing auditable artifacts. Every causal claim is tested against refutation, every edge in the causal graph carries a quantified Explanatory Power score, and every conclusion traces back to its data source through an immutable provenance chain.
+But the network doesn't expand forever. The further you trace from the origin, the weaker the explanatory signal becomes — multiplicatively, not linearly. At some point the trail goes cold. That boundary isn't a flaw. It's the natural horizon of what can be understood from a given starting point.
 
-The quality bar is publication-ready. Not "good enough to ship" — good enough for a senior review committee.
+OpenPE works within that horizon. It builds causal graphs from first principles, tests every link against refutation, and projects forward only as far as the evidence can carry — from **principle** to **endgame**.
 
 ---
 
