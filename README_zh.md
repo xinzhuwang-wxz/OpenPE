@@ -267,13 +267,12 @@ analyses/my_analysis/           # 独立 git 仓库
 
 ## 致谢
 
-OpenPE 源于 [slop-X](https://github.com/jfc-mit/slop-X)，一个面向高能物理的结构化分析框架。核心理念——第一性原理因果推理可以被形式化为可复现的、agent 驱动的管线——源自于此。OpenPE 将其推广到任意领域。
+OpenPE 源于 [slop-X](https://github.com/jfc-mit/slop-X)，一个面向高能物理的结构化分析框架。OpenPE 将其推广到任意领域。
 
 我们还从以下开源项目中汲取灵感并适配模式：
 
 | 项目 | 借鉴内容 | 许可证 |
 |------|---------|--------|
-| [slop-X](https://github.com/jfc-mit/slop-X) | 原始框架概念和基于阶段的分析架构 | GPL-3.0 |
 | [ACG Protocol](https://github.com/Kos-M/acg_protocol) | UGVP 事实溯源 (IGM/SSR/VAR 审计结构) | — |
 | [Graphiti](https://github.com/getzep/graphiti) | 知识图谱的时间 EntityEdge 有效性模型 | Apache-2.0 |
 | [OpenViking](https://github.com/volcengine/OpenViking) | 记忆生命周期热度评分 (`sigmoid × recency`) | Apache-2.0 |

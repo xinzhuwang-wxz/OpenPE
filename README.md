@@ -267,13 +267,12 @@ analyses/my_analysis/           # Independent git repo
 
 ## Acknowledgments
 
-OpenPE originated from [slop-X](https://github.com/jfc-mit/slop-X), a structured analysis framework for high-energy physics. The core idea — that first-principles causal reasoning can be formalized into a reproducible, agent-driven pipeline — came from there. OpenPE generalizes this to any domain.
+OpenPE originated from [slop-X](https://github.com/jfc-mit/slop-X), a structured analysis framework for high-energy physics. OpenPE generalizes this to any domain.
 
 We also draw inspiration and adapt patterns from these open-source projects:
 
 | Project | What We Borrowed | License |
 |---------|-----------------|---------|
-| [slop-X](https://github.com/jfc-mit/slop-X) | Original framework concept and phase-based analysis architecture | GPL-3.0 |
 | [ACG Protocol](https://github.com/Kos-M/acg_protocol) | UGVP fact grounding (IGM/SSR/VAR audit structures) | — |
 | [Graphiti](https://github.com/getzep/graphiti) | Temporal EntityEdge validity model for knowledge graphs | Apache-2.0 |
 | [OpenViking](https://github.com/volcengine/OpenViking) | Memory lifecycle hotness scoring (`sigmoid × recency`) | Apache-2.0 |

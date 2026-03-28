@@ -267,13 +267,12 @@ analyses/my_analysis/           # 독립 git 저장소
 
 ## 감사의 말
 
-OpenPE는 [slop-X](https://github.com/jfc-mit/slop-X)에서 시작되었습니다. 고에너지 물리학을 위한 구조화된 분석 프레임워크입니다. 핵심 아이디어 — 제1원리 인과 추론을 재현 가능한 에이전트 기반 파이프라인으로 형식화할 수 있다는 것 — 은 거기서 왔습니다. OpenPE는 이를 모든 도메인으로 일반화합니다.
+OpenPE는 [slop-X](https://github.com/jfc-mit/slop-X)에서 시작되었습니다. 고에너지 물리학을 위한 구조화된 분석 프레임워크입니다. OpenPE는 이를 모든 도메인으로 일반화합니다.
 
 다음 오픈소스 프로젝트에서도 영감을 받고 패턴을 적용했습니다:
 
 | 프로젝트 | 차용한 내용 | 라이선스 |
 |---------|------------|---------|
-| [slop-X](https://github.com/jfc-mit/slop-X) | 원본 프레임워크 컨셉과 단계 기반 분석 아키텍처 | GPL-3.0 |
 | [ACG Protocol](https://github.com/Kos-M/acg_protocol) | UGVP 사실 근거 (IGM/SSR/VAR 감사 구조) | — |
 | [Graphiti](https://github.com/getzep/graphiti) | 지식 그래프의 시간적 EntityEdge 유효성 모델 | Apache-2.0 |
 | [OpenViking](https://github.com/volcengine/OpenViking) | 메모리 생명주기 활성도 평가 (`sigmoid × recency`) | Apache-2.0 |
