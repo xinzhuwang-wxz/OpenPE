@@ -12,6 +12,5 @@ analyses/
 # Global memory (accumulates per-user, not shared)
 memory/
 
-# Development-only (not shipped to users)
-tests/
-docs/
+# Reference repos (read-only, not part of OpenPE)
+_ref/
