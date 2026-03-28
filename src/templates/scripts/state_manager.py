@@ -66,11 +66,17 @@ class StateManager:
         self.path.write_text("\n".join(lines))
 
     def load(self) -> None:
-        """Parse existing STATE.md from disk."""
+        """Parse existing STATE.md from disk.
+
+        Restores ALL state fields so that cross-session resumption
+        preserves phase history, iteration counts, blockers, and
+        data callback usage.
+        """
         if not self.path.exists():
             return
         text = self.path.read_text()
 
+        # Scalar fields
         m = re.search(r"\*\*Current phase\*\*:\s*(\d+)", text)
         if m:
             self.current_phase = int(m.group(1))
@@ -86,6 +92,37 @@ class StateManager:
         m = re.search(r"\*\*Data callbacks used\*\*:\s*(\d+)", text)
         if m:
             self.data_callbacks_used = int(m.group(1))
+
+        # Phase history table: | phase | status | artifact | review | iterations | notes |
+        self.phase_history.clear()
+        self.iteration_counts.clear()
+        table_pattern = re.compile(
+            r"^\|\s*(\d+)\s*\|\s*(\S+)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(\d+)\s*\|\s*(.*?)\s*\|",
+            re.MULTILINE,
+        )
+        for row in table_pattern.finditer(text):
+            phase_num = int(row.group(1))
+            self.phase_history.append({
+                "phase": phase_num,
+                "status": row.group(2).strip(),
+                "artifact": row.group(3).strip(),
+                "review": row.group(4).strip(),
+                "notes": row.group(6).strip(),
+            })
+            iters = int(row.group(5))
+            if iters > 0:
+                self.iteration_counts[phase_num] = iters
+
+        # Blockers: lines starting with "- " after "## Blockers"
+        self.blockers.clear()
+        blockers_section = re.search(
+            r"## Blockers\n(.*?)(?=\n## |\Z)", text, re.DOTALL
+        )
+        if blockers_section:
+            for line in blockers_section.group(1).strip().split("\n"):
+                line = line.strip()
+                if line.startswith("- ") and line != "- (none)":
+                    self.blockers.append(line[2:])
 
     def advance_phase(
         self,
