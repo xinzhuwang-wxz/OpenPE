@@ -93,16 +93,24 @@ def classify_refutation_results(results: list[RefutationResult]) -> str:
 
 
 def _is_contradictory(results: list[RefutationResult]) -> bool:
-    """Detect contradictory refutation patterns.
+    """Detect contradictory refutation patterns using semantic logic.
 
-    Contradictions arise when tests that should agree give opposite signals:
-    - placebo passes (effect is treatment-specific) but data_subset fails
-      (effect not stable) — the treatment matters but inconsistently
-    - data_subset passes (stable effect) but placebo fails (random
-      treatment also produces effect) — stable but not treatment-specific
+    Uses placebo as the causal anchor — it is the most direct test of
+    whether the effect is treatment-specific (i.e. "real").
 
-    Returns True if the pattern is logically contradictory rather than
-    merely inconclusive.
+    Logic:
+      If placebo passes → effect is "real" (treatment-specific)
+        Then subset and common_cause should also pass (a real effect
+        should be stable and robust to confounding).
+        Either failing contradicts the "real" conclusion → DISPUTED.
+
+      If placebo fails → effect is "not real" (random treatment works too)
+        Then subset passing is contradictory (how is a non-real effect
+        perfectly stable across data splits?).
+        But common_cause passing is fine (a non-real effect naturally
+        won't be affected by confounders).
+
+    Returns True if the pattern is logically contradictory.
     """
     by_name = {r.test_name: r.passed for r in results}
 
@@ -110,18 +118,19 @@ def _is_contradictory(results: list[RefutationResult]) -> bool:
     subset = by_name.get("data_subset")
     common_cause = by_name.get("random_common_cause")
 
-    # Placebo and subset are the strongest contradiction pair:
-    # - Placebo passes → effect is treatment-specific (real)
-    # - Subset fails → effect is not stable across data splits (unreliable)
-    # These directly contradict: the effect is "real" but "unreliable".
-    #
-    # The reverse is also contradictory:
-    # - Placebo fails → random treatment also produces effect (not real)
-    # - Subset passes → effect is perfectly stable (reliable)
-    # A "not real" but "reliable" effect is contradictory.
-    if placebo is not None and subset is not None:
-        if placebo != subset:
-            return True
+    if placebo is None:
+        return False
+
+    if placebo:
+        # Effect is "real" — any other test failing contradicts this
+        if subset is not None and not subset:
+            return True   # real but unstable
+        if common_cause is not None and not common_cause:
+            return True   # real but confounded
+    else:
+        # Effect is "not real" — only subset passing is contradictory
+        if subset is not None and subset:
+            return True   # not real but stable
 
     return False
 

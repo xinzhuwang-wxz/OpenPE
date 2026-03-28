@@ -48,12 +48,21 @@ def test_classify_all_pass():
     assert classify_refutation_results(results) == "DATA_SUPPORTED"
 
 
-def test_classify_two_pass():
-    """2 pass, 1 fail → CORRELATION."""
+def test_classify_two_pass_placebo_anchored():
+    """Placebo pass + cc fail → DISPUTED (scheme C: real but confounded)."""
     results = [
         RefutationResult("placebo", passed=True, p_value=0.85),
         RefutationResult("random_common_cause", passed=False, p_value=0.03),
         RefutationResult("data_subset", passed=True, p_value=0.68),
+    ]
+    assert classify_refutation_results(results) == "DISPUTED"
+
+
+def test_classify_correlation_no_placebo():
+    """Without placebo, mixed results → CORRELATION (no anchor to contradict)."""
+    results = [
+        RefutationResult("random_common_cause", passed=True, p_value=0.72),
+        RefutationResult("data_subset", passed=False, p_value=0.04),
     ]
     assert classify_refutation_results(results) == "CORRELATION"
 
@@ -94,13 +103,23 @@ def test_classify_contradictory_reverse():
 
 
 def test_classify_non_contradictory_correlation():
-    """Non-contradictory partial failure → CORRELATION (not DISPUTED)."""
+    """Placebo fail + cc fail + subset fail with different p-values → HYPOTHESIZED."""
     results = [
-        RefutationResult("placebo", passed=True, p_value=0.80),
-        RefutationResult("random_common_cause", passed=False, p_value=0.03),
-        RefutationResult("data_subset", passed=True, p_value=0.65),
+        RefutationResult("placebo", passed=False, p_value=0.03),
+        RefutationResult("random_common_cause", passed=False, p_value=0.02),
+        RefutationResult("data_subset", passed=False, p_value=0.04),
     ]
-    # placebo passes and data_subset passes — consistent. Only common_cause fails.
+    # All fail, no contradiction — just no evidence
+    assert classify_refutation_results(results) == "HYPOTHESIZED"
+
+
+def test_classify_placebo_fail_cc_pass_subset_fail():
+    """Placebo fail + subset fail → not contradictory (both say 'not real')."""
+    results = [
+        RefutationResult("placebo", passed=False, p_value=0.02),
+        RefutationResult("random_common_cause", passed=True, p_value=0.70),
+        RefutationResult("data_subset", passed=False, p_value=0.04),
+    ]
     assert classify_refutation_results(results) == "CORRELATION"
 
 
