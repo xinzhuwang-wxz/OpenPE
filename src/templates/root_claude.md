@@ -25,13 +25,20 @@ it will produce, what the artifact structure will be. The subagent executes
 only after the plan is set. This prevents agents from diving into code
 without thinking.
 
+**Memory loading at analysis start.** If a global `memory/` directory exists
+(at the spec root or a configured path), copy its contents into the
+analysis-local `memory/` directory before beginning Phase 0. Each phase
+agent reads L0 (global conventions) and L1 (analysis-specific context) from
+`memory/` at the start of its invocation. This ensures accumulated domain
+knowledge persists across analyses.
+
 **The orchestrator loop for each phase:**
 
 ```
-for each phase in [1, 2, 3, 4a, 4b, 4c, 5]:
+for each phase in [0, 1, 2, 3, 4, 5, 6]:
 
   1. EXECUTE — spawn a phase executor subagent (start in plan mode) with:
-     - The physics prompt
+     - The analysis question and context
      - The phase CLAUDE.md (read from disk, pass in prompt)
      - Paths to upstream artifacts (subagent reads from disk)
      - The experiment log path (subagent appends to it)
@@ -45,7 +52,7 @@ for each phase in [1, 2, 3, 4a, 4b, 4c, 5]:
      - Instruction to write REVIEW_NOTES.md in the phase directory
 
   3. CHECK — read the review findings (short).
-     If regression trigger (physics issue from earlier phase):
+     If regression trigger (logic or methodology issue from earlier phase):
        → enter Phase Regression protocol (see below).
      If Category A or B issues: spawn a fix agent to address ALL of them,
        then re-review with a fresh reviewer added to the panel.
@@ -53,36 +60,48 @@ for each phase in [1, 2, 3, 4a, 4b, 4c, 5]:
 
   4. COMMIT — commit the phase's work.
 
-  5. HUMAN GATE (after 4b for both measurements and searches):
-     Present the draft AN and 10% results to the human. Pause until approved.
+  5. HUMAN GATE (after Phase 5 only):
+     Present the verification report, key causal findings, EP propagation
+     summary, and projection scenarios to the human. Pause until approved.
 
   6. ADVANCE — proceed to next phase.
 ```
 
-**Phase 4 flow (both measurements and searches):**
-All three sub-phases (4a → 4b → 4c) are required for both analysis types.
-- **4a:** Statistical analysis — systematics, expected results. No AN draft.
-- **4b:** 10% data validation. Compare to expected. Write full AN draft.
-  Review + PDF render. Human gate after 4b review passes.
-- **4c:** Full data. Compare to **both** 10% and expected. Update AN with full results.
+**Agent roster and phase mapping:**
 
-**Context splitting:** Phase 4b and Phase 5 are context-intensive (AN writing
-alongside statistical analysis). When context pressure is high, split into
-separate subagent invocations: one for statistical analysis, another for AN
-writing/rendering. The AN-writing subagent reads the inference artifact from
-disk.
+| Phase | Executor agent(s) | Role |
+|-------|-------------------|------|
+| 0: Discovery | `hypothesis_agent` → `data_acquisition_agent` → `data_quality_agent` | Question decomposition, DAG construction, data acquisition, quality gate |
+| 1: Strategy | `lead_analyst` | Analysis strategy from DAGs and data |
+| 2: Exploration | `data_explorer` | Exploratory data analysis, distribution checks |
+| 3: Causal Analysis | `analyst` (steps 1-5), `analyst` (steps 6-7, context split) | Causal testing, refutation, statistical modeling |
+| 4: Projection | `projector_agent` | Forward projection, scenario analysis |
+| 5: Verification | `verifier` | Cross-validation, sensitivity analysis, EP reconciliation |
+| 6: Documentation | `report_writer` + `plot_validator` | Final report, all figures validated |
+
+**Context splitting — Phase 3:** Steps 1-5 (causal testing, refutation,
+EP updates) and steps 6-7 (statistical model fitting, uncertainty
+quantification) should be split into separate subagent invocations. The
+step 6-7 subagent reads the causal testing artifact from disk. This prevents
+context exhaustion during the most compute-intensive phase.
+
+**EP monitoring at sub-chain expansion.** During Phase 3, when an event or
+edge triggers sub-chain expansion, the orchestrator checks Joint_EP. If an
+event's individual EP > 0.3 and the chain's Joint_EP > 0.15, scaffold a
+sub-analysis directory using the scaffolder. If Joint_EP <= 0.15, log it as
+"below soft truncation — lightweight assessment only" and do not expand.
 
 **Agent profiles:** Detailed role definitions with domain knowledge, mandatory
 checklists, and output formats live in `.claude/agents/*.md`. When spawning an
 executor or reviewer, instruct it to read its agent profile first. The profile
-contains the deep domain expertise (5-step selection philosophy, 8 mandatory
-fit diagnostics, closure test criteria, etc.) that makes the agent effective.
-The agent roster and phase-to-agent mapping is in
+contains the deep domain expertise (causal inference methodology, EP
+assessment criteria, data quality standards, etc.) that makes the agent
+effective. The agent roster and phase-to-agent mapping is in
 `methodology/orchestration/agents.md` (or `src/orchestration/agents.md` from
 the spec root).
 
 **Anti-patterns:**
-- Running straight from Phase 1 to Phase 5 with no intermediate artifacts
+- Running straight from Phase 1 to Phase 6 with no intermediate artifacts
 - The orchestrator writing analysis scripts itself
 - Using an LLM for format conversion — use pandoc, not an agent
 - Writing a workaround when a maintained tool exists — `pixi add` it instead
@@ -91,6 +110,10 @@ the spec root).
 - Subagents reading files with `cat | sed | head` instead of the Read tool
 - Skipping plot-validator in review cycles — it catches errors LLMs miss
 - Spawning an executor without pointing it to its `.claude/agents/` profile
+- Presenting correlation as causation without refutation tests in Phase 3
+- Skipping EP assessment for causal edges — every edge must have EP values
+- Ignoring data quality gate warnings from Phase 0 in downstream artifacts
+- Expanding sub-chains beyond recursion depth 2 without orchestrator approval
 
 **What the orchestrator does NOT do:**
 - Read full scripts or data files (subagents do this)
@@ -103,13 +126,17 @@ the spec root).
   every ~5 minutes for long-running subagents. Respawn stalled agents from
   the last commit (if no commit in >10 minutes and no progress, terminate
   and respawn). When background/non-blocking agent spawning is available,
-  use it for long-running subagents (Phase 3 processing, Phase 4 systematic
-  evaluation, Phase 5 AN writing) to enable monitoring and respawning.
+  use it for long-running subagents (Phase 3 causal testing, Phase 4
+  projection scenarios, Phase 6 report writing) to enable monitoring and
+  respawning.
 - Ensure review quality. Do NOT conserve tokens by accepting weak reviews
   or rushing past issues. If a reviewer finds problems, have the work redone
   properly — not minimally patched.
-- Trigger phase regression when ANY review finds physics issues traceable
-  to an earlier phase.
+- Trigger phase regression when ANY review finds logic or methodology issues
+  traceable to an earlier phase.
+- **EP propagation tracking.** After Phase 3, maintain a running summary of
+  Joint_EP values for all causal chains. Pass this summary to Phase 4 and
+  Phase 5 agents so they can prioritize high-EP findings.
 
 **Subagent model selection:** All subagents — executors, reviewers, arbiters,
 fix agents — must be spawned with `model: "opus"`. Never use Sonnet or Haiku
@@ -130,9 +157,8 @@ Read relevant sections from `methodology/` as needed:
 |-------|------|------|
 | Phase definitions | `methodology/03-phases.md` | Before each phase |
 | Orchestration | `methodology/03a-orchestration.md` | Orchestrator planning |
-| Blinding | `methodology/04-blinding.md` | Phase 4 |
 | Artifacts | `methodology/05-artifacts.md` | Writing phase artifacts |
-| Analysis note spec | `methodology/analysis-note.md` | Phase 4b (writing AN), Phase 5 |
+| Analysis note spec | `methodology/analysis-note.md` | Phase 6 (writing report), Phase 5 |
 | Review protocol | `methodology/06-review.md` | Spawning reviewers |
 | Tools & paradigms | `methodology/07-tools.md` | Coding phases |
 | Coding practices | `methodology/11-coding.md` | Coding phases |
@@ -149,7 +175,7 @@ All scripts must run through pixi:
 
 ```bash
 pixi run py path/to/script.py          # run a script
-pixi run py -c "import uproot; ..."     # quick check
+pixi run py -c "import pandas; ..."    # quick check
 pixi shell                              # interactive shell with all deps
 ```
 
@@ -165,18 +191,21 @@ Non-negotiable. Use these — not alternatives.
 
 | Task | Use | NOT |
 |------|-----|-----|
-| ROOT file I/O | `uproot` | PyROOT, ROOT C++ macros |
-| Array operations | `awkward-array`, `numpy` | pandas (for HEP event data) |
-| Histogramming | `hist`, `boost-histogram` | ROOT TH1, numpy.histogram (for filling) |
-| Plotting | `matplotlib` + `mplhep` | ROOT TCanvas, plotly |
-| Statistical model | `pyhf` (binned), `zfit` (unbinned) | RooFit, RooStats, custom likelihood code |
-| Jet clustering | `fastjet` (Python) | manual clustering |
+| Tabular data | `pandas` | manual CSV parsing, raw dicts |
+| Causal inference | `dowhy` | ad-hoc regression-only approaches |
+| World Bank data | `wbgapi` | manual URL construction to World Bank API |
+| FRED data | `fredapi` | manual URL construction to FRED API |
+| Array operations | `numpy`, `scipy` | manual loops for numerical work |
+| Statistical modeling | `statsmodels`, `scikit-learn` | custom likelihood code (unless justified) |
+| Plotting | `matplotlib` | plotly (for static reports) |
 | Logging | `logging` + `rich` | `print()` — never use bare print |
-| Document prep | `pandoc` (>=3.0) + pdflatex | LLM-based markdown→LaTeX conversion |
+| Document prep | `pandoc` (>=3.0) + pdflatex | LLM-based markdown-to-LaTeX conversion |
 | Dependency mgmt | `pixi` | pip, conda |
+| Data serialization | `pyarrow` / parquet | CSV for intermediate artifacts |
 
-**Optional:** `coffea` (`NanoEvents` for schema-driven array access,
-`PackedSelection` for cutflow management) when the event structure benefits.
+**Optional:** `networkx` for DAG manipulation and visualization when graph
+operations go beyond simple rendering. `seaborn` for statistical
+visualization when distribution plots or pair plots are needed.
 
 ---
 
@@ -187,13 +216,13 @@ phase begins. No exceptions.
 
 | Phase | Required artifact | Review type |
 |-------|-------------------|-------------|
+| 0 | `phase0_discovery/exec/DISCOVERY.md` + `phase0_discovery/exec/DATA_QUALITY.md` + `data/registry.yaml` | 4-bot |
 | 1 | `phase1_strategy/exec/STRATEGY.md` | 4-bot |
 | 2 | `phase2_exploration/exec/EXPLORATION.md` | Self |
-| 3 | `phase3_selection/exec/SELECTION.md` | 1-bot |
-| 4a | `phase4_inference/exec/INFERENCE_EXPECTED.md` | 4-bot |
-| 4b | `phase4_inference/exec/INFERENCE_PARTIAL.md` + `ANALYSIS_NOTE_DRAFT.md` | 4-bot → human gate |
-| 4c | `phase4_inference/exec/INFERENCE_OBSERVED.md` | 1-bot |
-| 5 | `phase5_documentation/exec/ANALYSIS_NOTE.md` | 5-bot (4 + rendering) |
+| 3 | `phase3_analysis/exec/ANALYSIS.md` | 4-bot |
+| 4 | `phase4_projection/exec/PROJECTION.md` | 4-bot |
+| 5 | `phase5_verification/exec/VERIFICATION.md` | 4-bot + Human Gate |
+| 6 | `phase6_documentation/exec/ANALYSIS_NOTE.md` | 5-bot (4 + rendering) |
 
 **Review before advancing.** After each artifact, spawn a reviewer subagent.
 Self-review is only acceptable for Phase 2 (exploration). All other phases
@@ -216,15 +245,27 @@ See `methodology/06-review.md` for the full protocol. Key rules:
 
 The arbiter must not PASS with unresolved A or B items.
 
+**Reviewer agents:**
+
+| Role | Agent | Purpose |
+|------|-------|---------|
+| Domain reviewer | `domain_reviewer` | Domain expertise, factual accuracy, literature grounding |
+| Logic reviewer | `logic_reviewer` | Causal reasoning validity, DAG consistency, EP arithmetic |
+| Methods reviewer | `methods_reviewer` | Statistical methodology, test selection, uncertainty quantification |
+| Arbiter | `arbiter` | Synthesizes all reviews, makes PASS/FAIL decision |
+| Rendering reviewer | `rendering_reviewer` | Document formatting, figure quality, pandoc compatibility |
+
+**Review tiers by phase:**
+
 | Phase | Review type |
 |-------|-------------|
-| 1: Strategy | 4-bot + plot-validator (physics + critical + constructive + arbiter) |
+| 0: Discovery | 4-bot (domain + logic + methods → arbiter) |
+| 1: Strategy | 4-bot (domain + logic + methods → arbiter) |
 | 2: Exploration | Self-review |
-| 3: Processing | 1-bot + plot-validator (critical + plot-validator) |
-| 4a: Expected | 4-bot + plot-validator |
-| 4b: 10% validation | 4-bot + plot-validator → human gate |
-| 4c: Full data | 1-bot + plot-validator |
-| 5: Documentation | 5-bot + plot-validator (4-bot + rendering + plot-validator) |
+| 3: Causal Analysis | 4-bot (domain + logic + methods → arbiter) |
+| 4: Projection | 4-bot (domain + logic + methods → arbiter) |
+| 5: Verification | 4-bot (domain + logic + methods → arbiter) + Human Gate |
+| 6: Documentation | 5-bot (domain + logic + methods + rendering → arbiter) |
 
 **Plot-validator** runs alongside all other reviewers in parallel. It performs
 programmatic (not visual) checks on plotting code and output data. Red flags
@@ -238,8 +279,9 @@ downgrade them. See `.claude/agents/plot-validator.md` and
 
 ## Phase Regression
 
-When a reviewer at Phase N finds a **physics issue** traceable to Phase M < N,
-this triggers regression. See `methodology/06-review.md` §6.8 for the full protocol.
+When a reviewer at Phase N finds a **logic or methodology issue** traceable
+to Phase M < N, this triggers regression. See `methodology/06-review.md` §6.8
+for the full protocol.
 
 **Regression trigger:** Spawn an Investigator to trace impact →
 `REGRESSION_TICKET.md` → fix origin phase → re-run affected downstream →
@@ -252,8 +294,9 @@ resume review.
 
 ## Coding Rules
 
-- **Columnar analysis.** Arrays, not event loops. Selections are boolean masks.
-- **Prototype on a slice.** ~1000 events first, full data only for production.
+- **Tabular analysis.** DataFrames and array operations, not row-by-row loops.
+  Selections are boolean masks or query expressions.
+- **Prototype on a slice.** Small sample first, full data only for production.
 - **No bare `print()`.** Use `logging` + `rich`. Ruff T201 enforces this.
 - **Conventional commits.** `<type>(phase): <description>`.
 - **Scripts as pixi tasks.** Every script gets a named task in `pixi.toml`.
@@ -280,13 +323,13 @@ See `methodology/11-coding.md` for full coding practices.
 ## Scale-Out Rules
 
 **Always estimate before running at full scale.** Check input size, time a
-1000-event slice, extrapolate.
+small slice, extrapolate.
 
 | Estimated time | Action |
 |---|---|
 | < 2 min | Single-core local — just run it |
 | 2–15 min | `ProcessPoolExecutor` or equivalent multicore |
-| > 15 min | SLURM: `sbatch --wait` (single) or `--array` (per-file) |
+| > 15 min | Consider chunking, caching intermediate results, or parallelizing across datasets |
 
 ---
 
@@ -294,10 +337,11 @@ See `methodology/11-coding.md` for full coding practices.
 
 See `methodology/appendix-plotting.md` for full plotting standards. Essentials:
 
-- **Style:** `import mplhep as mh; mh.style.use("CMS")` (CMS style is the default mplhep preset — clean, widely used)
+- **Style:** Use a clean, consistent matplotlib style. Set a project-wide
+  style at the top of plotting scripts (e.g., `plt.style.use('seaborn-v0_8-whitegrid')` or a custom stylesheet).
 - **Figure size:** `figsize=(10, 10)`. Subplots: `figsize=(10*ncols, 10*nrows)`.
 - **No titles.** Never `ax.set_title()`. Captions go in the analysis note.
-- **No absolute font sizes.** The CMS stylesheet sets sizes. Use `'x-small'` for legends.
+- **No absolute font sizes.** Use relative sizes (`'x-small'`, `'small'`).
 - **Save as PDF + PNG.** `bbox_inches="tight"`, `dpi=200`, `transparent=True`. Close after saving.
 - **Figures in artifacts:** `![Detailed caption](figures/name.pdf)`.
 
@@ -308,13 +352,13 @@ See `methodology/appendix-plotting.md` for full plotting standards. Essentials:
 Read applicable files in `conventions/` at three mandatory checkpoints:
 
 1. **Phase 1 (Strategy):** Read all applicable conventions before writing
-   the systematic plan. Enumerate every required source with "Will implement"
+   the analysis plan. Enumerate every required methodology with "Will implement"
    or "Not applicable because [reason]."
-2. **Phase 4a (Inference):** Re-read conventions before finalizing
-   systematics. Produce a completeness table comparing sources against
-   conventions AND reference analyses.
-3. **Phase 5 (Documentation):** Final conventions check — verify everything
-   required is present in the analysis note.
+2. **Phase 3 (Causal Analysis):** Re-read conventions before finalizing
+   causal tests and statistical models. Produce a completeness table comparing
+   methods against conventions AND reference analyses.
+3. **Phase 5 (Verification):** Final conventions check — verify everything
+   required is present in the verification report.
 
 If a convention requires something you plan to omit, justify explicitly.
 
@@ -322,11 +366,11 @@ If a convention requires something you plan to omit, justify explicitly.
 
 | Analysis technique | Read these files |
 |--------------------|-----------------|
-| Unfolded measurement (IBU, SVD, TUnfold, OmniFold, bin-by-bin) | `conventions/unfolding.md` |
-| Extraction measurement (double-tag, ratio, branching fraction, counting) | `conventions/extraction.md` |
-| Search / limit-setting | `conventions/search.md` |
+| Causal inference (DAG-based, do-calculus, IV, DiD) | `conventions/causal_inference.md` |
+| Time series / forecasting | `conventions/time_series.md` |
+| Cross-sectional / panel analysis | `conventions/panel_analysis.md` |
 
-If unsure, the technique selection in Phase 1 determines which file applies.
+If unsure, the methodology selection in Phase 1 determines which file applies.
 Read the "When this applies" section of each candidate file to confirm.
 Ignore `conventions/TEMPLATE.md` — it is a skeleton for spec developers
 creating new conventions files.
@@ -337,7 +381,7 @@ creating new conventions files.
 
 The analysis note (`ANALYSIS_NOTE.md`) must be **pandoc-compatible markdown**:
 
-- **LaTeX math:** `$...$` inline, `$$...$$` display. Write `$\alpha_s$`, not `alpha_s`.
+- **LaTeX math:** `$...$` inline, `$$...$$` display. Write `$\alpha$`, not `alpha`.
 - **Figures:** `![Caption text](figures/name.pdf)` — pandoc converts to `\includegraphics`.
 - **No raw HTML.** Pandoc markdown only.
 - **Tables:** Pipe tables (`| col1 | col2 |`).
@@ -347,7 +391,7 @@ The analysis note (`ANALYSIS_NOTE.md`) must be **pandoc-compatible markdown**:
 - **Citations:** `[@key]` with a `references.bib` BibTeX file. `build-pdf` uses `--citeproc`.
 - **Sections:** `#`, `##`, `###` — pandoc adds numbering with `--number-sections`.
 
-Required AN sections — see `methodology/03-phases.md` → Phase 5 for the full list.
+Required AN sections — see `methodology/03-phases.md` → Phase 6 for the full list.
 
 ---
 
@@ -361,8 +405,9 @@ See `methodology/12-downscoping.md` for the full evaluation protocol.
 ## Reference Analyses
 
 To be filled during Phase 1. The strategy must identify 2-3 published
-reference analyses and tabulate their systematic programs. This table is
-a binding input to Phase 4 and Phase 5 reviews.
+reference analyses (peer-reviewed papers, institutional reports, or
+established methodological benchmarks) and tabulate their approaches. This
+table is a binding input to Phase 3 and Phase 5 reviews.
 
 ---
 
@@ -384,14 +429,15 @@ pandoc = ">=3.0"
 
 # Python packages (from PyPI)
 [pypi-dependencies]
-uproot = ">=5.0"
+pandas = ">=2.0"
 numpy = ">=1.24"
+dowhy = ">=0.11"
 
 # Named tasks
 [tasks]
 py = "python"
-select = "python phase3_selection/scripts/apply_selection.py"
-all = "python phase3_selection/scripts/apply_selection.py && ..."
+acquire = "python phase0_discovery/scripts/acquire_data.py"
+all = "python phase0_discovery/scripts/acquire_data.py && ..."
 ```
 
 **Common pitfalls:**
