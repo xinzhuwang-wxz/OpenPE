@@ -253,6 +253,9 @@ def commit_session(
     # Commit to memory store
     new_entries = []
     for i, exp in enumerate(experiences):
+        # L0 entries are created via promote_tier() (corroboration across analyses),
+        # not via single-analysis extraction. The "principle" type is reserved for
+        # manual seeding (e.g., user explicitly declares a universal principle).
         tier = "L0" if exp.experience_type == "principle" else "L1"
         entry = MemoryEntry(
             memory_id=f"{analysis_id}_{exp.experience_type}_{i}",
