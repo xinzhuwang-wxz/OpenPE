@@ -27,6 +27,7 @@ class StateManager:
         self.phase_history: list[dict] = []
         self.blockers: list[str] = []
         self.iteration_counts: dict[int, int] = {}
+        self.data_callbacks_used: int = 0
 
     def save(self) -> None:
         """Write STATE.md to disk."""
@@ -36,7 +37,8 @@ class StateManager:
             f"- **Analysis**: {self.analysis_name}",
             f"- **Current phase**: {self.current_phase}",
             f"- **Status**: {self.status}",
-            f"- **Last updated**: {now}\n",
+            f"- **Last updated**: {now}",
+            f"- **Data callbacks used**: {self.data_callbacks_used}/{self.MAX_DATA_CALLBACKS}\n",
             "## Phase History\n",
             "| Phase | Status | Artifact | Review | Iterations | Notes |",
             "|-------|--------|----------|--------|------------|-------|",
@@ -81,6 +83,10 @@ class StateManager:
         if m:
             self.analysis_name = m.group(1).strip()
 
+        m = re.search(r"\*\*Data callbacks used\*\*:\s*(\d+)", text)
+        if m:
+            self.data_callbacks_used = int(m.group(1))
+
     def advance_phase(
         self,
         completed_phase: int,
@@ -118,6 +124,26 @@ class StateManager:
 
     def should_hard_stop(self, phase: int) -> bool:
         return self.get_iteration_count(phase) >= HARD_STOP_THRESHOLD
+
+    # --- Data callback tracking ---
+
+    MAX_DATA_CALLBACKS = 2
+
+    def record_data_callback(self, reason: str) -> bool:
+        """Record a data callback invocation.
+
+        Returns True if the callback is allowed (under cap), False if denied.
+        The orchestrator must check this BEFORE spawning the data agent.
+        """
+        if self.data_callbacks_used >= self.MAX_DATA_CALLBACKS:
+            return False
+        self.data_callbacks_used += 1
+        self.save()
+        return True
+
+    def can_data_callback(self) -> bool:
+        """Check if a data callback is still allowed."""
+        return self.data_callbacks_used < self.MAX_DATA_CALLBACKS
 
     def add_blocker(self, description: str) -> None:
         self.blockers.append(description)

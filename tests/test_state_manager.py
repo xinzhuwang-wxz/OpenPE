@@ -77,3 +77,30 @@ def test_load_existing_state():
     sm2 = StateManager(TMP / "STATE.md")
     sm2.load()
     assert sm2.current_phase == 1
+
+
+def test_data_callback_tracking():
+    sm = StateManager(TMP / "STATE.md", analysis_name="test")
+    sm.save()
+    assert sm.can_data_callback() is True
+    assert sm.record_data_callback("need GDP data") is True
+    assert sm.record_data_callback("need trust survey") is True
+    assert sm.can_data_callback() is False
+    assert sm.record_data_callback("third attempt") is False  # denied
+
+
+def test_data_callback_persists_across_load():
+    sm = StateManager(TMP / "STATE.md", analysis_name="test")
+    sm.save()
+    sm.record_data_callback("need GDP data")
+
+    sm2 = StateManager(TMP / "STATE.md")
+    sm2.load()
+    assert sm2.data_callbacks_used == 1
+    assert sm2.can_data_callback() is True
+
+    sm2.record_data_callback("need trust survey")
+    sm3 = StateManager(TMP / "STATE.md")
+    sm3.load()
+    assert sm3.data_callbacks_used == 2
+    assert sm3.can_data_callback() is False
