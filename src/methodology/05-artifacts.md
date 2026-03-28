@@ -51,6 +51,33 @@ high. It prevents agents from re-trying failed approaches and gives humans
 visibility into the agent's decision-making without reading full session
 transcripts.
 
+#### Structured Log Format
+
+The `ExperimentLogger` module (`scripts/experiment_logger.py`) writes entries
+in a consistent format:
+
+```
+## [Phase N] agent_name — YYYY-MM-DD HH:MM
+
+**Decision:** What was decided
+**Rationale:** Why it was decided
+**Data:**
+- `key`: value
+```
+
+#### IGM/SSR/VAR Audit Structures
+
+The audit trail (`scripts/audit_trail.py`) includes ACG Protocol-inspired
+provenance structures:
+- **IGM (Inline Grounding Marker):** `[C1:a1b2c3d4e5:phase3/data.csv:row42]`
+  — embeds source hash in report text.
+- **SSR (Structured Source Registry):** `sources.yaml` — SHA-256 hash,
+  source type, URI, verification status per dataset.
+- **VAR (Veracity Audit Registry):** `veracity.yaml` — relation type,
+  dependent claims, logic verification status per inference.
+- **`verify_logic()`** automatically checks if all dependent claims are
+  verified before marking an inference as `VERIFIED_LOGIC`.
+
 **Context management:** The experiment log is a file on disk, not part of the
 agent's default input context. Agents read the log on demand — typically at the
 start of a session ("what has been tried so far?") and when deciding what to try

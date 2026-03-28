@@ -126,6 +126,17 @@ data.
   must either acquire additional data, propose a proxy variable (with EP
   penalty), or recommend scoping out that sub-question.
 
+#### Data Callback Protocol
+
+Later phases may request additional data via orchestrator-mediated callbacks:
+- **Trigger:** Causal edge with EP > 0.30 cannot be tested due to missing data.
+- **Cap:** Maximum 2 callbacks per analysis (tracked in STATE.md).
+- **Process:** Orchestrator re-invokes data acquisition agent for the specific
+  variable, followed by quality gate. Results appended to `registry.yaml`.
+- **5-strategy search:** Before declaring "no data found," agents must try:
+  alternative APIs, proxy variables, academic datasets, report extraction
+  (via `data_extractor.py`), and composite indicators.
+
 **Output artifact:** `DISCOVERY.md` — question decomposition, data
 inventory with quality metrics, feasibility assessment per sub-question,
 data lineage documentation, and initial EP assessment (how confident is

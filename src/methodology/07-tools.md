@@ -22,6 +22,13 @@ what works well in practice.
 | Dependency mgmt | pixi | All dependencies managed via pixi (conda-forge + pypi). `pixi.toml` / `pyproject.toml` is the single source of truth for the environment. |
 | Logging | logging + rich | Python `logging` with `rich.logging.RichHandler`. No bare `print()`. See Section 11 for setup and enforcement. |
 | Document preparation | pandoc (>=3.0) + pdflatex | Markdown for development, pandoc for PDF conversion. Install pandoc via pixi (`[dependencies] pandoc = ">=3.0"`). Do NOT use an LLM to convert markdown to LaTeX — pandoc handles this programmatically. Default figure width: `0.5\textwidth`. |
+| Data extraction | `data_extractor.py` | Extract numbers from text with confidence labeling (`exact`/`estimated`/`interpolated`), tables from PDFs via pdfplumber |
+| State management | `state_manager.py` | STATE.md read/write with phase tracking, review iteration counting, data callback tracking |
+| Experiment logging | `experiment_logger.py` | Structured append-only log with phase tags and data fields |
+| Causal discovery | `causal_discovery.py` | PC algorithm (via causal-learn) for DAG structure learning from observational data |
+| Memory management | `memory_store.py` | L0/L1/L2 tiered memory with confidence decay, hotness scoring, archival, keyword similarity |
+| Knowledge graph | `causal_knowledge_graph.py` | Temporal validity (valid_at/invalid_at/expired_at), reuse policies, graph pruning |
+| Verification | `verification.py` | `run_all_checks(analysis_dir)` auto-discovers and verifies data provenance, EP propagation, causal labels |
 
 ### 7.2 Paradigms
 

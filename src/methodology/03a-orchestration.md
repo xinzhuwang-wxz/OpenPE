@@ -257,3 +257,38 @@ backgrounds to include, what selection approach to use, or whether closure
 tests pass are the executor's responsibility. Sub-agents handle execution.
 
 ---
+
+### 3a.6 STATE.md Management
+
+The `StateManager` module (`scripts/state_manager.py`) provides programmatic
+STATE.md read/write with cross-session persistence:
+
+- **Phase tracking:** `advance_phase(N, artifact, review, notes)` records
+  completion and advances to the next phase.
+- **Review iteration counting:** `record_review_iteration(phase, issues_a, issues_b)`
+  increments per-phase counters. `should_warn(phase)` at 3 iterations,
+  `should_hard_stop(phase)` at 10.
+- **Data callback tracking:** `record_data_callback(reason)` enforces the
+  2-callback hard cap. `can_data_callback()` checks before spawning.
+- **Blocker tracking:** `add_blocker(description)` persists blockers.
+- **Cross-session reliability:** `load()` fully restores all state fields
+  (phase history, iteration counts, blockers, callback count) from STATE.md
+  on session restart.
+
+---
+
+### 3a.7 Cross-Analysis Memory System
+
+The memory system enables learning across analyses:
+
+- **Global memory** (`<repo>/memory/{L0,L1,L2,causal_graph}/`) persists
+  high-confidence findings across analyses.
+- **Scaffolding:** `scaffold_analysis.py` copies global memory into each
+  new analysis's local `memory/` directory.
+- **Session commit:** After analysis completion, `session_commit.py`
+  extracts experiences and `promote_to_global()` copies entries with
+  confidence ≥ 0.6 back to global.
+- **Lifecycle:** Entries decay (-0.01 per analysis), quarantine at conf < 0.1,
+  archive when hotness < 0.1. Prevents unbounded growth.
+
+---
