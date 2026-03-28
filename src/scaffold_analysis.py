@@ -128,7 +128,7 @@ def scaffold(analysis_dir: Path, analysis_type: str):
 
     # Symlink conventions/, methodology/, and .claude/ into the analysis directory
     # Each analysis gets its own git repo, so Claude Code won't walk up to
-    # the parent slopspec/.claude/. Symlinking ensures agents, skills, hooks,
+    # the parent OpenPE/.claude/. Symlinking ensures agents, skills, hooks,
     # and settings are available inside each analysis directory.
     conventions_link = analysis_dir / "conventions"
     conventions_src = HERE / "conventions"
