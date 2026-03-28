@@ -1,137 +1,274 @@
 # OpenPE — Principle to Endgame
 
-Autonomous first-principles analysis framework. An orchestrator agent
-delegates work to specialized subagents through seven sequential phases,
-producing a comprehensive report from any user question.
+**An LLM-driven framework that turns any question into a rigorous, first-principles causal analysis — from hypothesis to publication-ready report.**
 
-## Quick start
+OpenPE is not a chatbot wrapper or a prompt chain. It is a structured analytical engine where an orchestrator agent delegates work to specialized subagents across seven phases, each producing auditable artifacts. Every causal claim is tested against refutation, every edge in the causal graph carries a quantified Explanatory Power score, and every conclusion traces back to its data source through an immutable provenance chain.
+
+The quality bar is publication-ready. Not "good enough to ship" — good enough for a senior review committee.
+
+---
+
+## Quick Start
+
+### Option 1: Manual Setup
 
 ```bash
-pixi run scaffold analyses/my_analysis
+git clone https://github.com/xinzhuwang-wxz/OpenPE.git
+cd OpenPE
+
+# Install pixi (if not already installed)
+curl -fsSL https://pixi.sh/install.sh | bash
+
+# Scaffold your first analysis
+python src/scaffold_analysis.py analyses/my_analysis
 cd analyses/my_analysis
-# Edit analysis_config.yaml → set question, domain, input_mode
+
+# Configure
+# Edit analysis_config.yaml → set question and domain
 pixi install
 claude   # starts the orchestrator agent
 ```
 
-## How it works
+### Option 2: One-Shot with Claude Code
+
+Paste this directly into [Claude Code](https://claude.ai/claude-code):
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     ORCHESTRATOR                             │
-│  Never writes code. Holds: question, summaries, verdicts     │
-└─────┬───────────────────────────────────────────────────────┘
-      │
-      ▼
- ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
- │ Phase 0  │──▶│ Phase 1  │──▶│ Phase 2  │──▶│ Phase 3  │──▶│ Phase 4  │──▶│ Phase 5  │──▶│ Phase 6  │
- │Discovery │   │ Strategy │   │ Explore  │   │ Analysis │   │Projection│   │ Verify   │   │ Document │
- │ (4-bot)  │   │ (4-bot)  │   │ (self)   │   │ (4-bot)  │   │ (4-bot)  │   │(4-bot+HG)│   │ (5-bot)  │
- └──────────┘   └──────────┘   └──────────┘   └──────────┘   └──────────┘   └────┬─────┘   └──────────┘
-                                                                                  │
-                                                                            HUMAN GATE
+Clone https://github.com/xinzhuwang-wxz/OpenPE and use OpenPE's scaffolding + orchestrator flow to complete this analysis: <your question here>
 ```
 
-Each phase runs the same loop:
+Claude Code will scaffold the analysis, install dependencies, and run all seven phases autonomously — producing a full report with causal DAGs, refutation tests, scenario projections, and an audit trail.
+
+---
+
+## How It Works
 
 ```
-  1. EXECUTE ── spawn executor subagent (enters plan mode first)
-  2. REVIEW ─── spawn reviewer(s) per review tier
-  3. CHECK:
-       Regression trigger? → Investigator → fix origin + downstream → resume
-       A or B items?       → fix agent + fresh reviewer → re-review (loop)
-       Only C items?       → PASS, executor applies Cs before commit
-  4. COMMIT
-  5. HUMAN GATE (after Phase 5 Verification)
-  6. ADVANCE
+Question ─→ Phase 0: Discovery ─→ Phase 1: Strategy ─→ Phase 2: Exploration
+                │                      │                     │
+           Causal DAGs            Method Selection        EDA + Figures
+           Data Acquisition       EP Assessment            Distribution Checks
+           Quality Gate           Chain Planning
+                │                      │                     │
+                ▼                      ▼                     ▼
+           Phase 3: Analysis ─→ Phase 4: Projection ─→ Phase 5: Verification
+                │                      │                     │
+           Causal Testing         Monte Carlo Scenarios   Independent Reproduction
+           3-Refutation Battery   Sensitivity Tornado     EP Propagation Audit
+           EP Propagation         Endgame Classification  Causal Label Audit
+                │                      │                     │
+                ▼                      ▼                     ▼
+                         Phase 6: Documentation
+                              │
+                         Analysis Note (MD + PDF)
+                         Audit Trail (Claims + Sources + Logic)
+                         EP Decay Visualization
 ```
 
-### Phases
+Each phase follows the same loop:
 
-| Phase | Review | Key deliverable |
-|-------|--------|-----------------|
-| **0. Discovery** | 4-bot | Question decomposition, causal DAG, data acquisition, quality gate |
-| **1. Strategy** | 4-bot | Method selection, EP assessment, chain planning, systematic inventory |
-| **2. Exploration** | Self | Data cleaning, feature engineering, variable ranking by EP |
-| **3. Analysis** | 4-bot | Causal testing (3 refutations), EP propagation, sub-chain expansion |
-| **4. Projection** | 4-bot | Scenario simulation, sensitivity analysis, endgame convergence |
-| **5. Verification** | 4-bot + HG | Independent reproduction, data provenance audit, logic audit, human gate |
-| **6. Documentation** | 5-bot | Complete report (pandoc → PDF), EP decay visualization, audit trail |
+1. **EXECUTE** — Subagent produces artifact (starts in plan mode)
+2. **REVIEW** — Independent reviewers classify issues as A (blocking) / B (must fix) / C (suggestion)
+3. **CHECK** — Arbiter decides pass/iterate/regress
+4. **COMMIT** — State tracked in STATE.md
+5. **HUMAN GATE** — After Phase 5, human approves before final report
 
-The human gate is between Phase 5 and Phase 6.
+---
 
-### Core concepts
+## Three Core Innovations
 
-**Explanatory Power (EP).** Each node in the causal chain carries an EP
-score = f(truth, relevance). Joint EP decays along the chain. When Joint EP
-falls below 0.05, the chain is truncated — this is the natural analytical
-horizon.
+### 1. Explanatory Power (EP) — Quantified Reasoning Under Uncertainty
 
-**Input modes.** Users can provide:
-- Mode A: Question only (agent acquires data autonomously)
-- Mode B: Question + user data (data still goes through quality gate)
-- Mode C: Question + user hypotheses (hypotheses compete with agent-generated ones)
+Most analysis frameworks treat confidence as a binary: "we believe this" or "we don't." OpenPE introduces **Explanatory Power** — a continuous, multiplicative measure that tracks how much explanatory value survives along a causal chain.
 
-**Causal testing.** Every causal claim must pass 3 refutation tests (placebo,
-random common cause, data subset). Results are labeled:
-DATA_SUPPORTED / CORRELATION / HYPOTHESIZED / DISPUTED.
+```
+EP = truth × relevance
 
-**Self-evolution.** The memory system (L0/L1/L2 tiers + causal knowledge
-graph) accumulates experience across analyses. Domain packs grow
-automatically.
+truth:     How confident are we that this causal link is real? (0–1)
+relevance: How much of the outcome's variance does this link explain? (0–1)
+```
 
-### Review classification
+Along a causal chain A → B → C → D, **Joint EP decays multiplicatively**:
 
-| Cat | Meaning | Action |
-|-----|---------|--------|
-| **A** | Would invalidate conclusions | Fix + re-review + fresh reviewer |
-| **B** | Weakens the analysis | Same — must be zero before PASS |
-| **C** | Style / clarity | Arbiter PASses; executor applies before commit |
+```
+Joint_EP = EP(A→B) × EP(B→C) × EP(C→D)
+```
 
-### Phase regression
+This has a profound consequence: long causal chains naturally lose explanatory power. A 5-link chain where each edge has EP=0.7 yields Joint_EP = 0.17 — barely above the soft truncation threshold. The framework enforces explicit stopping rules:
 
-Any review can trigger regression when an issue is traceable to an earlier
-phase. The investigator traces impact, writes a REGRESSION_TICKET.md, then
-the fix cycle re-runs affected phases.
+| Threshold | Joint EP | Action |
+|-----------|----------|--------|
+| **Hard truncation** | < 0.05 | Stop exploring. This chain is beyond the analytical horizon. |
+| **Soft truncation** | < 0.15 | Lightweight assessment only. No sub-chain expansion. |
+| **Sub-chain expansion** | > 0.30 | Worth investigating in detail. Scaffold a sub-analysis. |
 
-## Directory structure
+EP values evolve across the analysis lifecycle. Pre-analysis labels (`LITERATURE_SUPPORTED` → truth=0.70, `THEORIZED` → 0.40, `SPECULATIVE` → 0.15) are updated by Phase 3 refutation testing to post-analysis classifications (`DATA_SUPPORTED` → 0.85, `CORRELATION` → 0.50, `HYPOTHESIZED` → 0.15, `DISPUTED` → 0.30).
+
+**Why this matters:** EP makes the decay of analytical confidence visible and quantifiable. Rather than burying uncertainty in prose hedging, every causal argument carries a number that the reader can trace and challenge.
+
+### 2. Placebo-Anchored Contradiction Detection (DISPUTED Classification)
+
+Standard causal inference treats refutation results as a scorecard: more tests pass → stronger evidence. OpenPE adds a semantic layer that detects **logical contradictions** in the evidence pattern.
+
+Every causal edge undergoes three refutation tests:
+- **Placebo treatment** — Replace treatment with random variable; effect should vanish
+- **Random common cause** — Add random confounder; estimate should remain stable
+- **Data subset** — Estimate on random 80% subsets; should be consistent
+
+The classification uses **placebo as the causal anchor**:
+
+- If placebo **passes** (effect is treatment-specific / "real"), then subset and common_cause failures are contradictory — a real effect should be stable and robust to confounders
+- If placebo **fails** (effect is not treatment-specific), then subset passing is contradictory — a non-real effect cannot be perfectly stable
+
+When these contradictions are detected, the edge is classified as `DISPUTED` — not DATA_SUPPORTED, not CORRELATION, but a flag for human review. The framework refuses to auto-classify contradictory evidence.
+
+```python
+# Contradiction detection logic (Scheme C)
+if placebo_passed and (not subset_passed or not cc_passed):
+    return "DISPUTED"   # Real but unstable/confounded — contradictory
+if not placebo_passed and subset_passed:
+    return "DISPUTED"   # Not real but perfectly stable — contradictory
+```
+
+**Why this matters:** Most frameworks force a classification even when the evidence disagrees with itself. DISPUTED acknowledges that some patterns don't have a clean answer — and routes them to human judgment rather than algorithmic guessing.
+
+### 3. Cross-Analysis Memory with Evidence-Driven Tier Transitions
+
+OpenPE analyses don't start from zero. A tiered memory system accumulates domain knowledge across analyses, with confidence-driven lifecycle management:
+
+| Tier | Scope | Loading | Content |
+|------|-------|---------|---------|
+| **L0** | Universal | Always loaded | Cross-domain principles validated by ≥3 analyses |
+| **L1** | Domain | Loaded for matching domain | Domain-specific experiences (methods, data sources, failures) |
+| **L2** | Detail | On-demand | Full analysis summaries (auto-generated) |
+
+Memories aren't static. They evolve:
+
+```
+Created (L1, conf=0.50)
+  → Corroborated by 2nd analysis (+0.15 → 0.65)
+  → Corroborated by 3rd analysis (+0.15 → 0.80) → PROMOTED to L0
+  → Contradicted by 4th analysis (-0.25 → 0.55)
+  → Contradicted by 5th analysis (-0.25 → 0.30) → DEMOTED back to L1
+  → Decays over time (-0.01 per analysis)
+  → Eventually: conf < 0.05 AND hotness < 0.01 → FORGOTTEN (deleted)
+```
+
+The lifecycle is fully automated in `commit_session()`:
+- **Promotion** (L1→L0): ≥2 independent corroborations
+- **Demotion** (L0→L1): confidence drops below 0.30
+- **Forgetting**: confidence ≤ 0.05 AND hotness < 0.01 → file deleted
+- **Archival**: cold L2 entries (hotness < 0.1) moved to `_archive/`
+- **Idempotent commit**: marker file prevents double-decay on crash+restart
+
+Global memory lives at the repo root (`memory/`). Each new analysis inherits a snapshot via scaffolding and promotes high-confidence findings back after completion.
+
+**Why this matters:** The 3rd analysis in a domain is better than the 1st — not because the code improved, but because the memory system learned what works and what doesn't.
+
+---
+
+## Adapted Foundations
+
+OpenPE builds on ideas from three notable projects, adapted to fit the first-principles analysis context:
+
+### ACG Protocol → Audit Trail (IGM/SSR/VAR)
+
+The [ACG Protocol](https://github.com/acg-team/acg_protocol) introduced Inline Grounding Markers and source verification registries for fact-grounded text generation. OpenPE adapts this into a three-layer audit trail:
+
+- **IGM** (Inline Grounding Markers): `[C1:a1b2c3d4e5:phase3/data.csv:row42]` — every claim embeds a hash linking to its source
+- **SSR** (Structured Source Registry): SHA-256 hashes, source types, verification status per dataset
+- **VAR** (Veracity Audit Registry): tracks inferential logic chains with `verify_logic()` for automated consistency checking
+
+### Graphiti → Temporal Causal Knowledge Graph
+
+[Graphiti](https://github.com/getzep/graphiti)'s temporal EntityEdge model inspired the validity-window pattern in OpenPE's causal knowledge graph. Relationships carry `valid_at`/`invalid_at`/`expired_at` timestamps, enabling the graph to record *when* a causal mechanism was true — not just *whether* it's true. Combined with confidence-driven reuse policies (SKIP / LIGHTWEIGHT_VERIFY / MUST_RETEST), this allows high-confidence relationships to skip re-testing in future analyses.
+
+### OpenViking → Memory Hotness Scoring
+
+[OpenViking](https://github.com/AIsmart-Team/OpenViking)'s memory lifecycle system provided the hotness scoring formula: `sigmoid(frequency) × exponential_recency`. OpenPE uses this to distinguish actively-used memories from stale ones, driving the archival and forgetting mechanisms that keep the memory system bounded.
+
+---
+
+## Project Structure
 
 ```
 OpenPE/
-  src/                        Spec infrastructure
-    methodology/              Methodology spec (human reference)
-    orchestration/            Session management (human reference)
-    conventions/              Domain knowledge (symlinked into analyses)
-    templates/                CLAUDE.md, pixi.toml, and script templates
-    scaffold_analysis.py      Scaffolder
-  analyses/                   Each is its own git repo
-    <name>/
-      CLAUDE.md               Self-contained orchestrator instructions
-      pixi.toml               Environment + task graph
-      analysis_config.yaml    Question, domain, EP thresholds
-      .analysis_config        data_dir + allow paths for isolation hook
-      conventions/ → src/conventions/
-      memory/                 L0/L1/L2/causal_graph (per-analysis memory)
-      phase{0..6}_*/          Phase dirs with CLAUDE.md, exec/, scripts/, figures/, review/
+├── src/
+│   ├── scaffold_analysis.py    # Creates analysis directories
+│   ├── templates/              # CLAUDE.md templates + shared scripts
+│   │   ├── scripts/            # EP engine, causal pipeline, memory store, ...
+│   │   └── report_template/    # Professional PDF styling
+│   ├── methodology/            # Spec documents (01-09 + appendices)
+│   ├── conventions/            # Domain knowledge (causal inference, time series, panel)
+│   └── orchestration/          # Session management spec
+├── .claude/
+│   ├── agents/                 # Agent profile definitions (15+ specialized agents)
+│   ├── hooks/                  # Isolation hook for analysis sandboxing
+│   └── skills/                 # Analysis pipeline skills
+├── CLAUDE.md                   # Project-level instructions
+├── pyproject.toml              # Root pixi config
+└── LICENSE                     # GPL-3.0
 ```
 
-## How scaffolding works
+When you scaffold an analysis:
 
-The scaffolder (`pixi run scaffold`) creates a new analysis directory:
+```
+analyses/my_analysis/           # Independent git repo
+├── CLAUDE.md                   # Orchestrator protocol (self-contained)
+├── analysis_config.yaml        # Question, domain, EP thresholds
+├── STATE.md                    # Pipeline state (phase, iterations, blockers)
+├── pixi.toml                   # Environment + task graph
+├── scripts/                    # Shared modules (copied from templates)
+├── memory/                     # L0/L1/L2/causal_graph
+├── conventions/ → src/conventions  # Symlink
+├── methodology/ → src/methodology  # Symlink
+└── phase{0..6}_*/
+    ├── CLAUDE.md               # Phase-specific instructions
+    ├── exec/                   # Artifacts (DISCOVERY.md, ANALYSIS.md, ...)
+    ├── scripts/                # Phase-specific code
+    ├── figures/                # PDF + PNG plots
+    └── review/                 # REVIEW_NOTES.md
+```
 
-1. **Template files** (`root_claude.md`, `phase*_claude.md`, `pixi.toml`)
-   are copied with `{{name}}` and `{{analysis_type}}` placeholders replaced.
-2. **Seven phase directories** (`phase0_discovery/` through
-   `phase6_documentation/`) are created with standard subdirs.
-3. **Helper scripts** (EP engine, causal pipeline, data fetchers, etc.) are
-   copied into `phase0_discovery/scripts/`.
-4. **Memory structure** (`memory/L0_universal/`, `L1_domain/`, `L2_detailed/`,
-   `causal_graph/`) is initialized.
-5. **Symlinks** — `conventions/`, `methodology/`, `.claude/` point back to
-   the parent project.
-6. **Git repo** is initialized in the analysis directory.
+---
+
+## Input Modes
+
+| Mode | When | Behavior |
+|------|------|----------|
+| **A** — Question only | No data provided | Fully autonomous: hypothesis, data acquisition, quality gate |
+| **B** — Question + data | User provides datasets | User data passes through the same quality gate as acquired data |
+| **C** — Question + hypotheses | User provides causal hypotheses | User hypotheses become one candidate DAG — no trust privilege |
+
+---
 
 ## Requirements
 
-- [pixi](https://pixi.sh) for environment management
-- [Claude Code](https://claude.ai/claude-code) as the agent runtime
+- **Python** ≥ 3.11
+- **[pixi](https://pixi.sh)** — dependency management (installs everything else)
+- **[Claude Code](https://claude.ai/claude-code)** — LLM orchestrator
+- **pandoc** ≥ 3.0 + xelatex — PDF generation (installed via pixi)
+
+---
+
+## Acknowledgments
+
+OpenPE draws inspiration and adapts patterns from these open-source projects:
+
+| Project | What We Borrowed | License |
+|---------|-----------------|---------|
+| [ACG Protocol](https://github.com/acg-team/acg_protocol) | UGVP fact grounding (IGM/SSR/VAR audit structures) | — |
+| [Graphiti](https://github.com/getzep/graphiti) | Temporal EntityEdge validity model for knowledge graphs | Apache 2.0 |
+| [OpenViking](https://github.com/AIsmart-Team/OpenViking) | Memory lifecycle hotness scoring (`sigmoid × recency`) | — |
+| [Causica](https://github.com/microsoft/causica) | Graph evaluation metrics patterns | MIT |
+| [causal-learn](https://github.com/py-why/causal-learn) | PC algorithm for causal structure discovery | MIT |
+| [DoWhy](https://github.com/py-why/dowhy) | Causal inference + refutation testing framework | MIT |
+| [DeerFlow](https://github.com/nicepkg/deer-flow) | Multi-agent orchestration patterns | MIT |
+
+The development workflow was powered by [Superpowers](https://github.com/cline/superpowers-marketplace) skills for Claude Code — particularly `writing-plans`, `subagent-driven-development`, `test-driven-development`, and `code-reviewer`.
+
+---
+
+## License
+
+[GPL-3.0](LICENSE) — Free to use, modify, and distribute. Derivative works must also be open-source under GPL-3.0.
