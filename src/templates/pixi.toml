@@ -43,7 +43,7 @@ pdfplumber = ">=0.10"    # PDF table extraction
 
 [tasks]
 py = "python"
-build-pdf = "cd phase6_documentation/exec && pandoc REPORT.md -o REPORT.pdf --pdf-engine=xelatex -V geometry:margin=1in -V documentclass:article -V fontsize:11pt --number-sections --toc --filter pandoc-crossref --citeproc -V header-includes='\\usepackage{graphicx}\\setkeys{Gin}{width=0.45\\linewidth,keepaspectratio}'"
+build-pdf = "cd phase6_documentation/exec && pandoc REPORT.md -o REPORT.pdf --pdf-engine=xelatex --defaults=../../scripts/openpe-metadata.yaml --number-sections --toc --filter pandoc-crossref --citeproc"
 # --- Analysis tasks: uncomment and update as you write scripts ---
 # acquire = "python phase0_discovery/scripts/acquire_data.py"
 # analyze = "python phase3_analysis/scripts/run_analysis.py"

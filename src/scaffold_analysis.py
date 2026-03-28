@@ -147,6 +147,16 @@ def scaffold(analysis_dir: Path, analysis_type: str):
                 dst.write_text(script.read_text())
                 print(f"  copied {dst}")
 
+    # Copy report template files
+    report_tmpl_src = TEMPLATES / "report_template"
+    if report_tmpl_src.exists():
+        for tmpl_file in report_tmpl_src.iterdir():
+            if tmpl_file.is_file():
+                dst = scripts_dst / tmpl_file.name
+                if not dst.exists():
+                    dst.write_text(tmpl_file.read_text())
+                    print(f"  copied {dst}")
+
     # Memory directory — MemoryStore uses short tier names (L0, L1, L2).
     # We also create human-readable aliases for discoverability.
     memory_dir = analysis_dir / "memory"

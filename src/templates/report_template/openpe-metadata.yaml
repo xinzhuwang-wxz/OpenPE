@@ -1,0 +1,29 @@
+# Default pandoc metadata for OpenPE reports
+documentclass: article
+fontsize: 11pt
+geometry: margin=1in
+colorlinks: true
+linkcolor: NavyBlue
+urlcolor: NavyBlue
+citecolor: NavyBlue
+numbersections: true
+toc: true
+toc-depth: 3
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage{longtable}
+  - \usepackage{graphicx}
+  - \usepackage{xcolor}
+  - \usepackage{fancyhdr}
+  - \usepackage{tcolorbox}
+  - \setkeys{Gin}{width=0.85\linewidth,keepaspectratio}
+  - \definecolor{openpe-blue}{HTML}{2563EB}
+  - \definecolor{openpe-gray}{HTML}{6B7280}
+  - \definecolor{exec-bg}{HTML}{EFF6FF}
+  - \pagestyle{fancy}
+  - \fancyhf{}
+  - \fancyhead[L]{\small\textcolor{openpe-gray}{OpenPE Analysis Report}}
+  - \fancyhead[R]{\small\textcolor{openpe-gray}{\leftmark}}
+  - \fancyfoot[C]{\thepage}
+  - \renewcommand{\headrulewidth}{0.4pt}
+  - \newtcolorbox{execbox}{colback=exec-bg,colframe=openpe-blue,fonttitle=\bfseries,title=Executive Summary,boxrule=1pt,arc=3pt}
