@@ -60,6 +60,12 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
 
   4. COMMIT — commit the phase's work.
 
+  4b. STATE_UPDATE — Update STATE.md using `scripts/state_manager.py`:
+     - Call `state_manager.advance_phase(N, artifact=..., review=...)`
+     - This records the phase completion, review result, and iteration count
+     - STATE.md is the single source of truth for pipeline progress
+     - On resumption after interruption, read STATE.md to determine where to restart
+
   5. HUMAN GATE (after Phase 5 only):
      Present the verification report, key causal findings, EP propagation
      summary, and projection scenarios to the human. Pause until approved.
@@ -274,6 +280,12 @@ downgrade them. See `.claude/agents/plot-validator.md` and
 `methodology/06-review.md` §6.4.3 for the complete protocol.
 
 **Iteration limits:** 4/5-bot: warn at 3, strong warn at 5, hard cap at 10. 1-bot: warn at 2, escalate after 3. All subagents use `model: "opus"`.
+
+**Review iteration tracking:** Use `scripts/state_manager.py` to track iterations:
+- Call `state_manager.record_review_iteration(phase, issues_a, issues_b)` after each review cycle
+- `state_manager.should_warn(phase)` returns True at 3 iterations
+- `state_manager.should_hard_stop(phase)` returns True at 10 iterations
+- If hard stop triggered, present current state to human for guidance
 
 ---
 
