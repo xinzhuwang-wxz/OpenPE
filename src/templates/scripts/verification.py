@@ -260,6 +260,58 @@ def verify_causal_labels(analysis_results: list[dict]) -> list[VerificationCheck
     return checks
 
 
+def run_all_checks(analysis_dir: Path) -> VerificationReport:
+    """Auto-discover analysis data and run all verification checks.
+
+    This is the single entry point for Phase 5. It discovers:
+    - registry.yaml from phase0_discovery/data/
+    - EP chains from phase3_analysis/exec/ep_update_results.json
+    - Causal labels from phase3_analysis/exec/ANALYSIS.md
+    """
+    analysis_dir = Path(analysis_dir)
+    all_checks: list[VerificationCheck] = []
+
+    # 1. Data provenance
+    registry_path = analysis_dir / "phase0_discovery" / "data" / "registry.yaml"
+    if registry_path.exists():
+        all_checks.extend(verify_data_provenance(registry_path))
+    else:
+        all_checks.append(VerificationCheck(
+            name="registry_exists",
+            passed=False,
+            details="phase0_discovery/data/registry.yaml not found",
+        ))
+
+    # 2. EP propagation (if results exist)
+    ep_results_path = analysis_dir / "phase3_analysis" / "exec" / "ep_update_results.json"
+    if ep_results_path.exists():
+        import json
+        with open(ep_results_path) as f:
+            ep_data = json.load(f)
+        chains = ep_data.get("chains", [])
+        for chain_data in chains:
+            all_checks.extend(verify_ep_propagation(chain_data))
+
+    # 3. Causal labels (if ANALYSIS.md exists)
+    analysis_md = analysis_dir / "phase3_analysis" / "exec" / "ANALYSIS.md"
+    if analysis_md.exists():
+        import re as _re
+        text = analysis_md.read_text()
+        label_pattern = _re.compile(
+            r"(\w[\w ]*?)\s*(?:→|->)\s*(\w[\w ]*?):\s*(DATA_SUPPORTED|CORRELATION|HYPOTHESIZED|DISPUTED)",
+            _re.IGNORECASE | _re.MULTILINE,
+        )
+        for match in label_pattern.finditer(text):
+            label = match.group(3).upper()
+            all_checks.append(VerificationCheck(
+                name=f"causal_label_{match.group(1).strip()}_{match.group(2).strip()}",
+                passed=True,
+                details=f"Label {label} found for {match.group(1).strip()} -> {match.group(2).strip()}",
+            ))
+
+    return VerificationReport(checks=all_checks)
+
+
 def generate_verification_report(
     registry_path: Path | None = None,
     chain_dict: dict | None = None,

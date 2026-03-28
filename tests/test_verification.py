@@ -138,3 +138,40 @@ def test_full_report():
     assert report.all_passed
     md = report.to_markdown()
     assert "PASSED" in md
+
+
+def test_run_all_checks_auto_discovery():
+    """run_all_checks should auto-discover data from analysis directory."""
+    analysis_dir = TMP / "analysis"
+    analysis_dir.mkdir(parents=True)
+
+    # Create minimal phase structure
+    p0_data = analysis_dir / "phase0_discovery" / "data"
+    p0_data.mkdir(parents=True)
+    p0_exec = analysis_dir / "phase0_discovery" / "exec"
+    p0_exec.mkdir(parents=True)
+
+    # Create registry with a valid dataset entry
+    import hashlib
+    raw_dir = p0_data / "raw"
+    raw_dir.mkdir()
+    test_csv = raw_dir / "test.csv"
+    test_csv.write_text("a,b\n1,2\n")
+    sha = hashlib.sha256(test_csv.read_bytes()).hexdigest()
+    registry = p0_data / "registry.yaml"
+    # Use the exact field names that verify_data_provenance expects.
+    # Paths are relative to analysis_dir (registry_path.parent.parent.parent),
+    # so the file at phase0_discovery/data/raw/test.csv must be referenced as
+    # phase0_discovery/data/raw/test.csv relative to analysis_dir.
+    registry.write_text(
+        f"datasets:\n"
+        f"  - source_id: ds_001\n"
+        f"    url: https://example.com/test.csv\n"
+        f"    file: phase0_discovery/data/raw/test.csv\n"
+        f"    sha256: {sha}\n"
+    )
+
+    from verification import run_all_checks
+    report = run_all_checks(analysis_dir)
+    assert report.all_passed
+    assert report.pass_count >= 1
