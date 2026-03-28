@@ -37,11 +37,15 @@ def test_phase_directories_created():
 
 
 def test_phase0_has_data_subdirs():
-    """Phase 0 has data/raw, data/processed."""
+    """Phase 0 has data/raw, data/processed, registry.yaml."""
     scaffold(TEST_DIR, "analysis")
     data_dir = TEST_DIR / "phase0_discovery" / "data"
     assert (data_dir / "raw").is_dir()
     assert (data_dir / "processed").is_dir()
+    registry = data_dir / "registry.yaml"
+    assert registry.exists(), "Missing registry.yaml for data provenance"
+    content = registry.read_text()
+    assert "datasets:" in content
 
 
 def test_analysis_config_has_input_mode():
