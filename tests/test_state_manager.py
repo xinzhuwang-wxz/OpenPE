@@ -1,0 +1,79 @@
+"""Tests for state_manager.py — STATE.md read/write/update."""
+import shutil
+from pathlib import Path
+
+from state_manager import StateManager
+
+TMP = Path("/tmp/test_state_manager")
+
+
+def setup_function():
+    if TMP.exists():
+        shutil.rmtree(TMP)
+    TMP.mkdir(parents=True)
+
+
+def teardown_function():
+    if TMP.exists():
+        shutil.rmtree(TMP)
+
+
+def test_create_initial_state():
+    sm = StateManager(TMP / "STATE.md", analysis_name="test_analysis")
+    sm.save()
+    assert (TMP / "STATE.md").exists()
+    content = (TMP / "STATE.md").read_text()
+    assert "Current phase**: 0" in content
+    assert "initialized" in content
+
+
+def test_advance_phase():
+    sm = StateManager(TMP / "STATE.md", analysis_name="test")
+    sm.save()
+    sm.advance_phase(0, artifact="DISCOVERY.md", review="4-bot PASS", notes="2 DAGs")
+    content = (TMP / "STATE.md").read_text()
+    assert "Current phase**: 1" in content
+    assert "DISCOVERY.md" in content
+
+
+def test_record_review_iteration():
+    sm = StateManager(TMP / "STATE.md", analysis_name="test")
+    sm.save()
+    sm.record_review_iteration(phase=0, issues_a=1, issues_b=2)
+    sm.record_review_iteration(phase=0, issues_a=0, issues_b=0)
+    assert sm.get_iteration_count(0) == 2
+
+
+def test_iteration_warning_thresholds():
+    sm = StateManager(TMP / "STATE.md", analysis_name="test")
+    sm.save()
+    for i in range(3):
+        sm.record_review_iteration(phase=0, issues_a=1, issues_b=0)
+    assert sm.should_warn(0) is True
+    assert sm.should_hard_stop(0) is False
+
+
+def test_iteration_hard_stop():
+    sm = StateManager(TMP / "STATE.md", analysis_name="test")
+    sm.save()
+    for i in range(10):
+        sm.record_review_iteration(phase=0, issues_a=1, issues_b=0)
+    assert sm.should_hard_stop(0) is True
+
+
+def test_add_blocker():
+    sm = StateManager(TMP / "STATE.md", analysis_name="test")
+    sm.save()
+    sm.add_blocker("Missing GDP data for 2024")
+    content = (TMP / "STATE.md").read_text()
+    assert "Missing GDP data" in content
+
+
+def test_load_existing_state():
+    sm = StateManager(TMP / "STATE.md", analysis_name="test")
+    sm.save()
+    sm.advance_phase(0, artifact="DISCOVERY.md")
+
+    sm2 = StateManager(TMP / "STATE.md")
+    sm2.load()
+    assert sm2.current_phase == 1
