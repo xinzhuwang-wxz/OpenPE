@@ -2,7 +2,7 @@
 
 **Date**: 2026-03-28
 **Status**: Approved
-**Approach**: Incremental modification of slop-X (Phase Extension)
+**Approach**: Incremental modification of the legacy framework (Phase Extension)
 
 ---
 
@@ -11,9 +11,9 @@
 **Name**: OpenPE (Principle to Endgame)
 **Core thesis**: Any real-world event is governed by discoverable first principles. This framework starts from first principles, grows through data-driven analysis to user-specified events, then projects forward to find endgames.
 
-**Relationship to slop-X**: OpenPE is an in-place transformation of the existing slop-X HEP analysis framework. It preserves the phase-based pipeline, multi-agent review mechanism, isolation model, and pixi environment — while generalizing from particle physics to domain-agnostic first-principles reasoning.
+**Relationship to the legacy framework**: OpenPE is an in-place transformation of the existing the legacy framework domain-specific analysis framework. It preserves the phase-based pipeline, multi-agent review mechanism, isolation model, and pixi environment — while generalizing from particle physics to domain-agnostic first-principles reasoning.
 
-**Transformation scope**: This is an in-place modification, not a fork. The `src/` infrastructure (scaffolder, templates, agent profiles, methodology) is modified directly. Existing HEP-specific files are archived to `_archive/` before modification. No backward compatibility with slop-X HEP analyses is maintained — this is a clean transformation.
+**Transformation scope**: This is an in-place modification, not a fork. The `src/` infrastructure (scaffolder, templates, agent profiles, methodology) is modified directly. Existing domain-specific files are archived to `_archive/` before modification. No backward compatibility with the legacy framework domain-specific analyses is maintained — this is a clean transformation.
 
 **Endgame** (formal definition): The projected terminal state or steady-state outcome of the causal chain extending from the user's event of interest. An endgame may be a convergent point (all scenarios agree), a fork (scenarios diverge based on identifiable conditions), an equilibrium (self-sustaining state), or an unstable trajectory (bounded only by external constraints).
 
@@ -167,11 +167,11 @@ Sub-chain returns:
 
 ## 3. Phase Structure
 
-### 3.1 Phase Mapping (slop-X → OpenPE)
+### 3.1 Phase Mapping (the legacy framework → OpenPE)
 
-slop-X has 5 phases (with 4a/4b/4c split). OpenPE extends to 7 phases, preserving the review tier system.
+the legacy framework has 5 phases (with 4a/4b/4c split). OpenPE extends to 7 phases, preserving the review tier system.
 
-| New Phase | Name | Origin | Maps to slop-X | Review Tier |
+| New Phase | Name | Origin | Maps to the legacy framework | Review Tier |
 |-----------|------|--------|-----------------|-------------|
 | **Phase 0** | Discovery | **New** | — | 4-bot |
 | **Phase 1** | Strategy | Modified | Phase 1 | 4-bot |
@@ -217,7 +217,7 @@ slop-X has 5 phases (with 4a/4b/4c split). OpenPE extends to 7 phases, preservin
 **Purpose**: Formulate analysis strategy, assess initial EP, plan chain traversal.
 
 **Steps**:
-1. **Method selection** → regression, diff-in-diff, synthetic control, etc. (generalized from slop-X "technique selection")
+1. **Method selection** → regression, diff-in-diff, synthetic control, etc. (generalized from the legacy framework "technique selection")
 2. **Initial EP assessment** → estimate EP for each causal DAG edge
 3. **Chain planning** → determine main chain depth, identify potential sub-chain expansion points
 4. **Systematic uncertainty inventory**
@@ -226,7 +226,7 @@ slop-X has 5 phases (with 4a/4b/4c split). OpenPE extends to 7 phases, preservin
 - `STRATEGY.md` — analysis plan with EP assessments
 - Causal DAG visualization with EP annotations
 
-**Modification from slop-X**: Generalize "technique selection" to "method selection"; add EP assessment step.
+**Modification from the legacy framework**: Generalize "technique selection" to "method selection"; add EP assessment step.
 
 **Agents**: lead_analyst (prompt generalized)
 
@@ -247,7 +247,7 @@ slop-X has 5 phases (with 4a/4b/4c split). OpenPE extends to 7 phases, preservin
 - Variable importance ranking
 - Data issue discovery log
 
-**Modification from slop-X**: Generalize "sample inventory" to "data exploration".
+**Modification from the legacy framework**: Generalize "sample inventory" to "data exploration".
 
 **Agents**: data_explorer (prompt generalized)
 
@@ -271,7 +271,7 @@ slop-X has 5 phases (with 4a/4b/4c split). OpenPE extends to 7 phases, preservin
    - Classify: `DATA_SUPPORTED` / `CORRELATION` / `HYPOTHESIZED`
 4. **EP update** → use actual test results to update node EP values
 5. **Sub-chain expansion decision** → scaffold sub-analysis for high-EP branches
-6. **Statistical model construction** (absorbed from slop-X Phase 4a):
+6. **Statistical model construction** (absorbed from the legacy framework Phase 4a):
    - Build formal statistical model with nuisance parameters for each systematic uncertainty
    - Construct likelihood function connecting observed data to causal parameters
    - Run expected results: given the model and estimated parameters, what range of outcomes is expected?
@@ -289,7 +289,7 @@ slop-X has 5 phases (with 4a/4b/4c split). OpenPE extends to 7 phases, preservin
 - Statistical model specification (likelihood, nuisance parameters, constraints)
 - Expected results and signal injection validation
 
-**Modification from slop-X**: Merges Phase 3 (selection) and Phase 4a (expected results), including statistical model construction, signal injection, and expected results. Adds causal testing pipeline and EP propagation.
+**Modification from the legacy framework**: Merges Phase 3 (selection) and Phase 4a (expected results), including statistical model construction, signal injection, and expected results. Adds causal testing pipeline and EP propagation.
 
 **Causal testing failure modes**:
 ```
@@ -302,7 +302,7 @@ Decision tree for refutation test outcomes:
   Contradictory results → DISPUTED (flag for human review; do not auto-classify)
 ```
 
-**Context splitting**: Phase 3 is the most complex phase, absorbing responsibilities from 4 slop-X agents. Steps 1–5 (causal testing + EP propagation) and Steps 6–7 (statistical model + uncertainty quantification) should be split into separate subagent invocations to manage context pressure. The orchestrator may invoke the analyst agent twice: first for causal analysis, then for statistical modeling.
+**Context splitting**: Phase 3 is the most complex phase, absorbing responsibilities from 4 the legacy framework agents. Steps 1–5 (causal testing + EP propagation) and Steps 6–7 (statistical model + uncertainty quantification) should be split into separate subagent invocations to manage context pressure. The orchestrator may invoke the analyst agent twice: first for causal analysis, then for statistical modeling.
 
 **Agents**: analyst (generalized from signal_lead + background_estimator), verifier (generalized from cross_checker)
 
@@ -352,7 +352,7 @@ Decision tree for refutation test outcomes:
 
 Human may: (a) approve and proceed to Phase 6, (b) request re-analysis of specific edges, (c) request additional data acquisition, (d) terminate the analysis with findings to date.
 
-**Modification from slop-X**: Generalizes "unblinding" to "independent verification". The human gate moves from "10% data validation" to "full verification review".
+**Modification from the legacy framework**: Generalizes "unblinding" to "independent verification". The human gate moves from "10% data validation" to "full verification review".
 
 **Agents**: verifier (generalized from cross_checker)
 
@@ -382,7 +382,7 @@ Human may: (a) approve and proceed to Phase 6, (b) request re-analysis of specif
 ## Appendix
 ```
 
-**Modification from slop-X**: Extends "analysis note" to "comprehensive report with EP decay visualization".
+**Modification from the legacy framework**: Extends "analysis note" to "comprehensive report with EP decay visualization".
 
 **Agents**: report_writer (generalized from note_writer), plot_validator
 
@@ -390,9 +390,9 @@ Human may: (a) approve and proceed to Phase 6, (b) request re-analysis of specif
 
 ### 3.3 Review Mechanism
 
-slop-X's multi-tier review mechanism is preserved with role generalization:
+the legacy framework's multi-tier review mechanism is preserved with role generalization:
 
-| slop-X Reviewer | OpenPE Reviewer | Responsibility Change |
+| the legacy framework Reviewer | OpenPE Reviewer | Responsibility Change |
 |-----------------|------------------|----------------------|
 | Physics Reviewer | Domain Reviewer | "Physics correctness" → "Domain reasonableness" |
 | Critical Reviewer | Logic Reviewer | Preserved + EP propagation logic audit |
@@ -419,7 +419,7 @@ Non-blocking findings (Category B) are noted in the report.
 
 | Original | New Name | Transformation |
 |----------|----------|---------------|
-| lead_analyst | lead_analyst | Remove HEP terminology, add EP assessment responsibility |
+| lead_analyst | lead_analyst | Remove domain-specific terminology, add EP assessment responsibility |
 | data_explorer | data_explorer | "Sample inventory" → "Data exploration" + data quality pre-screening |
 | signal_lead | analyst | "Event selection" → "Signal extraction + causal testing" |
 | cross_checker | verifier | "Cross-check" → "Independent verification + data provenance" |
@@ -446,11 +446,11 @@ Non-blocking findings (Category B) are noted in the report.
 | data_quality_agent | Phase 0 | Data quality assessment, gate decision |
 | projector_agent | Phase 4 | Scenario simulation, sensitivity analysis, endgame convergence detection |
 
-**Retired (6 — absorbed or HEP-specific)**:
+**Retired (6 — absorbed or domain-specific)**:
 
 | Original | Disposition |
 |----------|------------|
-| detector_specialist | HEP-specific (detector calibration); no generalized equivalent |
+| detector_specialist | domain-specific (detector calibration); no generalized equivalent |
 | theory_scout | Responsibilities absorbed by hypothesis_agent + data_acquisition_agent |
 | systematic_source_evaluator | Absorbed into analyst |
 | background_estimator | Absorbed into analyst (as "baseline estimation") |
@@ -459,7 +459,7 @@ Non-blocking findings (Category B) are noted in the report.
 
 Retired agent prompt files are preserved in `_archive/agents/` for reference.
 
-**Note on regression mechanism**: slop-X's regression protocol (re-running earlier phases when reviews find fundamental issues) is preserved in OpenPE. When a Phase N review identifies a Category A issue originating from Phase M (M < N), the orchestrator rolls back to Phase M and re-executes. The investigator's role (root cause analysis for regressions) is absorbed into the verifier agent.
+**Note on regression mechanism**: the legacy framework's regression protocol (re-running earlier phases when reviews find fundamental issues) is preserved in OpenPE. When a Phase N review identifies a Category A issue originating from Phase M (M < N), the orchestrator rolls back to Phase M and re-executes. The investigator's role (root cause analysis for regressions) is absorbed into the verifier agent.
 
 ### 4.2 DAG Label Taxonomy
 
@@ -478,7 +478,7 @@ Two label sets are used at different stages. They are intentionally different �
 
 ### 4.3 New Agent Specification Template
 
-All new agents follow slop-X's comprehensive agent definition standard. Example for hypothesis_agent:
+All new agents follow the legacy framework's comprehensive agent definition standard. Example for hypothesis_agent:
 
 ```markdown
 # Hypothesis Agent
@@ -631,13 +631,13 @@ gate_decision:
 
 ### 5.4 Artifact Directory Structure
 
-**Directory naming convention**: Follow slop-X's semantic suffix pattern: `phase{N}_{name}/`. This ensures every template path reference, orchestrator loop, and CLAUDE.md remains consistent with the existing convention.
+**Directory naming convention**: Follow the legacy framework's semantic suffix pattern: `phase{N}_{name}/`. This ensures every template path reference, orchestrator loop, and CLAUDE.md remains consistent with the existing convention.
 
 ```
 analyses/my_analysis/
 ├── .analysis_config          # Input mode + data path + input_mode (A/B/C)
-├── STATE.md                  # Progress tracking (reused from slop-X)
-├── analysis_config.yaml      # Analysis metadata (reused from slop-X)
+├── STATE.md                  # Progress tracking (reused from the legacy framework)
+├── analysis_config.yaml      # Analysis metadata (reused from the legacy framework)
 ├── memory/                   # Analysis-local memory snapshot (copied from global at start)
 ├── phase0_discovery/
 │   ├── CLAUDE.md             # Phase 0 instructions for agents
@@ -820,7 +820,7 @@ Subsequent analyses in the same domain automatically receive this as L1 context.
 - Implement DataAcquisitionLayer (WebSearch + FRED + WorldBank providers)
 - Implement Data Quality Gate
 - Update `pixi.toml` template with OpenPE dependencies (pandas, dowhy, wbgapi, fredapi, etc.)
-- Archive existing HEP-specific agent profiles to `_archive/agents/`
+- Archive existing domain-specific agent profiles to `_archive/agents/`
 - Update `.analysis_config` schema to include `input_mode` field
 - End-to-end test: question → data acquired → quality assessed
 

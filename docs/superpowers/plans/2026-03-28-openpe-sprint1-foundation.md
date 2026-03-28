@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Transform slop-X scaffolding, templates, and agent profiles into OpenPE's Phase 0–6 structure, archive HEP-specific content, and create the 4 new agents needed for Phase 0 (Discovery) and Phase 4 (Projection).
+**Goal:** Transform the legacy framework scaffolding, templates, and agent profiles into OpenPE's Phase 0–6 structure, archive domain-specific content, and create the 4 new agents needed for Phase 0 (Discovery) and Phase 4 (Projection).
 
-**Architecture:** In-place modification of `src/` infrastructure. The scaffolder creates 7 phase directories (phase0_discovery through phase6_documentation). Templates are rewritten for domain-agnostic first-principles analysis. Existing HEP agent profiles are archived; new agents (hypothesis, data_acquisition, data_quality, projector) are created. The pixi.toml template swaps HEP packages (uproot, pyhf) for causal inference packages (dowhy, pandas, wbgapi, fredapi).
+**Architecture:** In-place modification of `src/` infrastructure. The scaffolder creates 7 phase directories (phase0_discovery through phase6_documentation). Templates are rewritten for domain-agnostic first-principles analysis. Existing domain-specific agent profiles are archived; new agents (hypothesis, data_acquisition, data_quality, projector) are created. The pixi.toml template swaps domain-specific packages (uproot, pyhf) for causal inference packages (dowhy, pandas, wbgapi, fredapi).
 
 **Tech Stack:** Python 3.11+, pixi, Claude Code agents, WebSearch/WebFetch for data acquisition, pandas/dowhy/wbgapi/fredapi for analysis.
 
@@ -23,16 +23,16 @@
 - `.claude/agents/data-acquisition-agent.md` — Data acquisition agent profile
 - `.claude/agents/data-quality-agent.md` — Data quality agent profile
 - `.claude/agents/projector-agent.md` — Projector agent profile
-- `_archive/agents/` — Directory for archived HEP agent profiles
+- `_archive/agents/` — Directory for archived domain-specific agent profiles
 - `tests/test_scaffold.py` — Scaffolder tests
 
 ### Files to Modify
 - `src/scaffold_analysis.py` — New phase list, new subdirs, new config format
 - `src/templates/root_claude.md` — Orchestrator loop: `[0,1,2,3,4,5,6]`, generalized instructions
-- `src/templates/phase1_claude.md` — Generalize from HEP strategy to domain-agnostic strategy
-- `src/templates/phase2_claude.md` — Generalize from HEP exploration to data exploration
-- `src/templates/phase3_claude.md` — Generalize from HEP selection to causal analysis
-- `src/templates/pixi.toml` — Replace HEP deps with OpenPE deps
+- `src/templates/phase1_claude.md` — Generalize from domain-specific strategy to domain-agnostic strategy
+- `src/templates/phase2_claude.md` — Generalize from domain-specific exploration to data exploration
+- `src/templates/phase3_claude.md` — Generalize from domain-specific selection to causal analysis
+- `src/templates/pixi.toml` — Replace domain-specific deps with OpenPE deps
 - `.claude/hooks/isolate.sh` — No changes needed (already handles `data_dir` + `allow=` lines)
 
 ### Files to Archive (move to `_archive/agents/`)
@@ -53,7 +53,7 @@
 
 ---
 
-## Task 1: Archive HEP-Specific Agents
+## Task 1: Archive domain-specific-Specific Agents
 
 **Files:**
 - Create: `_archive/agents/` (directory)
@@ -83,7 +83,7 @@ Expected: 12 (was 18, minus 6 archived).
 
 ```bash
 git add _archive/agents/ .claude/agents/
-git commit -m "Archive 6 HEP-specific agent profiles to _archive/"
+git commit -m "Archive 6 domain-specific agent profiles to _archive/"
 ```
 
 ---
@@ -190,7 +190,7 @@ def test_state_md_starts_at_phase_0():
 
 
 def test_analysis_config_yaml_no_hep():
-    """analysis_config.yaml has no HEP-specific fields."""
+    """analysis_config.yaml has no domain-specific fields."""
     scaffold(TEST_DIR, "analysis")
     yaml_content = (TEST_DIR / "analysis_config.yaml").read_text()
     assert "blinding" not in yaml_content
@@ -199,7 +199,7 @@ def test_analysis_config_yaml_no_hep():
 
 
 def test_old_phase_names_not_present():
-    """No slop-X phase names (phase3_selection, phase4_inference, etc.)."""
+    """No the legacy framework phase names (phase3_selection, phase4_inference, etc.)."""
     scaffold(TEST_DIR, "analysis")
     for name in ["phase3_selection", "phase4_inference", "phase5_documentation"]:
         assert not (TEST_DIR / name).exists(), f"Old phase dir still exists: {name}"
@@ -208,7 +208,7 @@ def test_old_phase_names_not_present():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `pixi run py -m pytest tests/test_scaffold.py -v`
-Expected: FAIL (old scaffolder creates slop-X phases, not OpenPE phases).
+Expected: FAIL (old scaffolder creates the legacy framework phases, not OpenPE phases).
 
 - [ ] **Step 3: Update scaffolder**
 
@@ -218,9 +218,9 @@ Modify `src/scaffold_analysis.py`. Key changes:
 3. Add Phase 0 data subdirs
 4. Update `.analysis_config` to include `input_mode`
 5. Update `STATE.md` to start at phase 0
-6. Update `analysis_config.yaml` to remove HEP fields, add `input_mode`
+6. Update `analysis_config.yaml` to remove domain-specific fields, add `input_mode`
 7. Replace `--type measurement|search` with `--type analysis` (single type for OpenPE)
-8. Remove HEP-specific conventions routing
+8. Remove domain-specific conventions routing
 
 Replace the full content of `src/scaffold_analysis.py` with:
 
@@ -549,7 +549,7 @@ Create `src/templates/phase0_claude.md`:
 ```markdown
 # Phase 0: Discovery
 
-> This phase is unique to OpenPE — it does not exist in the original slop-X framework.
+> This phase is unique to OpenPE — it does not exist in the original the legacy framework framework.
 
 You are conducting the Discovery phase for a **{{analysis_type}}** analysis.
 
@@ -649,7 +649,7 @@ git commit -m "feat: add Phase 0 (Discovery) template"
 
 - [ ] **Step 1: Write hypothesis-agent.md**
 
-Create `.claude/agents/hypothesis-agent.md`. Follow the depth and structure of existing agent profiles (see `lead-analyst.md` for the gold standard). Must include: frontmatter with tools/model, role description, initialization steps, mandatory checklist, output format, constraints. Full content provided in the spec Section 4.3 — expand to match slop-X agent depth (~200 lines).
+Create `.claude/agents/hypothesis-agent.md`. Follow the depth and structure of existing agent profiles (see `lead-analyst.md` for the gold standard). Must include: frontmatter with tools/model, role description, initialization steps, mandatory checklist, output format, constraints. Full content provided in the spec Section 4.3 — expand to match the legacy framework agent depth (~200 lines).
 
 Key sections:
 - Frontmatter: tools (Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch), model: opus
@@ -708,9 +708,9 @@ git commit -m "feat: add 4 new OpenPE agent profiles"
 
 - [ ] **Step 1: Rewrite phase1_claude.md**
 
-Replace full content. Key changes from slop-X:
+Replace full content. Key changes from the legacy framework:
 - Remove: RAG corpus queries (search_lep_corpus, compare_measurements)
-- Remove: "physics motivation", "sample inventory", HEP technique selection
+- Remove: "physics motivation", "sample inventory", domain-specific technique selection
 - Add: Method selection (regression, diff-in-diff, synthetic control, etc.)
 - Add: Initial EP assessment for each causal DAG edge
 - Add: Chain planning (main chain depth, sub-chain expansion points)
@@ -731,7 +731,7 @@ Replace full content. Key changes:
 - [ ] **Step 3: Rewrite phase3_claude.md**
 
 Replace full content. This is the most complex template — maps to spec Phase 3. Key changes:
-- Remove: event selection cuts, background estimation, HEP systematics
+- Remove: event selection cuts, background estimation, domain-specific systematics
 - Add: Signal extraction (patterns consistent with causal hypotheses)
 - Add: Baseline estimation (null-hypothesis model)
 - Add: Causal testing pipeline (3-refutation protocol with decision tree)
@@ -754,11 +754,11 @@ git commit -m "feat: rewrite Phase 1-3 templates for OpenPE"
 ## Task 8: Create Phase 4-6 Templates
 
 **Files:**
-- Overwrite: `src/templates/phase4_claude.md` (existing file is HEP inference — replace entirely with Projection)
-- Overwrite: `src/templates/phase5_claude.md` (existing file is HEP documentation — replace entirely with Verification)
+- Overwrite: `src/templates/phase4_claude.md` (existing file is domain-specific inference — replace entirely with Projection)
+- Overwrite: `src/templates/phase5_claude.md` (existing file is domain-specific documentation — replace entirely with Verification)
 - Create: `src/templates/phase6_claude.md` (new, does not exist yet)
 
-**Note:** `phase4_claude.md` and `phase5_claude.md` already exist with HEP content. These must be fully overwritten, not skipped. Use Write tool, not conditional creation.
+**Note:** `phase4_claude.md` and `phase5_claude.md` already exist with domain-specific content. These must be fully overwritten, not skipped. Use Write tool, not conditional creation.
 
 - [ ] **Step 1: Overwrite phase4_claude.md (Projection)**
 
@@ -809,12 +809,12 @@ This is the most critical file — it's the orchestrator's brain.
 
 - [ ] **Step 1: Rewrite root_claude.md**
 
-Key changes from slop-X version:
+Key changes from the legacy framework version:
 1. **Orchestrator loop**: Change from `[1, 2, 3, 4a, 4b, 4c, 5]` to `[0, 1, 2, 3, 4, 5, 6]`
 2. **Phase 4 flow**: Remove 4a/4b/4c sub-phases. Phase 3 absorbs 4a work. Phase 5 has the human gate.
 3. **Human gate**: Move from "after 4b" to "after Phase 5 (Verification)"
 4. **Agent roster**: Update to OpenPE agent names (analyst, verifier, domain-reviewer, etc.)
-5. **Methodology table**: Update phase definitions, remove HEP references
+5. **Methodology table**: Update phase definitions, remove domain-specific references
 6. **Anti-patterns**: Generalize (remove "physics prompt", "ROOT files", etc.)
 7. **Context splitting**: Add note about Phase 3 splitting (steps 1-5 vs 6-7)
 8. **EP monitoring**: Orchestrator checks Joint_EP at sub-chain expansion points
@@ -871,7 +871,7 @@ Key changes:
 - [ ] **Step 2: Generalize verifier.md**
 
 Key changes:
-- Remove: HEP cross-check programs (re-selection, alternative unfolding)
+- Remove: domain-specific cross-check programs (re-selection, alternative unfolding)
 - Add: Independent result reproduction
 - Add: Data provenance audit (spot-check URLs)
 - Add: Logic audit (causal claims vs refutation results)
@@ -881,7 +881,7 @@ Key changes:
 - [ ] **Step 3: Generalize remaining 10 agents**
 
 For each agent:
-- Remove HEP-specific terminology and references
+- Remove domain-specific terminology and references
 - Add OpenPE terminology (EP, causal DAG, explanatory chain)
 - Update phase references (e.g., "Phase 4a" → "Phase 3")
 - Update agent name references in cross-references
@@ -1174,7 +1174,7 @@ ls .claude/agents/
 
 Expected: 16 files (12 retained/renamed + 4 new).
 
-- [ ] **Step 4: Verify no HEP terminology in templates**
+- [ ] **Step 4: Verify no domain-specific terminology in templates**
 
 ```bash
 grep -r "uproot\|ROOT file\|particle physics\|HEP\|detector\|collider\|luminosity\|cross.section" src/templates/
@@ -1318,7 +1318,7 @@ git commit -m "chore: Sprint 1 complete — OpenPE foundation ready"
 
 | Task | Description | Files | Est. Effort |
 |------|-------------|-------|-------------|
-| 1 | Archive HEP agents | 6 moved | 2 min |
+| 1 | Archive domain-specific agents | 6 moved | 2 min |
 | 2 | Rename generalized agents | 6 renamed | 2 min |
 | 3 | Update scaffolder | 2 files | 15 min |
 | 4 | Update pixi.toml template | 1 file | 3 min |
