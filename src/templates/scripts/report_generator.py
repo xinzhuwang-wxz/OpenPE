@@ -127,6 +127,21 @@ class ReportBuilder:
         output_path.write_text(content)
         return output_path
 
+    def collect_figures(self, analysis_dir: Path) -> list[Path]:
+        """Collect all PDF figures from phase figure directories.
+
+        Returns list of PDF paths sorted by phase then name.
+        Skips PNG (PDF is preferred for pandoc/LaTeX).
+        """
+        analysis_dir = Path(analysis_dir)
+        figures = []
+        for phase_dir in sorted(analysis_dir.glob("phase*")):
+            fig_dir = phase_dir / "figures"
+            if fig_dir.exists():
+                for pdf in sorted(fig_dir.glob("*.pdf")):
+                    figures.append(pdf)
+        return figures
+
     def to_dict(self) -> dict:
         return {
             "analysis_name": self.analysis_name,

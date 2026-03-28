@@ -84,3 +84,19 @@ def test_missing_artifacts_handled():
     assert len(builder.sections) == 0
     md = builder.render()
     assert "# Empty" in md  # still renders
+
+
+def test_collect_figures():
+    """collect_figures should find all PDF figures across phases."""
+    analysis_dir = TMP / "analysis"
+    for phase in ["phase2_exploration", "phase3_analysis", "phase4_projection"]:
+        fig_dir = analysis_dir / phase / "figures"
+        fig_dir.mkdir(parents=True)
+        (fig_dir / "test_plot.pdf").write_text("fake pdf")
+        (fig_dir / "test_plot.png").write_text("fake png")
+
+    from report_generator import ReportBuilder
+    builder = ReportBuilder(analysis_name="test", question="q")
+    figures = builder.collect_figures(analysis_dir)
+    assert len(figures) >= 3
+    assert all(f.suffix == ".pdf" for f in figures)
