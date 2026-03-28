@@ -2,7 +2,7 @@
 import shutil
 from pathlib import Path
 
-from experiment_logger import ExperimentLogger
+from src.templates.scripts.experiment_logger import ExperimentLogger
 
 TMP = Path("/tmp/test_experiment_logger")
 

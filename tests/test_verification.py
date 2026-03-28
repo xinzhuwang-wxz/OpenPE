@@ -171,7 +171,7 @@ def test_run_all_checks_auto_discovery():
         f"    sha256: {sha}\n"
     )
 
-    from verification import run_all_checks
+    from src.templates.scripts.verification import run_all_checks
     report = run_all_checks(analysis_dir)
     assert report.all_passed
     assert report.pass_count >= 1

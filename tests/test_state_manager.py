@@ -2,7 +2,7 @@
 import shutil
 from pathlib import Path
 
-from state_manager import StateManager
+from src.templates.scripts.state_manager import StateManager
 
 TMP = Path("/tmp/test_state_manager")
 

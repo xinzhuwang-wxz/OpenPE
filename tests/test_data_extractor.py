@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from data_extractor import (
+from src.templates.scripts.data_extractor import (
     ExtractedValue,
     extract_numbers_from_text,
     extract_table_from_csv_text,
