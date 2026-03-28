@@ -1,5 +1,5 @@
 # Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
-# Modified by Max en Wong, 2026
+# Modified by Maxen Wong, 2026
 
 """Post-analysis session commit for OpenPE.
 
