@@ -1,4 +1,4 @@
-# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Copyright 2026 OpenPE Contributors — Licensed under GPL-3.0
 # Modified by Maxen Wong, 2026
 
 """World Bank data fetcher for OpenPE.
