@@ -3,6 +3,10 @@ import shutil
 from pathlib import Path
 import yaml
 from src.templates.scripts.audit_trail import AuditTrail, Claim, MethodologyChoice
+from src.templates.scripts.audit_trail import (
+    SourceRecord, VeracityRecord,
+    compute_shi, construct_igm, construct_rm,
+)
 
 TMP = Path("/tmp/test_audit_trail")
 
@@ -104,3 +108,77 @@ def test_empty_trail():
     assert "Total claims:** 0" in md
     s = trail.summary()
     assert s["total_claims"] == 0
+
+
+def test_compute_shi():
+    sha = compute_shi("hello world")
+    assert len(sha) == 64
+    assert sha == compute_shi("hello world")
+    assert sha != compute_shi("different")
+
+
+def test_construct_igm():
+    igm = construct_igm("C1", "abcdef1234567890abcdef", "phase3/data.csv:row42")
+    assert igm == "[C1:abcdef1234:phase3/data.csv:row42]"
+
+
+def test_construct_rm():
+    rm = construct_rm("R1", "CAUSAL_CLAIM", ["C1", "C2"])
+    assert rm == "(R1:CAUSAL_CLAIM:C1,C2)"
+
+
+def test_source_record():
+    sr = SourceRecord(shi="abc123", source_type="dataset",
+                      uri="https://api.worldbank.org/test",
+                      verification_status="VERIFIED")
+    d = sr.to_dict()
+    assert d["shi"] == "abc123"
+    assert d["verification_status"] == "VERIFIED"
+
+
+def test_veracity_record():
+    vr = VeracityRecord(relation_id="R1", relation_type="INFERENCE",
+                        dependent_claims=["C1", "C2"])
+    assert vr.audit_status == "PENDING"
+    d = vr.to_dict()
+    assert d["dependent_claims"] == ["C1", "C2"]
+
+
+def test_verify_logic_all_supported():
+    trail = AuditTrail(analysis_name="test")
+    trail.add_claim(claim_id="C1", text="X causes Y",
+                    source_type="analysis", source_ref="test.py",
+                    evidence_type="DATA_SUPPORTED")
+    trail.add_claim(claim_id="C2", text="Y causes Z",
+                    source_type="analysis", source_ref="test.py",
+                    evidence_type="DATA_SUPPORTED")
+    trail.add_veracity(relation_id="R1", relation_type="INFERENCE",
+                       dependent_claims=["C1", "C2"])
+    trail.verify_logic()
+    assert trail.veracity[0].audit_status == "VERIFIED_LOGIC"
+
+
+def test_verify_logic_insufficient():
+    trail = AuditTrail(analysis_name="test")
+    trail.add_claim(claim_id="C1", text="X causes Y",
+                    source_type="analysis", source_ref="test.py",
+                    evidence_type="HYPOTHESIZED")
+    trail.add_veracity(relation_id="R1", relation_type="INFERENCE",
+                       dependent_claims=["C1"])
+    trail.verify_logic()
+    assert trail.veracity[0].audit_status == "INSUFFICIENT_PREMISE"
+
+
+def test_save_load_with_ssr_var():
+    trail = AuditTrail(analysis_name="test")
+    trail.add_source(shi="abc123", source_type="dataset",
+                     uri="test.csv", verification_status="VERIFIED")
+    trail.add_veracity(relation_id="R1", relation_type="CAUSAL_CLAIM",
+                       dependent_claims=["C1"])
+    trail.save(TMP)
+
+    loaded = AuditTrail.load(TMP)
+    assert len(loaded.sources) == 1
+    assert loaded.sources[0].shi == "abc123"
+    assert len(loaded.veracity) == 1
+    assert loaded.veracity[0].relation_id == "R1"
