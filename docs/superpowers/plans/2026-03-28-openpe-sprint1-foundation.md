@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.11+, pixi, Claude Code agents, WebSearch/WebFetch for data acquisition, pandas/dowhy/wbgapi/fredapi for analysis.
 
-**Spec:** `docs/superpowers/specs/2026-03-28-slop-fp-architecture-design.md`
+**Spec:** `docs/superpowers/specs/2026-03-28-openpe-architecture-design.md`
 
 ---
 

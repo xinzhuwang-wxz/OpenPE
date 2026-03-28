@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.11+, DoWhy (causal inference), pandas, numpy, matplotlib (EP visualization), pyyaml (artifact serialization)
 
-**Spec:** `docs/superpowers/specs/2026-03-28-slop-fp-architecture-design.md` — Sections 2.2-2.4 (EP), 3.2 Phase 3 (causal testing), 5.4 (artifact structure)
+**Spec:** `docs/superpowers/specs/2026-03-28-openpe-architecture-design.md` — Sections 2.2-2.4 (EP), 3.2 Phase 3 (causal testing), 5.4 (artifact structure)
 
 ---
 
