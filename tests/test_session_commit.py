@@ -100,6 +100,37 @@ def test_grow_domain_pack():
     assert "data_source" in pack["experiences"]
 
 
+def test_commit_session_idempotent():
+    """Double commit_session must not double-decay memories."""
+    analysis_dir = TMP / "analysis"
+    _mock_analysis(analysis_dir)
+
+    store = MemoryStore(TMP / "memory")
+    graph = CausalKnowledgeGraph(TMP / "memory" / "graph.json")
+
+    # Pre-populate a memory with known confidence
+    from src.templates.scripts.memory_store import MemoryEntry
+    store.add(MemoryEntry(
+        memory_id="existing_m", content="Old finding",
+        domain="economics", memory_type="domain", tier="L1", confidence=0.50,
+    ))
+
+    # First commit — should apply decay (0.50 → 0.49)
+    commit_session(analysis_dir, store, graph, analysis_id="idempotent_test")
+    store.load_all()
+    conf_after_first = store.entries["existing_m"].confidence
+
+    # Second commit (simulating crash + retry) — should NOT decay again
+    store2 = MemoryStore(TMP / "memory")
+    graph2 = CausalKnowledgeGraph(TMP / "memory" / "graph.json")
+    commit_session(analysis_dir, store2, graph2, analysis_id="idempotent_test")
+    store2.load_all()
+    conf_after_second = store2.entries["existing_m"].confidence
+
+    # Confidence should be the same (no double decay)
+    assert conf_after_first == conf_after_second
+
+
 def test_promote_to_global():
     """High-confidence findings should be promoted to global memory."""
     analysis_dir = TMP / "analysis"

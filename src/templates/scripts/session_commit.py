@@ -184,13 +184,24 @@ def commit_session(
 ) -> list[MemoryEntry]:
     """Extract experiences and commit to memory store + causal graph.
 
+    Idempotent: safe to call multiple times with the same analysis_id
+    (e.g., after a crash and restart). Uses a commit marker file to
+    prevent double-decay on re-invocation.
+
     Returns the list of newly created memory entries.
     """
     if not analysis_id:
         analysis_id = f"analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
-    # Apply decay to existing memories
-    memory_store.apply_decay()
+    analysis_dir = Path(analysis_dir)
+
+    # Idempotency guard: prevent double-decay on re-invocation
+    commit_marker = analysis_dir / "memory" / f".committed_{analysis_id}"
+    already_committed = commit_marker.exists()
+
+    if not already_committed:
+        # Apply decay only on first commit (not on re-run after crash)
+        memory_store.apply_decay()
 
     # Extract experiences
     experiences = extract_experiences(analysis_dir)
@@ -215,6 +226,11 @@ def commit_session(
     _commit_causal_findings(analysis_dir, causal_graph, analysis_id)
 
     causal_graph.save()
+
+    # Write commit marker for idempotency
+    commit_marker.parent.mkdir(parents=True, exist_ok=True)
+    commit_marker.write_text(datetime.now().isoformat())
+
     return new_entries
 
 
