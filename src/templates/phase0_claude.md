@@ -1,9 +1,8 @@
 # Phase 0: Discovery
 
-> **This phase is new to OpenPE.** It has no equivalent in slop-X. Discovery
-> decomposes the user's question from first principles, hypothesizes causal
-> structures, acquires public data, and gates on data quality — all before
-> any analysis strategy is formulated.
+> **Phase 0: Discovery** decomposes the user's question from first principles,
+> hypothesizes causal structures, acquires public data, and gates on data
+> quality — all before any analysis strategy is formulated.
 
 You are running Phase 0 for a **{{analysis_type}}** analysis named
 **{{name}}**.

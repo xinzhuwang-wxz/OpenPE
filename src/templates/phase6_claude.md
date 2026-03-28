@@ -1,9 +1,7 @@
 # Phase 6: Documentation
 
-> **This phase generalizes slop-X's Phase 5 (analysis note writing).**
-> Instead of a domain-specific analysis note, Phase 6 produces a
-> comprehensive, auditable report with EP decay visualization, full audit
-> trail, and PDF output.
+> **Phase 6: Documentation** produces a comprehensive, auditable report with
+> EP decay visualization, full audit trail, and PDF output.
 
 You are running Phase 6 for a **{{analysis_type}}** analysis named
 **{{name}}**.

@@ -1,7 +1,6 @@
 # Phase 5: Verification
 
-> **This phase replaces slop-X's "unblinding" concept.** Instead of revealing
-> blinded data, Phase 5 independently verifies the analysis chain through
+> **Phase 5: Verification** independently verifies the analysis chain through
 > reproduction, provenance auditing, logic auditing, and EP verification —
 > then gates on human approval.
 

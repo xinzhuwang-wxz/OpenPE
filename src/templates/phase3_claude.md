@@ -323,7 +323,7 @@ findings and enables rigorous inference.
    - Specify how it affects the likelihood (additive, multiplicative,
      shape variation)
 
-3. **Compute expected results.** Before unblinding or finalizing:
+3. **Compute expected results.** Before finalizing:
    - What is the expected sensitivity given the data?
    - What precision is achievable?
    - Are the constraints on nuisance parameters reasonable?

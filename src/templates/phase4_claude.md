@@ -1,8 +1,8 @@
 # Phase 4: Projection
 
-> **This phase is new to OpenPE.** It has no equivalent in slop-X. Projection
-> forward-projects from Phase 3's established causal relationships to endgame,
-> using scenario simulation, sensitivity analysis, and convergence detection.
+> **Phase 4: Projection** forward-projects from Phase 3's established causal
+> relationships to endgame, using scenario simulation, sensitivity analysis,
+> and convergence detection.
 
 You are running Phase 4 for a **{{analysis_type}}** analysis named
 **{{name}}**.
