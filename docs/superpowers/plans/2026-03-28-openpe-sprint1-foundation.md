@@ -325,6 +325,14 @@ def scaffold(analysis_dir: Path, analysis_type: str = "analysis"):
             claude_path.write_text(_substitute(template, variables))
             print(f"  wrote {claude_path}")
 
+    # Create memory/ directory (empty until Sprint 5, but exists for forward compat)
+    memory_dir = analysis_dir / "memory"
+    memory_dir.mkdir(exist_ok=True)
+    (memory_dir / "L0_universal").mkdir(exist_ok=True)
+    (memory_dir / "L1_domain").mkdir(exist_ok=True)
+    (memory_dir / "L2_detailed").mkdir(exist_ok=True)
+    (memory_dir / "causal_graph").mkdir(exist_ok=True)
+
     # Symlink conventions/, methodology/, and .claude/ into the analysis directory
     for link_name, src_path in [
         ("conventions", HERE / "conventions"),
@@ -746,11 +754,13 @@ git commit -m "feat: rewrite Phase 1-3 templates for OpenPE"
 ## Task 8: Create Phase 4-6 Templates
 
 **Files:**
-- Create: `src/templates/phase4_claude.md` (replaces old HEP phase4)
-- Create: `src/templates/phase5_claude.md` (replaces old HEP phase5)
-- Create: `src/templates/phase6_claude.md` (new)
+- Overwrite: `src/templates/phase4_claude.md` (existing file is HEP inference — replace entirely with Projection)
+- Overwrite: `src/templates/phase5_claude.md` (existing file is HEP documentation — replace entirely with Verification)
+- Create: `src/templates/phase6_claude.md` (new, does not exist yet)
 
-- [ ] **Step 1: Write phase4_claude.md (Projection)**
+**Note:** `phase4_claude.md` and `phase5_claude.md` already exist with HEP content. These must be fully overwritten, not skipped. Use Write tool, not conditional creation.
+
+- [ ] **Step 1: Overwrite phase4_claude.md (Projection)**
 
 Key content:
 - Scenario simulation (Monte Carlo, ≥3 scenarios)
@@ -888,7 +898,226 @@ git commit -m "feat: generalize all retained agent profiles for OpenPE"
 
 ---
 
-## Task 11: Update pyproject.toml
+## Task 11: Data Acquisition Helper Scripts
+
+**Files:**
+- Create: `src/templates/scripts/fetch_worldbank.py`
+- Create: `src/templates/scripts/fetch_fred.py`
+- Create: `src/templates/scripts/registry_utils.py`
+
+These are helper scripts that get copied into each scaffolded analysis's `phase0_discovery/scripts/` directory. They provide concrete tools for the data_acquisition_agent to call.
+
+- [ ] **Step 1: Write registry_utils.py**
+
+Create `src/templates/scripts/registry_utils.py`:
+
+```python
+"""Data registry utilities for OpenPE data provenance tracking.
+
+Provides functions to register downloaded datasets in registry.yaml
+with full provenance (URL, date, hash, query params).
+"""
+import hashlib
+import yaml
+from pathlib import Path
+from datetime import datetime
+
+
+def compute_hash(filepath: Path) -> str:
+    """Compute SHA-256 hash of a file."""
+    h = hashlib.sha256()
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def register_dataset(
+    registry_path: Path,
+    source_id: str,
+    name: str,
+    url: str,
+    filepath: Path,
+    query_params: dict | None = None,
+    notes: str = "",
+) -> dict:
+    """Register a downloaded dataset in registry.yaml."""
+    entry = {
+        "source_id": source_id,
+        "name": name,
+        "url": url,
+        "retrieved": datetime.now().isoformat(),
+        "file": str(filepath),
+        "sha256": compute_hash(filepath),
+        "query_params": query_params or {},
+        "notes": notes,
+    }
+
+    # Load or create registry
+    if registry_path.exists():
+        with open(registry_path) as f:
+            registry = yaml.safe_load(f) or {"datasets": []}
+    else:
+        registry = {"datasets": []}
+
+    registry["datasets"].append(entry)
+
+    with open(registry_path, "w") as f:
+        yaml.dump(registry, f, default_flow_style=False, sort_keys=False)
+
+    return entry
+```
+
+- [ ] **Step 2: Write fetch_worldbank.py**
+
+Create `src/templates/scripts/fetch_worldbank.py`:
+
+```python
+"""World Bank data fetcher for OpenPE.
+
+Usage:
+    pixi run py phase0_discovery/scripts/fetch_worldbank.py \\
+        --indicator NY.GDP.PCAP.CD --country CHN --start 1980 --end 2025 \\
+        --output phase0_discovery/data/raw/
+"""
+import argparse
+from pathlib import Path
+
+import pandas as pd
+import wbgapi as wb
+
+from registry_utils import register_dataset
+
+
+def fetch(indicator: str, country: str, start: int, end: int, output_dir: Path) -> Path:
+    """Fetch a World Bank indicator and save as Parquet."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    df = wb.data.DataFrame(indicator, country, time=range(start, end + 1))
+    df = df.T.reset_index()
+    df.columns = ["year", "value"]
+
+    filename = f"wb_{indicator}_{country}_{start}_{end}.parquet"
+    filepath = output_dir / filename
+    df.to_parquet(filepath, index=False)
+
+    # Register in provenance
+    registry_path = output_dir.parent / "registry.yaml"
+    register_dataset(
+        registry_path=registry_path,
+        source_id=f"wb_{indicator}_{country}",
+        name=f"World Bank: {indicator} for {country}",
+        url=f"https://data.worldbank.org/indicator/{indicator}?locations={country}",
+        filepath=filepath,
+        query_params={"indicator": indicator, "country": country, "start": start, "end": end},
+    )
+
+    print(f"Saved {filepath} ({len(df)} rows)")
+    return filepath
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Fetch World Bank data")
+    parser.add_argument("--indicator", required=True)
+    parser.add_argument("--country", required=True)
+    parser.add_argument("--start", type=int, default=1960)
+    parser.add_argument("--end", type=int, default=2025)
+    parser.add_argument("--output", type=Path, default=Path("phase0_discovery/data/raw"))
+    args = parser.parse_args()
+    fetch(args.indicator, args.country, args.start, args.end, args.output)
+```
+
+- [ ] **Step 3: Write fetch_fred.py**
+
+Create `src/templates/scripts/fetch_fred.py`:
+
+```python
+"""FRED data fetcher for OpenPE.
+
+Usage:
+    pixi run py phase0_discovery/scripts/fetch_fred.py \\
+        --series GDP --start 1980-01-01 --end 2025-01-01 \\
+        --output phase0_discovery/data/raw/
+
+Requires FRED_API_KEY environment variable (free at https://fred.stlouisfed.org/docs/api/api_key.html).
+"""
+import argparse
+import os
+from pathlib import Path
+
+import pandas as pd
+from fredapi import Fred
+
+from registry_utils import register_dataset
+
+
+def fetch(series_id: str, start: str, end: str, output_dir: Path) -> Path:
+    """Fetch a FRED series and save as Parquet."""
+    api_key = os.environ.get("FRED_API_KEY", "")
+    if not api_key:
+        raise ValueError("Set FRED_API_KEY environment variable. Get one free at https://fred.stlouisfed.org/docs/api/api_key.html")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    fred = Fred(api_key=api_key)
+    data = fred.get_series(series_id, observation_start=start, observation_end=end)
+    df = data.reset_index()
+    df.columns = ["date", "value"]
+
+    filename = f"fred_{series_id}_{start}_{end}.parquet"
+    filepath = output_dir / filename
+    df.to_parquet(filepath, index=False)
+
+    registry_path = output_dir.parent / "registry.yaml"
+    register_dataset(
+        registry_path=registry_path,
+        source_id=f"fred_{series_id}",
+        name=f"FRED: {series_id}",
+        url=f"https://fred.stlouisfed.org/series/{series_id}",
+        filepath=filepath,
+        query_params={"series_id": series_id, "start": start, "end": end},
+    )
+
+    print(f"Saved {filepath} ({len(df)} rows)")
+    return filepath
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Fetch FRED data")
+    parser.add_argument("--series", required=True)
+    parser.add_argument("--start", default="1960-01-01")
+    parser.add_argument("--end", default="2025-01-01")
+    parser.add_argument("--output", type=Path, default=Path("phase0_discovery/data/raw"))
+    args = parser.parse_args()
+    fetch(args.series, args.start, args.end, args.output)
+```
+
+- [ ] **Step 4: Update scaffolder to copy helper scripts into Phase 0**
+
+Add to `scaffold()` in `src/scaffold_analysis.py`, after the phase directory creation loop:
+
+```python
+    # Copy data acquisition helper scripts into Phase 0
+    scripts_src = TEMPLATES / "scripts"
+    scripts_dst = analysis_dir / "phase0_discovery" / "scripts"
+    if scripts_src.exists():
+        for script in scripts_src.glob("*.py"):
+            dst = scripts_dst / script.name
+            if not dst.exists():
+                dst.write_text(script.read_text())
+                print(f"  copied {dst}")
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/templates/scripts/ src/scaffold_analysis.py
+git commit -m "feat: add data acquisition helper scripts (WorldBank, FRED, registry)"
+```
+
+---
+
+## Task 12: Update pyproject.toml (Root)
 
 **Files:**
 - Modify: `pyproject.toml` (root)
@@ -919,7 +1148,7 @@ git commit -m "feat: update root pyproject.toml for OpenPE scaffold command"
 
 ---
 
-## Task 12: End-to-End Smoke Test
+## Task 13: Structural Smoke Test
 
 - [ ] **Step 1: Scaffold a full test analysis**
 
@@ -953,11 +1182,133 @@ grep -r "uproot\|ROOT file\|particle physics\|HEP\|detector\|collider\|luminosit
 
 Expected: No matches (or only in comments explaining the heritage).
 
-- [ ] **Step 5: Clean up and commit**
+- [ ] **Step 5: Clean up**
 
 ```bash
 rm -rf /tmp/openpe_smoke_test
-git add -A
+```
+
+- [ ] **Step 6: Commit any remaining fixes**
+
+```bash
+git status
+git add src/ .claude/ tests/
+git commit -m "fix: address smoke test findings"
+```
+
+---
+
+## Task 14: Functional End-to-End Test (Spec Requirement)
+
+The spec requires: "End-to-end test: question → data acquired → quality assessed."
+
+This tests that the scaffolded analysis structure can support a real Phase 0 execution. We create a minimal test script that exercises the data acquisition helpers and produces a DATA_QUALITY.md.
+
+**Files:**
+- Create: `tests/test_e2e_phase0.py`
+
+- [ ] **Step 1: Write functional e2e test**
+
+Create `tests/test_e2e_phase0.py`:
+
+```python
+"""Functional end-to-end test for Phase 0 data acquisition flow.
+
+Tests that the helper scripts can:
+1. Fetch data from World Bank API
+2. Register it in registry.yaml
+3. Produce a basic DATA_QUALITY.md skeleton
+
+This test requires network access and may be slow.
+Mark with @pytest.mark.slow for CI filtering.
+"""
+import shutil
+import pytest
+from pathlib import Path
+
+TEST_DIR = Path("/tmp/test_openpe_e2e")
+
+
+def setup_function():
+    if TEST_DIR.exists():
+        shutil.rmtree(TEST_DIR)
+
+
+def teardown_function():
+    if TEST_DIR.exists():
+        shutil.rmtree(TEST_DIR)
+
+
+@pytest.mark.slow
+def test_worldbank_fetch_and_register():
+    """Fetch a World Bank indicator and verify registry entry."""
+    from src.scaffold_analysis import scaffold
+    scaffold(TEST_DIR, "analysis")
+
+    # Import the helper from the scaffolded analysis
+    import sys
+    sys.path.insert(0, str(TEST_DIR / "phase0_discovery" / "scripts"))
+    from fetch_worldbank import fetch
+
+    output = fetch(
+        indicator="SP.POP.TOTL",
+        country="CHN",
+        start=2010,
+        end=2020,
+        output_dir=TEST_DIR / "phase0_discovery" / "data" / "raw",
+    )
+
+    # Verify file exists and has data
+    assert output.exists()
+    assert output.stat().st_size > 0
+
+    # Verify registry entry
+    import yaml
+    registry_path = TEST_DIR / "phase0_discovery" / "data" / "registry.yaml"
+    assert registry_path.exists()
+    with open(registry_path) as f:
+        registry = yaml.safe_load(f)
+    assert len(registry["datasets"]) >= 1
+    entry = registry["datasets"][0]
+    assert "sha256" in entry
+    assert "worldbank" in entry["url"].lower()
+
+
+def test_scaffold_produces_quality_template():
+    """Scaffolded analysis has DATA_QUALITY.md placeholder location."""
+    from src.scaffold_analysis import scaffold
+    scaffold(TEST_DIR, "analysis")
+
+    # Phase 0 CLAUDE.md references DATA_QUALITY.md output
+    phase0_claude = (TEST_DIR / "phase0_discovery" / "CLAUDE.md").read_text()
+    assert "DATA_QUALITY" in phase0_claude
+
+    # exec/ directory exists for the output
+    assert (TEST_DIR / "phase0_discovery" / "exec").is_dir()
+```
+
+- [ ] **Step 2: Run the non-network test**
+
+Run: `pixi run py -m pytest tests/test_e2e_phase0.py::test_scaffold_produces_quality_template -v`
+Expected: PASS
+
+- [ ] **Step 3: Run the full e2e test (requires network)**
+
+Run: `pixi run py -m pytest tests/test_e2e_phase0.py::test_worldbank_fetch_and_register -v -m slow`
+Expected: PASS (fetches real World Bank data, registers in registry.yaml)
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add tests/test_e2e_phase0.py
+git commit -m "test: add functional e2e test for Phase 0 data acquisition"
+```
+
+- [ ] **Step 5: Final Sprint 1 commit**
+
+```bash
+git status
+git add src/ .claude/ tests/ _archive/
 git commit -m "chore: Sprint 1 complete — OpenPE foundation ready"
 ```
 
@@ -977,6 +1328,8 @@ git commit -m "chore: Sprint 1 complete — OpenPE foundation ready"
 | 8 | Create Phase 4-6 templates | 3 files | 15 min |
 | 9 | Rewrite orchestrator template | 1 file | 25 min |
 | 10 | Generalize retained agents | 12 files | 40 min |
-| 11 | Update pyproject.toml | 1 file | 3 min |
-| 12 | End-to-end smoke test | — | 5 min |
-| **Total** | | **~40 files** | **~170 min** |
+| 11 | Data acquisition helpers | 3 files + scaffolder update | 20 min |
+| 12 | Update pyproject.toml | 1 file | 3 min |
+| 13 | Structural smoke test | — | 5 min |
+| 14 | Functional e2e test | 1 test file | 15 min |
+| **Total** | | **~45 files** | **~205 min** |
