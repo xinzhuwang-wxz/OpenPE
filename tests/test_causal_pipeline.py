@@ -5,11 +5,32 @@ The pipeline wraps DoWhy — tests verify our wrapper logic,
 not DoWhy internals.
 """
 import importlib.util
+import subprocess
+import sys
+
 import pytest
 import numpy as np
 import pandas as pd
 
-_dowhy_available = importlib.util.find_spec("dowhy") is not None
+
+def _ensure_dowhy():
+    """Try to import dowhy; if unavailable, attempt pip install."""
+    if importlib.util.find_spec("dowhy") is not None:
+        return True
+    try:
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "dowhy", "-q"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=120,
+        )
+        return importlib.util.find_spec("dowhy") is not None
+    except Exception:
+        return False
+
+
+_dowhy_available = _ensure_dowhy()
+
 from src.templates.scripts.causal_pipeline import (
     CausalTest,
     RefutationResult,
