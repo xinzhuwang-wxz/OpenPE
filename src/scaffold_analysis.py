@@ -110,6 +110,16 @@ def scaffold(analysis_dir: Path, analysis_type: str):
                 claude_path.write_text(f"# {phase_name}\n\n> Template not yet created.\n")
                 print(f"  wrote {claude_path} (placeholder)")
 
+    # Copy data acquisition helper scripts into Phase 0
+    scripts_src = TEMPLATES / "scripts"
+    scripts_dst = analysis_dir / "phase0_discovery" / "scripts"
+    if scripts_src.exists():
+        for script in scripts_src.glob("*.py"):
+            dst = scripts_dst / script.name
+            if not dst.exists():
+                dst.write_text(script.read_text())
+                print(f"  copied {dst}")
+
     # Memory directory for forward compatibility
     memory_dir = analysis_dir / "memory"
     for subdir in ["L0_universal", "L1_domain", "L2_detailed", "causal_graph"]:
