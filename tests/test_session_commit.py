@@ -172,3 +172,45 @@ def test_promote_to_global():
     global_graph.load()
     assert "A→B" in global_graph.relationships
     assert "C→D" not in global_graph.relationships
+
+
+def test_commit_generates_l2_summary():
+    """commit_session should create an L2 entry with analysis summary."""
+    analysis_dir = TMP / "analysis"
+    _mock_analysis(analysis_dir)
+
+    store = MemoryStore(TMP / "memory")
+    graph = CausalKnowledgeGraph(TMP / "memory" / "graph.json")
+
+    entries = commit_session(analysis_dir, store, graph, analysis_id="l2_test")
+
+    l2_entries = [e for e in entries if e.tier == "L2"]
+    assert len(l2_entries) >= 1
+    assert (TMP / "memory" / "L2" / "l2_test_summary_0.yaml").exists()
+
+
+def test_commit_triggers_tier_transitions():
+    """commit_session should promote well-corroborated L1 and forget stale."""
+    analysis_dir = TMP / "analysis"
+    _mock_analysis(analysis_dir)
+
+    store = MemoryStore(TMP / "memory")
+    graph = CausalKnowledgeGraph(TMP / "memory" / "graph.json")
+
+    from src.templates.scripts.memory_store import MemoryEntry
+    store.add(MemoryEntry(
+        memory_id="well_corroborated", content="Reliable cross-analysis finding",
+        domain="economics", memory_type="domain", tier="L1", confidence=0.85,
+        corroborated_by=["a1", "a2", "a3"],
+    ))
+    store.add(MemoryEntry(
+        memory_id="stale_entry", content="Very old forgotten entry",
+        domain="economics", memory_type="domain", tier="L1",
+        confidence=0.03, active_count=0, updated="2020-01-01T00:00:00",
+    ))
+
+    commit_session(analysis_dir, store, graph, analysis_id="tier_test")
+
+    store.load_all()
+    assert store.entries["well_corroborated"].tier == "L0"
+    assert "stale_entry" not in store.entries

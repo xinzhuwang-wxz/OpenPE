@@ -176,6 +176,50 @@ def _extract_from_verification(analysis_dir: Path, domain: str, out: list[Experi
         ))
 
 
+def _generate_l2_summary(
+    analysis_dir: Path,
+    analysis_id: str,
+) -> MemoryEntry | None:
+    """Generate an L2 summary entry from analysis artifacts."""
+    analysis_dir = Path(analysis_dir)
+
+    config_path = analysis_dir / "analysis_config.yaml"
+    domain = "general"
+    question = ""
+    if config_path.exists():
+        with open(config_path) as f:
+            config = yaml.safe_load(f) or {}
+        domain = config.get("domain", domain)
+        question = config.get("question", "")
+
+    parts = []
+    if question:
+        parts.append(f"Question: {question}")
+
+    for artifact_name in ["DISCOVERY.md", "ANALYSIS.md", "VERIFICATION.md"]:
+        path = _find_artifact(analysis_dir, artifact_name)
+        if path:
+            text = path.read_text()
+            for line in text.split("\n"):
+                line = line.strip()
+                if line and not line.startswith("#") and not line.startswith("|") and not line.startswith("-"):
+                    parts.append(f"{artifact_name}: {line[:120]}")
+                    break
+
+    if not parts:
+        return None
+
+    return MemoryEntry(
+        memory_id=f"{analysis_id}_summary_0",
+        content=" | ".join(parts),
+        domain=domain,
+        memory_type="domain",
+        tier="L2",
+        confidence=0.5,
+        source_analysis=analysis_id,
+    )
+
+
 def commit_session(
     analysis_dir: Path,
     memory_store: MemoryStore,
@@ -230,6 +274,19 @@ def commit_session(
     # Write commit marker for idempotency
     commit_marker.parent.mkdir(parents=True, exist_ok=True)
     commit_marker.write_text(datetime.now().isoformat())
+
+    # Generate L2 analysis summary
+    l2_entry = _generate_l2_summary(analysis_dir, analysis_id)
+    if l2_entry:
+        memory_store.add(l2_entry)
+        new_entries.append(l2_entry)
+
+    # Tier transitions: promote well-corroborated L1→L0, demote contradicted L0→L1, forget stale
+    memory_store.load_all()
+    for mid in list(memory_store.entries.keys()):
+        memory_store.promote_tier(mid)
+        memory_store.demote_tier(mid)
+    memory_store.forget()
 
     return new_entries
 

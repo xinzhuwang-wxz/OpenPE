@@ -86,9 +86,13 @@ class MemoryEntry:
         self.updated = datetime.now().isoformat()
 
     def decay(self) -> None:
-        """Apply per-analysis confidence decay."""
+        """Apply per-analysis confidence decay.
+
+        Note: does NOT update the `updated` timestamp — that field tracks
+        meaningful semantic changes (corroboration, contradiction, tier changes)
+        rather than maintenance operations like decay.
+        """
         self.confidence = max(CONFIDENCE_FLOOR, self.confidence - self.decay_rate)
-        self.updated = datetime.now().isoformat()
 
     @property
     def is_quarantined(self) -> bool:
@@ -331,13 +335,13 @@ class MemoryStore:
     FORGET_HOTNESS = 0.01
 
     def forget(self) -> list[str]:
-        """Delete entries with confidence < 0.05 AND hotness < 0.01.
+        """Delete entries with confidence <= 0.05 AND hotness < 0.01.
         True forgetting — removes file entirely. Returns forgotten IDs.
         """
         self.load_all()
         forgotten = []
         for entry in list(self.entries.values()):
-            if entry.confidence < self.FORGET_CONFIDENCE and entry.hotness < self.FORGET_HOTNESS:
+            if entry.confidence <= self.FORGET_CONFIDENCE and entry.hotness < self.FORGET_HOTNESS:
                 path = self._entry_path(entry)
                 if path.exists():
                     path.unlink()
