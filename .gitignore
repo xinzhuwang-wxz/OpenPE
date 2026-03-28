@@ -6,11 +6,5 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Analyses (each has its own git repo)
-analyses/
-
-# Reference repos (read-only, not part of OpenPE)
-_ref/
-
 # Tests (run locally, not shipped with analyses)
 tests/
