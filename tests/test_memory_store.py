@@ -114,3 +114,46 @@ def test_context_string():
     ctx = store.to_context_string(list(store.entries.values()))
     assert "Always verify data" in ctx
     assert "[WARNING" in ctx
+
+
+def test_promote_tier_l1_to_l0():
+    """L1 entry corroborated by 3+ analyses should promote to L0."""
+    store = MemoryStore(TMP / "memory")
+    entry = MemoryEntry(
+        memory_id="promotable",
+        content="World Bank wbgapi works without API key",
+        domain="economics",
+        memory_type="data_source",
+        tier="L1",
+        confidence=0.8,
+    )
+    entry.corroborated_by = ["analysis_1", "analysis_2", "analysis_3"]
+    store.add(entry)
+
+    promoted = store.promote_tier("promotable")
+    assert promoted is True
+    assert store.entries["promotable"].tier == "L0"
+    assert (TMP / "memory" / "L0" / "promotable.yaml").exists()
+    assert not (TMP / "memory" / "L1" / "promotable.yaml").exists()
+
+
+def test_promote_tier_insufficient_corroboration():
+    store = MemoryStore(TMP / "memory")
+    entry = MemoryEntry(
+        memory_id="not_ready", content="Some finding",
+        domain="test", memory_type="domain", tier="L1", confidence=0.6,
+    )
+    entry.corroborated_by = ["analysis_1"]
+    store.add(entry)
+    assert store.promote_tier("not_ready") is False
+    assert store.entries["not_ready"].tier == "L1"
+
+
+def test_promote_tier_already_l0():
+    store = MemoryStore(TMP / "memory")
+    entry = MemoryEntry(
+        memory_id="already_l0", content="Universal principle",
+        domain="general", memory_type="principle", tier="L0", confidence=0.9,
+    )
+    store.add(entry)
+    assert store.promote_tier("already_l0") is False

@@ -284,6 +284,30 @@ class MemoryStore:
 
         return archived
 
+    PROMOTION_CORROBORATION_MIN = 3
+    DEMOTION_CONFIDENCE_MAX = 0.3
+
+    def promote_tier(self, memory_id: str) -> bool:
+        """Promote L1→L0 if corroboration threshold is met.
+        Moves the YAML file from L1/ to L0/ on disk.
+        """
+        entry = self.entries.get(memory_id)
+        if entry is None or entry.tier != "L1":
+            return False
+        if len(entry.corroborated_by) < self.PROMOTION_CORROBORATION_MIN:
+            return False
+
+        old_path = self._entry_path(entry)
+        entry.tier = "L0"
+        entry.updated = datetime.now().isoformat()
+        new_path = self._entry_path(entry)
+
+        self._save_entry(entry)
+        if old_path.exists() and old_path != new_path:
+            old_path.unlink()
+
+        return True
+
     def find_similar(
         self,
         content: str,
