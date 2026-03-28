@@ -92,6 +92,21 @@ and causal structure identified in Phase 0.
 
    Document these as inputs to Phase 2 data preparation.
 
+**Method-environment cross-check (non-negotiable):** For every method
+selected in the strategy, verify that the required Python package is
+available in `pixi.toml`. Run a quick import check:
+
+```
+pixi run py -c "import dowhy; import statsmodels; import scipy"
+```
+
+If a method requires a package not in `pixi.toml`, either:
+1. Add it to `pixi.toml` and run `pixi install`, OR
+2. Replace the method with one that uses available packages
+
+**Never recommend a method whose implementation is not installable.**
+Document the availability check result in `experiment_log.md`.
+
 **Output:** Method selection table in STRATEGY.md:
 
 ```markdown
