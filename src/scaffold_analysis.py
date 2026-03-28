@@ -71,6 +71,20 @@ def scaffold(analysis_dir: Path, analysis_type: str):
     """Create the analysis directory structure with CLAUDE.md files."""
     analysis_dir.mkdir(parents=True, exist_ok=True)
 
+    # Check pixi availability and warn if missing
+    if shutil.which("pixi") is None:
+        setup_notes = analysis_dir / "SETUP_NOTES.md"
+        setup_notes.write_text(
+            "# Setup Notes\n\n"
+            "**Warning:** `pixi` was not found on your PATH.\n\n"
+            "Install pixi before running this analysis:\n"
+            "```bash\n"
+            "curl -fsSL https://pixi.sh/install.sh | bash\n"
+            "```\n\n"
+            "Then: `cd " + str(analysis_dir) + " && pixi install`\n"
+        )
+        print(f"  WARNING: pixi not found — wrote {setup_notes}")
+
     variables = {
         "name": analysis_dir.name,
         "analysis_type": analysis_type,
