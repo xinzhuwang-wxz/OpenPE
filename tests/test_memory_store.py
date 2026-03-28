@@ -157,3 +157,54 @@ def test_promote_tier_already_l0():
     )
     store.add(entry)
     assert store.promote_tier("already_l0") is False
+
+
+def test_demote_tier_l0_to_l1():
+    store = MemoryStore(TMP / "memory")
+    entry = MemoryEntry(
+        memory_id="demotable", content="Previously trusted principle",
+        domain="general", memory_type="principle", tier="L0", confidence=0.25,
+    )
+    store.add(entry)
+    assert store.demote_tier("demotable") is True
+    assert store.entries["demotable"].tier == "L1"
+    assert (TMP / "memory" / "L1" / "demotable.yaml").exists()
+    assert not (TMP / "memory" / "L0" / "demotable.yaml").exists()
+
+
+def test_demote_tier_confidence_ok():
+    store = MemoryStore(TMP / "memory")
+    entry = MemoryEntry(
+        memory_id="solid", content="Well-established principle",
+        domain="general", memory_type="principle", tier="L0", confidence=0.7,
+    )
+    store.add(entry)
+    assert store.demote_tier("solid") is False
+    assert store.entries["solid"].tier == "L0"
+
+
+def test_forget_removes_entry():
+    store = MemoryStore(TMP / "memory")
+    entry = MemoryEntry(
+        memory_id="forgettable", content="Ancient irrelevant finding",
+        domain="test", memory_type="domain", tier="L1",
+        confidence=0.04, active_count=0, updated="2020-01-01T00:00:00",
+    )
+    store.add(entry)
+    assert (TMP / "memory" / "L1" / "forgettable.yaml").exists()
+    forgotten = store.forget()
+    assert "forgettable" in forgotten
+    assert "forgettable" not in store.entries
+    assert not (TMP / "memory" / "L1" / "forgettable.yaml").exists()
+
+
+def test_forget_keeps_recent():
+    store = MemoryStore(TMP / "memory")
+    entry = MemoryEntry(
+        memory_id="keeper", content="Recent finding",
+        domain="test", memory_type="domain", tier="L1", confidence=0.3,
+    )
+    store.add(entry)
+    forgotten = store.forget()
+    assert "keeper" not in forgotten
+    assert "keeper" in store.entries

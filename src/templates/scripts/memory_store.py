@@ -308,6 +308,43 @@ class MemoryStore:
 
         return True
 
+    def demote_tier(self, memory_id: str) -> bool:
+        """Demote L0→L1 if confidence drops below demotion threshold."""
+        entry = self.entries.get(memory_id)
+        if entry is None or entry.tier != "L0":
+            return False
+        if entry.confidence >= self.DEMOTION_CONFIDENCE_MAX:
+            return False
+
+        old_path = self._entry_path(entry)
+        entry.tier = "L1"
+        entry.updated = datetime.now().isoformat()
+        new_path = self._entry_path(entry)
+
+        self._save_entry(entry)
+        if old_path.exists() and old_path != new_path:
+            old_path.unlink()
+
+        return True
+
+    FORGET_CONFIDENCE = 0.05
+    FORGET_HOTNESS = 0.01
+
+    def forget(self) -> list[str]:
+        """Delete entries with confidence < 0.05 AND hotness < 0.01.
+        True forgetting — removes file entirely. Returns forgotten IDs.
+        """
+        self.load_all()
+        forgotten = []
+        for entry in list(self.entries.values()):
+            if entry.confidence < self.FORGET_CONFIDENCE and entry.hotness < self.FORGET_HOTNESS:
+                path = self._entry_path(entry)
+                if path.exists():
+                    path.unlink()
+                del self.entries[entry.memory_id]
+                forgotten.append(entry.memory_id)
+        return forgotten
+
     def find_similar(
         self,
         content: str,
