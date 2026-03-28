@@ -29,7 +29,7 @@ done
 CONFIG="$ANALYSIS_DIR/.analysis_config"
 
 # Build list of allowed paths: analysis dir, /tmp, data_dir, any allow= lines
-ALLOWED=("$ANALYSIS_DIR" "/tmp")
+ALLOWED=("$ANALYSIS_DIR" "/tmp" "$HOME/.claude")
 while IFS='=' read -r key val; do
     val=$(echo "$val" | xargs)  # trim whitespace
     [ -z "$val" ] && continue
