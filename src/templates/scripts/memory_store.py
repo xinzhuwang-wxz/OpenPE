@@ -288,7 +288,7 @@ class MemoryStore:
 
         return archived
 
-    PROMOTION_CORROBORATION_MIN = 3
+    PROMOTION_CORROBORATION_MIN = 2  # ≥2 independent corroborations (creator + 2 analyses = 3 total)
     DEMOTION_CONFIDENCE_MAX = 0.3
 
     def promote_tier(self, memory_id: str) -> bool:
