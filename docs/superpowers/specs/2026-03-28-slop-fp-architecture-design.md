@@ -1,7 +1,7 @@
 # slop-FP Architecture Design
 
 **Date**: 2026-03-28
-**Status**: Approved
+**Status**: Under Review
 **Approach**: Incremental modification of slop-X (Phase Extension)
 
 ---
@@ -302,6 +302,8 @@ Decision tree for refutation test outcomes:
   Contradictory results → DISPUTED (flag for human review; do not auto-classify)
 ```
 
+**Context splitting**: Phase 3 is the most complex phase, absorbing responsibilities from 4 slop-X agents. Steps 1–5 (causal testing + EP propagation) and Steps 6–7 (statistical model + uncertainty quantification) should be split into separate subagent invocations to manage context pressure. The orchestrator may invoke the analyst agent twice: first for causal analysis, then for statistical modeling.
+
 **Agents**: analyst (generalized from signal_lead + background_estimator), verifier (generalized from cross_checker)
 
 ---
@@ -341,7 +343,16 @@ Decision tree for refutation test outcomes:
 
 **Gate**: Must pass verification before proceeding to documentation.
 
-**Modification from slop-X**: Generalizes "unblinding" to "independent verification".
+**Human gate protocol**: After automated verification passes, the following is presented to the human for approval:
+- Verification report summary (pass/fail per check)
+- Key causal findings table (edge, classification, EP, confidence interval)
+- EP propagation summary (main chain with Joint_EP at each node)
+- Projection scenario summaries (≤3 paragraphs each)
+- Any DISPUTED edges or data quality warnings
+
+Human may: (a) approve and proceed to Phase 6, (b) request re-analysis of specific edges, (c) request additional data acquisition, (d) terminate the analysis with findings to date.
+
+**Modification from slop-X**: Generalizes "unblinding" to "independent verification". The human gate moves from "10% data validation" to "full verification review".
 
 **Agents**: verifier (generalized from cross_checker)
 
@@ -508,7 +519,7 @@ DISCOVERY.md containing:
 - User-provided hypotheses receive no trust privilege
 ```
 
-### 4.3 Memory Integration (All Agents)
+### 4.4 Memory Integration (All Agents)
 
 Every agent receives two memory interfaces at invocation:
 
