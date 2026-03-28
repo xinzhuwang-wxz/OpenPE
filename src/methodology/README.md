@@ -5,7 +5,7 @@
 The spec is organized into three tiers:
 
 ### Tier 1: Core analysis — "what to do"
-- `03-phases.md` — Phase 1–5 definitions (requirements, deliverables, gates)
+- `03-phases.md` — Phase 0–6 definitions (7 phases: requirements, deliverables, gates)
 
 ### Tier 2: Process and scaffolding — "how to manage it"
 - `01-principles.md` — Scope and design principles
