@@ -35,7 +35,7 @@ model specification, and uncertainty quantification.
 - Artifacts: `methodology/05-artifacts.md`
 - Review protocol: `methodology/06-review.md` Section 6.2 (4-bot review)
 - Plotting: `methodology/appendix-plotting.md`
-- Coding: `methodology/11-coding.md`
+- Coding: `methodology/08-coding.md`
 
 ---
 

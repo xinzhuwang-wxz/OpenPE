@@ -1,6 +1,6 @@
 <!-- Spec developer note: agent prompt templates live in
      src/orchestration/agents.md. Context assembly rules are in
-     src/methodology/03a-orchestration.md §3a.4.2. -->
+     src/methodology/04-orchestration.md §3a.4.2. -->
 
 # Analysis: {{name}}
 
@@ -176,13 +176,13 @@ Read relevant sections from `methodology/` as needed:
 | Topic | File | When |
 |-------|------|------|
 | Phase definitions | `methodology/03-phases.md` | Before each phase |
-| Orchestration | `methodology/03a-orchestration.md` | Orchestrator planning |
+| Orchestration | `methodology/04-orchestration.md` | Orchestrator planning |
 | Artifacts | `methodology/05-artifacts.md` | Writing phase artifacts |
 | Analysis note spec | `methodology/analysis-note.md` | Phase 6 (writing report), Phase 5 |
 | Review protocol | `methodology/06-review.md` | Spawning reviewers |
 | Tools & paradigms | `methodology/07-tools.md` | Coding phases |
-| Coding practices | `methodology/11-coding.md` | Coding phases |
-| Downscoping | `methodology/12-downscoping.md` | Hitting limitations |
+| Coding practices | `methodology/08-coding.md` | Coding phases |
+| Downscoping | `methodology/09-downscoping.md` | Hitting limitations |
 | Plotting | `methodology/appendix-plotting.md` | All figure-producing phases |
 | Checklist | `methodology/appendix-checklist.md` | Review, Phase 5 |
 
@@ -342,7 +342,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 ```
 
-See `methodology/11-coding.md` for full coding practices.
+See `methodology/08-coding.md` for full coding practices.
 
 ---
 
@@ -424,7 +424,7 @@ Required AN sections — see `methodology/03-phases.md` → Phase 6 for the full
 ## Feasibility Evaluation
 
 When the analysis encounters a limitation, do not silently downscope.
-See `methodology/12-downscoping.md` for the full evaluation protocol.
+See `methodology/09-downscoping.md` for the full evaluation protocol.
 
 ---
 

@@ -25,7 +25,7 @@ assessment for Phase 3.
 - Phase requirements: `methodology/03-phases.md` (for gate protocol)
 - Artifacts: `methodology/05-artifacts.md`
 - Plotting: `methodology/appendix-plotting.md`
-- Coding: `methodology/11-coding.md`
+- Coding: `methodology/08-coding.md`
 
 ---
 

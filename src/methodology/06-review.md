@@ -358,7 +358,7 @@ iterate at Phase 5 than to publish an incomplete result.
 ### 6.4.5 Single-Session Review via Subagents
 
 When the analysis runs in a single session, reviews are implemented by
-spawning dedicated reviewer subagents (see §3a (`03a-orchestration.md`) for the full
+spawning dedicated reviewer subagents (see §3a (`04-orchestration.md`) for the full
 orchestrator protocol). The reviewer subagent reads the phase artifact from
 disk and applies the review criteria.
 

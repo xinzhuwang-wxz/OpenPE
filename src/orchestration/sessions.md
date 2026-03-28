@@ -1,6 +1,6 @@
 # Orchestration Guide
 
-> See `../methodology/03a-orchestration.md` for the architectural rationale.
+> See `../methodology/04-orchestration.md` for the architectural rationale.
 > See `agents.md` for the agent prompt templates that populate this layout.
 
 How to execute the methodology specification using Claude Code or any

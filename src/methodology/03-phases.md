@@ -38,7 +38,7 @@ If context limits are approaching, the agent should write the artifact for
 the current phase, commit, and stop — not rush through remaining phases
 without artifacts.
 
-**Orchestrator architecture.** See §3a (`03a-orchestration.md`) for the
+**Orchestrator architecture.** See §3a (`04-orchestration.md`) for the
 orchestrator loop, subagent delegation, context management, and health
 monitoring. Phase-specific agent instructions are provided by the CLAUDE.md
 templates in each phase directory (sourced from `templates/`) — these are
