@@ -120,9 +120,11 @@ def scaffold(analysis_dir: Path, analysis_type: str):
                 claude_path.write_text(f"# {phase_name}\n\n> Template not yet created.\n")
                 print(f"  wrote {claude_path} (placeholder)")
 
-    # Copy data acquisition helper scripts into Phase 0
+    # Copy shared runtime scripts to analysis root scripts/ directory.
+    # All phases reference these via `pixi run py scripts/<name>.py`.
     scripts_src = TEMPLATES / "scripts"
-    scripts_dst = analysis_dir / "phase0_discovery" / "scripts"
+    scripts_dst = analysis_dir / "scripts"
+    scripts_dst.mkdir(exist_ok=True)
     if scripts_src.exists():
         for script in scripts_src.glob("*.py"):
             dst = scripts_dst / script.name
