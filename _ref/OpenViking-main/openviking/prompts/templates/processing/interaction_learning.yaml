@@ -1,0 +1,56 @@
+metadata:
+  id: "processing.interaction_learning"
+  name: "Interaction Record Learning"
+  description: "Extract reusable experience from interaction records"
+  version: "1.0.0"
+  language: "en"
+  category: "processing"
+
+variables:
+  - name: "interactions_summary"
+    type: "string"
+    description: "Interaction summary"
+    required: true
+
+  - name: "effective_resources"
+    type: "string"
+    description: "Effective resource usage (contribution >= 0.3)"
+    required: true
+
+  - name: "successful_skills"
+    type: "string"
+    description: "Successful skill invocations"
+    required: true
+
+template: |
+  Please analyze the following interaction records and extract reusable experience:
+
+  Interaction Summary:
+  {{ interactions_summary }}
+
+  Effective Resource Usage (contribution >= 0.3):
+  {{ effective_resources }}
+
+  Successful Skill Invocations:
+  {{ successful_skills }}
+
+  Please extract the following types of experience:
+  1. Resource usage insights: Which resources work well in which scenarios
+  2. Skill combination patterns: Which skill combinations work well together
+  3. User preferences: User's implicit preferences
+
+  Output in JSON format:
+  {
+      "resource_insights": [
+          {"resource_uri": "URI", "scenario": "Applicable scenario", "effectiveness": "Effectiveness description"}
+      ],
+      "skill_patterns": [
+          {"skills": ["URI1", "URI2"], "scenario": "Applicable scenario", "strategy": "Usage strategy"}
+      ],
+      "user_preferences": [
+          {"preference": "Preference description", "evidence": "Evidence"}
+      ]
+  }
+
+llm_config:
+  temperature: 0.0

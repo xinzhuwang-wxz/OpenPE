@@ -1,0 +1,42 @@
+name: Pyright Type Check
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  pyright:
+    runs-on: depot-ubuntu-22.04
+    environment: development
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+      - name: Install dependencies
+        run: uv sync --all-extras
+      - name: Run Pyright for graphiti-core
+        shell: bash
+        run: |
+          uv run pyright ./graphiti_core
+      - name: Install graph-service dependencies
+        shell: bash
+        run: |
+          cd server
+          uv sync --all-extras
+      - name: Run Pyright for graph-service
+        shell: bash
+        run: |
+          cd server
+          uv run pyright .

@@ -1,0 +1,30 @@
+name: 02. Main Branch Checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'LICENSE'
+      - 'CONTRIBUTING.md'
+      - '**.png'
+      - '**.jpg'
+      - '**.jpeg'
+      - '**.gif'
+      - '**.svg'
+      - '.gitignore'
+      - '.editorconfig'
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  test-full:
+    uses: ./.github/workflows/_test_full.yml
+
+  security-scan:
+    uses: ./.github/workflows/_codeql.yml

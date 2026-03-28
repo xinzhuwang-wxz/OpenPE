@@ -1,0 +1,448 @@
+# Copyright (c) 2026 Beijing Volcano Engine Technology Co., Ltd.
+# SPDX-License-Identifier: Apache-2.0
+import json
+import os
+from pathlib import Path
+from threading import Lock
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, Field, ValidationError
+
+from openviking_cli.session.user_id import UserIdentifier
+
+from .config_loader import resolve_config_path
+from .config_utils import format_validation_error, raise_unknown_config_fields
+from .consts import (
+    DEFAULT_CONFIG_DIR,
+    DEFAULT_OV_CONF,
+    OPENVIKING_CONFIG_ENV,
+    SYSTEM_CONFIG_DIR,
+)
+from .embedding_config import EmbeddingConfig
+from .encryption_config import EncryptionConfig
+from .log_config import LogConfig
+from .memory_config import MemoryConfig
+from .parser_config import (
+    AudioConfig,
+    CodeConfig,
+    DirectoryConfig,
+    FeishuConfig,
+    HTMLConfig,
+    ImageConfig,
+    MarkdownConfig,
+    PDFConfig,
+    SemanticConfig,
+    TextConfig,
+    VideoConfig,
+)
+from .rerank_config import RerankConfig
+from .storage_config import StorageConfig
+from .vlm_config import VLMConfig
+
+
+class OpenVikingConfig(BaseModel):
+    """Main configuration for OpenViking."""
+
+    default_account: Optional[str] = Field(
+        default="default", description="Default account identifier"
+    )
+    default_user: Optional[str] = Field(default="default", description="Default user identifier")
+    default_agent: Optional[str] = Field(default="default", description="Default agent identifier")
+
+    storage: StorageConfig = Field(
+        default_factory=lambda: StorageConfig(), description="Storage configuration"
+    )
+
+    embedding: EmbeddingConfig = Field(
+        default_factory=lambda: EmbeddingConfig(), description="Embedding configuration"
+    )
+
+    vlm: VLMConfig = Field(default_factory=lambda: VLMConfig(), description="VLM configuration")
+
+    rerank: RerankConfig = Field(
+        default_factory=lambda: RerankConfig(), description="Rerank configuration"
+    )
+
+    # Encryption configuration
+    encryption: EncryptionConfig = Field(
+        default_factory=lambda: EncryptionConfig(), description="Encryption configuration"
+    )
+
+    # Parser configurations
+    pdf: PDFConfig = Field(
+        default_factory=lambda: PDFConfig(), description="PDF parsing configuration"
+    )
+
+    code: CodeConfig = Field(
+        default_factory=lambda: CodeConfig(), description="Code parsing configuration"
+    )
+
+    image: ImageConfig = Field(
+        default_factory=lambda: ImageConfig(), description="Image parsing configuration"
+    )
+
+    audio: AudioConfig = Field(
+        default_factory=lambda: AudioConfig(), description="Audio parsing configuration"
+    )
+
+    video: VideoConfig = Field(
+        default_factory=lambda: VideoConfig(), description="Video parsing configuration"
+    )
+
+    markdown: MarkdownConfig = Field(
+        default_factory=lambda: MarkdownConfig(), description="Markdown parsing configuration"
+    )
+
+    html: HTMLConfig = Field(
+        default_factory=lambda: HTMLConfig(), description="HTML parsing configuration"
+    )
+
+    text: TextConfig = Field(
+        default_factory=lambda: TextConfig(), description="Text parsing configuration"
+    )
+
+    directory: DirectoryConfig = Field(
+        default_factory=lambda: DirectoryConfig(), description="Directory parsing configuration"
+    )
+
+    feishu: FeishuConfig = Field(
+        default_factory=lambda: FeishuConfig(),
+        description="Feishu/Lark document parsing configuration",
+    )
+
+    semantic: SemanticConfig = Field(
+        default_factory=lambda: SemanticConfig(),
+        description="Semantic processing configuration (overview/abstract limits)",
+    )
+
+    auto_generate_l0: bool = Field(
+        default=True, description="Automatically generate L0 (abstract) if not provided"
+    )
+
+    auto_generate_l1: bool = Field(
+        default=True, description="Automatically generate L1 (overview) if not provided"
+    )
+
+    default_search_mode: str = Field(
+        default="thinking",
+        description="Default search mode: 'fast' (vector only) or 'thinking' (vector + LLM rerank)",
+    )
+
+    default_search_limit: int = Field(default=3, description="Default number of results to return")
+
+    enable_memory_decay: bool = Field(default=True, description="Enable automatic memory decay")
+
+    memory_decay_check_interval: int = Field(
+        default=3600, description="Interval (seconds) to check for expired memories"
+    )
+
+    language_fallback: str = Field(
+        default="en",
+        description=(
+            "Fallback language used by memory extraction when dominant user language "
+            "cannot be confidently detected"
+        ),
+    )
+
+    log: LogConfig = Field(default_factory=lambda: LogConfig(), description="Logging configuration")
+
+    memory: MemoryConfig = Field(
+        default_factory=lambda: MemoryConfig(), description="Memory configuration"
+    )
+
+    model_config = {"arbitrary_types_allowed": True, "extra": "forbid"}
+
+    @classmethod
+    def from_dict(cls, config: Dict[str, Any]) -> "OpenVikingConfig":
+        """Create configuration from dictionary."""
+        try:
+            # Make a copy to avoid modifying the original
+            config_copy = config.copy()
+
+            parser_types = [
+                "pdf",
+                "code",
+                "image",
+                "audio",
+                "video",
+                "markdown",
+                "html",
+                "text",
+                "directory",
+                "feishu",
+            ]
+            raise_unknown_config_fields(
+                data=config_copy,
+                valid_fields=set(cls.model_fields.keys()) | {"server", "bot", "parsers"},
+                context_name="OpenVikingConfig",
+            )
+
+            # Remove sections managed by other loaders (e.g. server config)
+            config_copy.pop("server", None)
+            config_copy.pop("bot", None)
+
+            # Handle parser configurations from nested "parsers" section
+            parser_configs = {}
+            if "parsers" in config_copy:
+                parser_configs = config_copy.pop("parsers")
+                if parser_configs is None:
+                    parser_configs = {}
+                if not isinstance(parser_configs, dict):
+                    raise ValueError("Invalid parsers config: 'parsers' section must be an object")
+            raise_unknown_config_fields(
+                data=parser_configs,
+                valid_fields=set(parser_types),
+                context_name="parsers",
+            )
+            for parser_type in parser_types:
+                if parser_type in config_copy:
+                    parser_configs[parser_type] = config_copy.pop(parser_type)
+
+            # Handle log configuration from nested "log" section
+            log_config_data = None
+            if "log" in config_copy:
+                log_config_data = config_copy.pop("log")
+
+            # Handle memory configuration from nested "memory" section
+            memory_config_data = None
+            if "memory" in config_copy:
+                memory_config_data = config_copy.pop("memory")
+
+            instance = cls(**config_copy)
+
+            # Apply log configuration
+            if log_config_data is not None:
+                instance.log = LogConfig.from_dict(log_config_data)
+
+            # Apply memory configuration
+            if memory_config_data is not None:
+                instance.memory = MemoryConfig.from_dict(memory_config_data)
+
+            # Apply parser configurations
+            for parser_type, parser_data in parser_configs.items():
+                if hasattr(instance, parser_type):
+                    config_class = getattr(instance, parser_type).__class__
+                    setattr(instance, parser_type, config_class.from_dict(parser_data))
+
+            # Check dimension consistency
+            if (
+                getattr(instance, "storage", None)
+                and getattr(instance.storage, "vectordb", None)
+                and getattr(instance, "embedding", None)
+            ):
+                db_dim = instance.storage.vectordb.dimension
+                emb_dim = instance.embedding.dimension
+                if db_dim > 0 and emb_dim > 0 and db_dim != emb_dim:
+                    import logging
+
+                    logging.warning(
+                        f"Dimension mismatch: VectorDB dimension is {db_dim}, "
+                        f"but Embedding dimension is {emb_dim}. "
+                        "This may cause errors during vector search."
+                    )
+            return instance
+        except ValidationError as e:
+            raise ValueError(format_validation_error(root_model=cls, error=e)) from e
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert configuration to dictionary."""
+        return self.model_dump()
+
+
+class OpenVikingConfigSingleton:
+    """Global singleton for OpenVikingConfig.
+
+    Resolution chain for ov.conf:
+      1. Explicit path passed to initialize()
+      2. OPENVIKING_CONFIG_FILE environment variable
+      3. ~/.openviking/ov.conf
+      4. /etc/openviking/ov.conf
+      5. Error with clear guidance
+    """
+
+    _instance: Optional[OpenVikingConfig] = None
+    _lock: Lock = Lock()
+
+    @classmethod
+    def get_instance(cls) -> OpenVikingConfig:
+        """Get the global singleton instance.
+
+        Raises FileNotFoundError if no config file is found.
+        """
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    config_path = resolve_config_path(None, OPENVIKING_CONFIG_ENV, DEFAULT_OV_CONF)
+                    if config_path is not None:
+                        cls._instance = cls._load_from_file(str(config_path))
+                    else:
+                        default_path_user = DEFAULT_CONFIG_DIR / DEFAULT_OV_CONF
+                        default_path_system = SYSTEM_CONFIG_DIR / DEFAULT_OV_CONF
+                        raise FileNotFoundError(
+                            f"OpenViking configuration file not found.\n"
+                            f"Please create {default_path_user} or {default_path_system}, or set {OPENVIKING_CONFIG_ENV}.\n"
+                            f"See: https://openviking.dev/docs/guides/configuration"
+                        )
+        return cls._instance
+
+    @classmethod
+    def initialize(
+        cls,
+        config_dict: Optional[Dict[str, Any]] = None,
+        config_path: Optional[str] = None,
+    ) -> OpenVikingConfig:
+        """Initialize the global singleton.
+
+        Args:
+            config_dict: Direct config dictionary (highest priority).
+            config_path: Explicit path to ov.conf file.
+        """
+        with cls._lock:
+            if config_dict is not None:
+                cls._instance = OpenVikingConfig.from_dict(config_dict)
+            else:
+                path = resolve_config_path(config_path, OPENVIKING_CONFIG_ENV, DEFAULT_OV_CONF)
+                if path is not None:
+                    cls._instance = cls._load_from_file(str(path))
+                else:
+                    default_path_user = DEFAULT_CONFIG_DIR / DEFAULT_OV_CONF
+                    default_path_system = SYSTEM_CONFIG_DIR / DEFAULT_OV_CONF
+                    raise FileNotFoundError(
+                        f"OpenViking configuration file not found.\n"
+                        f"Please create {default_path_user} or {default_path_system}, or set {OPENVIKING_CONFIG_ENV}.\n"
+                        f"See: https://openviking.dev/docs/guides/configuration"
+                    )
+        return cls._instance
+
+    @classmethod
+    def _load_from_file(cls, config_file: str) -> "OpenVikingConfig":
+        """Load configuration from JSON config file."""
+        try:
+            config_path = Path(config_file)
+            if not config_path.exists():
+                raise FileNotFoundError(f"Config file does not exist: {config_file}")
+
+            with open(config_path, "r", encoding="utf-8") as f:
+                raw = f.read()
+
+            # Expand $VAR and ${VAR} inside the JSON text (useful for container deployments).
+            # Unset variables are left unchanged by expandvars().
+            raw = os.path.expandvars(raw)
+            config_data = json.loads(raw)
+
+            return OpenVikingConfig.from_dict(config_data)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Config file JSON format error: {e}")
+        except ValueError:
+            raise
+        except Exception as e:
+            raise RuntimeError(f"Failed to load config file: {e}")
+
+    @classmethod
+    def reset_instance(cls) -> None:
+        """Reset the singleton instance (mainly for testing)."""
+        with cls._lock:
+            cls._instance = None
+
+
+# Global convenience function
+def get_openviking_config() -> OpenVikingConfig:
+    """Get the global OpenVikingConfig instance."""
+    return OpenVikingConfigSingleton.get_instance()
+
+
+def set_openviking_config(config: OpenVikingConfig) -> None:
+    """Set the global OpenVikingConfig instance."""
+    OpenVikingConfigSingleton.initialize(config_dict=config.to_dict())
+
+
+def is_valid_openviking_config(config: OpenVikingConfig) -> bool:
+    """
+    Check if OpenVikingConfig is valid.
+
+    Note: Most validation is now handled by Pydantic validators in individual config classes.
+    This function only validates cross-config consistency.
+
+    Raises:
+        ValueError: If configuration is invalid with detailed error messages
+
+    Returns:
+        bool: True if configuration is valid
+    """
+    errors = []
+
+    # Validate account identifier
+    if not config.default_account or not config.default_account.strip():
+        errors.append("Default account identifier cannot be empty")
+
+    # Validate service mode vs embedded mode consistency
+    is_service_mode = config.storage.vectordb.backend == "http"
+    is_agfs_local = config.storage.agfs.backend == "local"
+
+    if is_service_mode and is_agfs_local and not config.storage.agfs.url:
+        errors.append(
+            "Service mode (VectorDB backend='http') with local AGFS backend requires 'agfs.url' to be set. "
+            "Consider using AGFS backend='s3' or provide remote AGFS URL."
+        )
+
+    if errors:
+        error_message = "Invalid OpenViking configuration:\n" + "\n".join(
+            f"  - {e}" for e in errors
+        )
+        raise ValueError(error_message)
+
+    return True
+
+
+def initialize_openviking_config(
+    user: Optional[UserIdentifier] = None,
+    path: Optional[str] = None,
+) -> OpenVikingConfig:
+    """
+    Initialize OpenViking configuration with provided parameters.
+
+    Loads ov.conf from the standard resolution chain, then applies
+    parameter overrides.
+
+    Args:
+        user: UserIdentifier for session management
+        path: Local storage path (workspace) for embedded mode
+
+    Returns:
+        Configured OpenVikingConfig instance
+
+    Raises:
+        ValueError: If the resulting configuration is invalid
+        FileNotFoundError: If no config file is found
+    """
+    config = get_openviking_config()
+
+    if user:
+        # Set user if provided, like a email address or a account_id
+        config.default_account = user._account_id
+        config.default_user = user._user_id
+        config.default_agent = user._agent_id
+
+    # Configure storage based on provided parameters
+    if path:
+        # Embedded mode: local storage
+        config.storage.agfs.backend = config.storage.agfs.backend or "local"
+        config.storage.vectordb.backend = config.storage.vectordb.backend or "local"
+        # Resolve and update workspace + dependent paths (model_validator won't
+        # re-run on attribute assignment, so sync agfs.path / vectordb.path here).
+        workspace_path = Path(path).expanduser().resolve()
+        workspace_path.mkdir(parents=True, exist_ok=True)
+        resolved = str(workspace_path)
+        config.storage.workspace = resolved
+        config.storage.agfs.path = resolved
+        config.storage.vectordb.path = resolved
+
+    # Ensure vector dimension is synced if not set in storage
+    if config.storage.vectordb.dimension == 0:
+        config.storage.vectordb.dimension = config.embedding.dimension
+
+    # Validate configuration
+    if not is_valid_openviking_config(config):
+        raise ValueError("Invalid OpenViking configuration")
+
+    return config

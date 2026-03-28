@@ -1,0 +1,50 @@
+metadata:
+  id: "vision.page_understanding_batch"
+  name: "Batch Page Understanding"
+  description: "Batch understand multiple document pages (for scanned PDFs)"
+  version: "1.0.0"
+  language: "en"
+  category: "vision"
+
+variables:
+  - name: "page_count"
+    type: "int"
+    description: "Number of pages"
+    required: true
+
+  - name: "instruction"
+    type: "string"
+    description: "Processing instruction"
+    default: "Understand document content"
+    required: false
+
+template: |
+  Please analyze the following {{ page_count }} document pages and generate understanding information for each page.
+
+  Processing Instruction: {{ instruction }}
+
+  Please output in JSON format:
+  {
+      "pages": [
+          {
+              "index": 0,
+              "semantic_name": "Page semantic name (for URI, English or Chinese, 2-6 words, e.g., 'viking_architecture' or 'system_architecture')",
+              "abstract": "Brief page description (no more than 50 words)",
+              "overview": "Detailed page content (no more than 300 words)",
+              "detail_text": "Complete page text content (OCR recognition)",
+              "has_title": true,
+              "title": "Page title (extract if there's an obvious title, otherwise empty)"
+          }
+      ]
+  }
+
+  Notes:
+  1. index starts from 0, corresponding to image order
+  2. semantic_name must be filled in, used for generating URI paths, should be concise and meaningful, can be a simplified version of the page title or content theme
+  3. If the page has an obvious title (such as slide title), set has_title=true and extract title
+  4. detail_text should include the complete text content of the page
+  5. abstract should concisely summarize the core content of the page
+
+llm_config:
+  temperature: 0.0
+  supports_vision: true

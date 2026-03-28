@@ -1,0 +1,223 @@
+# Copyright (c) 2026 Beijing Volcano Engine Technology Co., Ltd.
+# SPDX-License-Identifier: Apache-2.0
+
+"""Shared fixtures for OpenViking server tests."""
+
+import shutil
+import socket
+import threading
+import time
+from pathlib import Path
+from types import SimpleNamespace
+
+import httpx
+import pytest
+import pytest_asyncio
+import uvicorn
+
+from openviking import AsyncOpenViking
+from openviking.models.embedder.base import DenseEmbedderBase, EmbedResult
+from openviking.server.app import create_app
+from openviking.server.config import ServerConfig
+from openviking.server.identity import RequestContext, Role
+from openviking.service.core import OpenVikingService
+from openviking.storage.transaction import reset_lock_manager
+from openviking_cli.session.user_id import UserIdentifier
+from openviking_cli.utils.config.embedding_config import EmbeddingConfig
+from openviking_cli.utils.config.vlm_config import VLMConfig
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+TEST_TMP_DIR = PROJECT_ROOT / "test_data" / "tmp_server"
+
+# ---------------------------------------------------------------------------
+# Sample data
+# ---------------------------------------------------------------------------
+
+SAMPLE_MD_CONTENT = """\
+# Sample Document
+
+## Introduction
+This is a sample markdown document for server testing.
+
+## Features
+- Feature 1: Resource management
+- Feature 2: Semantic search
+"""
+
+
+def _install_fake_embedder(monkeypatch):
+    """Use an in-process fake embedder so server tests never hit external APIs."""
+    dimension = 2048
+
+    class FakeEmbedder(DenseEmbedderBase):
+        def __init__(self):
+            super().__init__(model_name="test-fake-embedder")
+
+        def embed(self, text: str, is_query: bool = False) -> EmbedResult:
+            return EmbedResult(dense_vector=[0.1] * dimension)
+
+        def embed_batch(self, texts: list[str], is_query: bool = False) -> list[EmbedResult]:
+            return [self.embed(text, is_query=is_query) for text in texts]
+
+        def get_dimension(self) -> int:
+            return dimension
+
+    monkeypatch.setattr(EmbeddingConfig, "get_embedder", lambda self: FakeEmbedder())
+    return FakeEmbedder
+
+
+def _install_fake_vlm(monkeypatch):
+    """Use a fake VLM so server tests never hit external LLM APIs."""
+
+    async def _fake_get_completion(self, prompt, thinking=False, max_retries=0):
+        return "# Test Summary\n\nFake summary for testing.\n\n## Details\nTest content."
+
+    async def _fake_get_vision_completion(self, prompt, images, thinking=False):
+        return "Fake image description for testing."
+
+    monkeypatch.setattr(VLMConfig, "is_available", lambda self: True)
+    monkeypatch.setattr(VLMConfig, "get_completion_async", _fake_get_completion)
+    monkeypatch.setattr(VLMConfig, "get_vision_completion_async", _fake_get_vision_completion)
+
+
+# ---------------------------------------------------------------------------
+# Core fixtures: service + app + async client (HTTP API tests, in-process)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="function")
+def temp_dir():
+    """Create a unique temp directory per test, auto-cleanup."""
+    import uuid
+
+    unique_dir = TEST_TMP_DIR / uuid.uuid4().hex[:8]
+    unique_dir.mkdir(parents=True, exist_ok=True)
+    yield unique_dir
+    shutil.rmtree(unique_dir, ignore_errors=True)
+
+
+@pytest.fixture(scope="function")
+def sample_markdown_file(temp_dir: Path) -> Path:
+    """Create a sample markdown file for resource tests."""
+    f = temp_dir / "sample.md"
+    f.write_text(SAMPLE_MD_CONTENT)
+    return f
+
+
+@pytest.fixture(scope="function")
+def upload_temp_dir(temp_dir: Path, monkeypatch) -> Path:
+    """Use the per-test temp directory as the HTTP upload temp dir."""
+    config = SimpleNamespace(
+        storage=SimpleNamespace(get_upload_temp_dir=lambda: temp_dir),
+    )
+    monkeypatch.setattr(
+        "openviking.server.routers.resources.get_openviking_config",
+        lambda: config,
+    )
+    monkeypatch.setattr(
+        "openviking.server.routers.pack.get_openviking_config",
+        lambda: config,
+    )
+    return temp_dir
+
+
+@pytest_asyncio.fixture(scope="function")
+async def service(temp_dir: Path, monkeypatch):
+    """Create and initialize an OpenVikingService in embedded mode."""
+    reset_lock_manager()
+    fake_embedder_cls = _install_fake_embedder(monkeypatch)
+    _install_fake_vlm(monkeypatch)
+    svc = OpenVikingService(
+        path=str(temp_dir / "data"), user=UserIdentifier.the_default_user("test_user")
+    )
+    await svc.initialize()
+    svc.viking_fs.query_embedder = fake_embedder_cls()
+    yield svc
+    await svc.close()
+    reset_lock_manager()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def app(service: OpenVikingService):
+    """Create FastAPI app with pre-initialized service (no auth)."""
+    from openviking.server.dependencies import set_service
+
+    config = ServerConfig()
+    fastapi_app = create_app(config=config, service=service)
+    # ASGITransport doesn't trigger lifespan, so wire up the service manually
+    set_service(service)
+    return fastapi_app
+
+
+@pytest_asyncio.fixture(scope="function")
+async def client(app):
+    """httpx AsyncClient bound to the ASGI app (no real network)."""
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as c:
+        yield c
+
+
+@pytest_asyncio.fixture(scope="function")
+async def client_with_resource(client, service, sample_markdown_file):
+    """Client + a resource already added and processed."""
+    ctx = RequestContext(user=UserIdentifier.the_default_user(), role=Role.ROOT)
+    result = await service.resources.add_resource(
+        path=str(sample_markdown_file),
+        ctx=ctx,
+        reason="test resource",
+        wait=True,
+    )
+    yield client, result.get("root_uri", "")
+
+
+# ---------------------------------------------------------------------------
+# SDK fixtures: real uvicorn server + AsyncHTTPClient (end-to-end tests)
+# ---------------------------------------------------------------------------
+
+
+@pytest_asyncio.fixture(scope="function")
+async def running_server(temp_dir: Path, monkeypatch):
+    """Start a real uvicorn server in a background thread."""
+    await AsyncOpenViking.reset()
+    reset_lock_manager()
+    fake_embedder_cls = _install_fake_embedder(monkeypatch)
+    _install_fake_vlm(monkeypatch)
+
+    svc = OpenVikingService(
+        path=str(temp_dir / "sdk_data"), user=UserIdentifier.the_default_user("sdk_test_user")
+    )
+    await svc.initialize()
+    svc.viking_fs.query_embedder = fake_embedder_cls()
+
+    config = ServerConfig()
+    fastapi_app = create_app(config=config, service=svc)
+
+    # Find a free port
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]
+
+    uvi_config = uvicorn.Config(fastapi_app, host="127.0.0.1", port=port, log_level="warning")
+    server = uvicorn.Server(uvi_config)
+    thread = threading.Thread(target=server.run, daemon=True)
+    thread.start()
+
+    # Wait for server ready
+    for _ in range(50):
+        try:
+            r = httpx.get(f"http://127.0.0.1:{port}/health", timeout=1)
+            if r.status_code == 200:
+                break
+        except Exception:
+            time.sleep(0.1)
+
+    yield port, svc
+
+    server.should_exit = True
+    thread.join(timeout=5)
+    await svc.close()
+    await AsyncOpenViking.reset()

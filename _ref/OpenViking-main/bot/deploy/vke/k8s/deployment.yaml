@@ -1,0 +1,104 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vikingbot-data
+spec:
+  accessModes:
+    - __ACCESS_MODES__
+  __STORAGE_CLASS_CONFIG__
+  __VOLUME_NAME_CONFIG__
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vikingbot
+  labels:
+    app: vikingbot
+spec:
+  replicas: __REPLICAS__
+  selector:
+    matchLabels:
+      app: vikingbot
+  template:
+    metadata:
+      labels:
+        app: vikingbot
+    spec:
+      initContainers:
+      - name: init-dirs
+        image: __IMAGE_NAME__
+        command: ["sh", "-c"]
+        args:
+        - |
+          mkdir -p /root/.vikingbot/workspace
+          mkdir -p /root/.vikingbot/sandboxes
+          mkdir -p /root/.vikingbot/bridge
+          echo 'Initialized vikingbot directories'
+        volumeMounts:
+        - name: vikingbot-data
+          mountPath: /root/.vikingbot
+      containers:
+      - name: vikingbot
+        image: __IMAGE_NAME__
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 18791
+        volumeMounts:
+        - name: vikingbot-data
+          mountPath: /root/.vikingbot
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        securityContext:
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - SYS_CHROOT
+            - NET_ADMIN
+          privileged: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 18791
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 18791
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        env:
+        - name: OPENVIKING_CONFIG_FILE
+          value: /root/.vikingbot/ov.conf
+        command: ["vikingbot"]
+        args: ["gateway"]
+      volumes:
+      - name: vikingbot-data
+        persistentVolumeClaim:
+          claimName: vikingbot-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vikingbot
+spec:
+  type: ClusterIP
+  selector:
+    app: vikingbot
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 18791

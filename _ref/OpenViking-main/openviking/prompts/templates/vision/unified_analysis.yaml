@@ -1,0 +1,118 @@
+metadata:
+  id: "vision.unified_analysis"
+  name: "Unified Document Analysis"
+  description: "Batch analyze document content including images, tables, and chapters"
+  version: "1.0.0"
+  language: "en"
+  category: "vision"
+
+variables:
+  - name: "title"
+    type: "string"
+    description: "Document title"
+    required: true
+
+  - name: "instruction"
+    type: "string"
+    description: "Processing instruction"
+    required: true
+
+  - name: "reason"
+    type: "string"
+    description: "Reason for addition"
+    required: true
+
+  - name: "content_preview"
+    type: "string"
+    description: "Document content preview"
+    required: true
+
+  - name: "image_count"
+    type: "int"
+    description: "Number of images"
+    required: true
+
+  - name: "images_section"
+    type: "string"
+    description: "Image list information"
+    required: true
+
+  - name: "table_count"
+    type: "int"
+    description: "Number of tables"
+    required: true
+
+  - name: "tables_section"
+    type: "string"
+    description: "Table list information"
+    required: true
+
+  - name: "section_count"
+    type: "int"
+    description: "Number of sections"
+    required: true
+
+  - name: "sections_list"
+    type: "string"
+    description: "Section list"
+    required: true
+
+template: |
+  Please analyze the following document content and complete multiple tasks.
+
+  ## Document Information
+  Title: {{ title }}
+  Processing Instruction: {{ instruction }}
+  Reason for Addition: {{ reason }}
+
+  ## Document Content Preview
+  {{ content_preview }}
+
+  ## Images to Analyze (Total {{ image_count }})
+  {{ images_section }}
+
+  ## Tables to Analyze (Total {{ table_count }}, only those without extractable structured data)
+  {{ tables_section }}
+
+  ## Section List (Total {{ section_count }})
+  {{ sections_list }}
+
+  Please output in JSON format:
+  {
+      "document": {
+          "abstract": "Concise document summary (no more than 100 words)",
+          "overview": "Document overview + metadata description (no more than 500 words)",
+          "meta_extracted": {
+              "author": "Extracted author (if any)",
+              "created_date": "Extracted creation date (if any)",
+              "keywords": ["keyword1", "keyword2"]
+          }
+      },
+      "images": [
+          {
+              "index": 0,
+              "abstract": "Brief image description",
+              "overview": "Detailed image understanding",
+              "detail_text": "Text description that can replace the image"
+          }
+      ],
+      "tables": [
+          {
+              "index": 0,
+              "abstract": "Table topic",
+              "overview": "Table content summary",
+              "detail_text": "Textual description of the table"
+          }
+      ],
+      "sections": [
+          {
+              "index": 0,
+              "abstract": "Section summary",
+              "overview": "Section usage scenario"
+          }
+      ]
+  }
+
+llm_config:
+  temperature: 0.0
+  supports_vision: true

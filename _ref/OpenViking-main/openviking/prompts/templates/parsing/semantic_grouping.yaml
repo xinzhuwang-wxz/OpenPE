@@ -1,0 +1,37 @@
+metadata:
+  id: "parsing.semantic_grouping"
+  name: "Semantic Grouping"
+  description: "Decide how to group or split content based on semantic meaning"
+  version: "1.0.0"
+  language: "en"
+  category: "parsing"
+
+variables:
+  - name: "items"
+    type: "string"
+    description: "List of content items"
+    required: true
+
+  - name: "threshold"
+    type: "integer"
+    description: "Recommended group size (character count)"
+    required: true
+
+  - name: "mode"
+    type: "string"
+    description: "Mode: sections (chapter grouping) or paragraphs (paragraph splitting)"
+    default: "sections"
+
+template: |
+  You are a document structure analyzer. Group semantically related content together.
+
+  Content List:
+  {{ items }}
+
+  Grouping Requirements:
+  - Each group's total character count should be approximately {{ threshold }}, can exceed appropriately to maintain semantic integrity
+  - Semantically related content should be in the same group
+  - Single oversized items can form their own group
+
+  Output as JSON array, each element is a list of indices for the group:
+  [[0,1,2],[3],[4,5]]

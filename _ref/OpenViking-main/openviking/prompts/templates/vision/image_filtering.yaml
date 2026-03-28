@@ -1,0 +1,39 @@
+metadata:
+  id: "vision.image_filtering"
+  name: "Image Filtering"
+  description: "Determine whether an image is meaningful for understanding document content"
+  version: "1.0.0"
+  language: "en"
+  category: "vision"
+
+variables:
+  - name: "document_title"
+    type: "string"
+    description: "Document topic"
+    required: true
+
+  - name: "context"
+    type: "string"
+    description: "Text surrounding the image"
+    required: true
+
+template: |
+  Please determine whether this image is meaningful for understanding the document content.
+
+  Document Topic: {{ document_title }}
+  Text Surrounding Image: {{ context }}
+
+  Judgment Criteria:
+  - Decorative images (return false): Logos, icons, watermarks, border decorations, dividers, advertisements, solid color blocks, header/footer decorations
+  - Meaningful images (return true): Charts, flowcharts, diagrams, data visualizations, product screenshots, illustrative images, images related to document content
+
+  Please output in JSON format:
+  {
+      "is_meaningful": true,
+      "reason": "Brief explanation of judgment (no more than 50 words)",
+      "image_type": "chart/diagram/screenshot/decorative/other"
+  }
+
+llm_config:
+  temperature: 0.0
+  supports_vision: true

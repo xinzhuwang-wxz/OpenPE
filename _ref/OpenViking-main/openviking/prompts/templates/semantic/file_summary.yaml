@@ -1,0 +1,36 @@
+metadata:
+  id: "semantic.file_summary"
+  name: "File Summary Generation"
+  description: "Generate summary for a single file in a directory, used for subsequent generation of directory abstract and overview"
+  version: "1.0.0"
+  language: "en"
+  category: "semantic"
+
+variables:
+  - name: "file_name"
+    type: "string"
+    description: "File name"
+    required: true
+
+  - name: "content"
+    type: "string"
+    description: "File content"
+    required: true
+
+template: |
+  Please generate a summary for the following file:
+
+  【File Name】
+  {{ file_name }}
+
+  【File Content】
+  {{ content }}
+
+  Output requirements:
+  - Length: 50-150 words
+  - Explain what this file is, what it covers, and what it's used for
+  - Include core keywords for understanding
+  - Output plain text directly, no markdown format
+
+llm_config:
+  temperature: 0.0

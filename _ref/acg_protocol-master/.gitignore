@@ -1,0 +1,12 @@
+
+venv/
+
+src/\.env
+
+archive/
+
+__pycache__/
+
+\.vscode/
+
+*.log

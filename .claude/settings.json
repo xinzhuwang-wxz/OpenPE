@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "deny": ["Read(**/.env)"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Write|Edit|Glob|Grep",
+        "hooks": [{"type": "command", "command": ".claude/hooks/isolate.sh"}]
+      }
+    ]
+  }
+}

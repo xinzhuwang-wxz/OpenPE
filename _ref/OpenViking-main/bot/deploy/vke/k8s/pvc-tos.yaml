@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: vikingbot-tos-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: fsx.csi.volcengine.com
+    volumeHandle: vikingbot-tos-pv
+    volumeAttributes:
+      bucket: caas-snapshot
+      region: cn-beijing
+      path: /
+      subpath: /
+      type: TOS
+      server: tos-cn-beijing.ivolces.com
+      secretName: secret-tos-aksk
+      secretNamespace: default
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vikingbot-data
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: ""
+  volumeName: vikingbot-tos-pv

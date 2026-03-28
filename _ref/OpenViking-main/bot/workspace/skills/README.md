@@ -1,0 +1,25 @@
+# vikingbot Skills
+
+This directory contains built-in skills that extend vikingbot's capabilities.
+
+## Skill Format
+
+Each skill is a directory containing a `SKILL.md` file with:
+- YAML frontmatter (name, description, metadata)
+- Markdown instructions for the agent
+
+## Attribution
+
+These skills are adapted from [OpenClaw](https://github.com/openclaw/openclaw)'s skill system.
+The skill format and metadata structure follow OpenClaw's conventions to maintain compatibility.
+
+## Available Skills
+
+| Skill | Description |
+|-------|-------------|
+| `github` | Interact with GitHub using the `gh` CLI |
+| `github-proxy` | GitHub 国内访问加速，使用 githubproxy.cc 代理加速 GitHub 仓库克隆、文件下载等操作 |
+| `weather` | Get weather info using wttr.in and Open-Meteo |
+| `summarize` | Summarize URLs, files, and YouTube videos |
+| `tmux` | Remote-control tmux sessions |
+| `skill-creator` | Create new skills |

@@ -1,0 +1,36 @@
+metadata:
+  id: "indexing.relevance_scoring"
+  name: "Relevance Scoring"
+  description: "Evaluate the relevance of candidate content to user query"
+  version: "1.0.0"
+  language: "en"
+  category: "indexing"
+
+variables:
+  - name: "query"
+    type: "string"
+    description: "User query"
+    required: true
+
+  - name: "candidate"
+    type: "string"
+    description: "Candidate content"
+    required: true
+
+template: |
+  Please evaluate the relevance of the following candidate content to the user query.
+
+  User Query: {{ query }}
+
+  Candidate Content:
+  {{ candidate }}
+
+  Please score based on the following criteria (0-10 points):
+  1. Semantic relevance: Is the content related to the query intent
+  2. Scenario matching: Is the content applicable to the scenario described in the query
+  3. Information value: Can the content help solve the query's problem
+
+  Only output a number (0-10), do not output any other content.
+
+llm_config:
+  temperature: 0.0

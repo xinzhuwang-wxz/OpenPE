@@ -1,0 +1,38 @@
+metadata:
+  id: "vision.table_understanding"
+  name: "Table Understanding"
+  description: "Use VLM to analyze table images and generate three-layer information"
+  version: "1.0.0"
+  language: "en"
+  category: "vision"
+
+variables:
+  - name: "instruction"
+    type: "string"
+    description: "Processing instruction"
+    default: "Understand table content"
+    required: false
+
+  - name: "context"
+    type: "string"
+    description: "Surrounding text context"
+    default: "No context"
+    required: false
+    max_length: 500
+
+template: |
+  Please analyze this table image and generate three-layer information.
+
+  Processing Instruction: {{ instruction }}
+  Surrounding Text Context: {{ context }}
+
+  Please output in JSON format:
+  {
+      "abstract": "Table topic (no more than 50 words)",
+      "overview": "Table content summary (no more than 300 words), including key data and trends",
+      "detail_text": "Complete textual description of the table, including all key data"
+  }
+
+llm_config:
+  temperature: 0.0
+  supports_vision: true

@@ -1,0 +1,44 @@
+name: Causica CI Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+
+    - uses: actions/cache@v3
+      with:
+        path: ~/.cache/pypoetry/virtualenvs
+        key: ${{ hashFiles('poetry.lock') }}
+      id: cache
+
+    - name: Install poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Install dependencies
+      run: |
+        poetry env use 3.10
+        poetry install --extras seaborn
+      if: steps.cache.outputs.cache-hit != 'true'
+
+    - name: Verify pre-commit checks
+      uses: pre-commit/action@v3.0.0
+      with:
+        extra_args: --all-files
+
+    - name: Test with pytest
+      run: poetry run python -m pytest ./test

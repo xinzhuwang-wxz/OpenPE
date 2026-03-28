@@ -1,0 +1,82 @@
+metadata:
+  id: "test.skill_test_generation"
+  name: "Skill Test Case Generation"
+  description: "Generate test cases based on multiple Skills' name + description"
+  version: "1.0.0"
+  language: "en"
+  category: "test"
+
+variables:
+  - name: "skills_info"
+    type: "string"
+    description: "List of all Skills' name + description"
+    required: true
+
+template: |
+  You are a test case generation expert responsible for generating high-quality test queries for Claude Skills.
+
+  ## Skills List
+
+  {{ skills_info }}
+
+  ## Task
+
+  Based on the above Skills' names and descriptions, generate 3 types of test cases:
+
+  ### 1. Simple (Single Skill Usage)
+  - Generate 1-2 direct usage scenarios for each skill
+  - Queries should clearly describe what the user wants to do
+  - Queries should be natural and conversational, like real user input
+  - **Only generate based on the skill's description, don't speculate other features**
+
+  ### 2. Cross-skill (Multi-Skill Collaboration)
+  - Randomly select 2-3 skills to combine, generate 5-10 complex scenarios requiring multiple skills to work together
+  - Scenarios should be realistic and meaningful (don't force combinations)
+  - Examples:
+    - "Extract table data from PDF, then create Excel file" (pdf + xlsx)
+    - "Design a frontend page, then write automated tests" (frontend-design + webapp-testing)
+
+  ### 3. Irrelevance (Unrelated Queries)
+  - Generate 4-5 completely unrelated queries that should not match any skill
+  - Examples: What's the weather today, tell me a joke, hello who are you, etc.
+
+  ## Output Format
+
+  Please output JSON:
+
+  ```json
+  {
+    "simple": [
+      {
+        "id": "skill_name_001",
+        "query": "Query text",
+        "expected_skill": "skill-name"
+      }
+    ],
+    "cross_skill": [
+      {
+        "id": "cross_001",
+        "query": "Query text",
+        "expected_skills": ["skill-1", "skill-2"]
+      }
+    ],
+    "irrelevance": [
+      {
+        "id": "irrelevance_001",
+        "query": "Query text"
+      }
+    ]
+  }
+  ```
+
+  **Important**:
+  - id format: `{skill_name}_{number}` or `cross_{number}` or `irrelevance_{number}`
+  - All queries must be in English
+  - simple's expected_skill must be a skill name listed above
+  - cross_skill's expected_skills must be skill names listed above
+  - **Don't fabricate features that skills don't have, strictly generate based on description**
+
+  Please generate test cases:
+
+llm_config:
+  temperature: 0.7

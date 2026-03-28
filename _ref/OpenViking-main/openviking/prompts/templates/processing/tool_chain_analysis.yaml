@@ -1,0 +1,35 @@
+metadata:
+  id: "processing.tool_chain_analysis"
+  name: "Tool Chain Analysis"
+  description: "Analyze tool call chains and identify valuable usage patterns"
+  version: "1.0.0"
+  language: "en"
+  category: "processing"
+
+variables:
+  - name: "tool_calls"
+    type: "string"
+    description: "Tool call sequence"
+    required: true
+
+template: |
+  Please analyze the following tool call chain and identify valuable usage patterns:
+
+  Tool Call Sequence:
+  {{ tool_calls }}
+
+  Please analyze:
+  1. Are there patterns of failure followed by success (what was learned)
+  2. Tool selection strategies (which tools to choose in which scenarios)
+  3. Best practices that can be summarized
+
+  Output in JSON format:
+  {
+      "patterns": [
+          {"scenario": "Scenario description", "strategy": "Strategy description", "outcome": "positive/negative"}
+      ],
+      "best_practices": ["practice1", "practice2"]
+  }
+
+llm_config:
+  temperature: 0.0

@@ -1,0 +1,111 @@
+metadata:
+  id: "parsing.context_generation"
+  name: "Text Document Understanding and Information Extraction"
+  description: "Generate semantic titles, abstracts (L0)/overviews (L1) for text document nodes, which are more concise than the original text and used for retrieval matching"
+  version: "4.0.0"
+  language: "en"
+  category: "parsing"
+
+variables:
+  - name: "title"
+    type: "string"
+    description: "Original title or filename, may also be chapter title if it's a sub-document"
+    default: ""
+
+  - name: "content"
+    type: "string"
+    description: "Original content of the file or sub-node"
+    required: true
+
+  - name: "children_info"
+    type: "string"
+    description: "Summary list of child nodes (if any)"
+    default: ""
+
+  - name: "instruction"
+    type: "string"
+    description: "Outer processing instruction, which the LLM should follow if it provides guidance"
+    default: ""
+
+  - name: "context_type"
+    type: "string"
+    description: "Context type, possible values: \"memory\" (user profile or historical event memory) / \"resource\" (materials/documents) / \"skill\" (agent skills)"
+    default: "resource"
+
+  - name: "is_leaf"
+    type: "boolean"
+    description: "Whether the current node is a traversal endpoint"
+    default: false
+
+template: |
+  Please analyze the input document content and generate semantic titles, abstracts (L0)/overviews (L1) for retrieval, which will be used for semantic search matching with user queries.
+
+  Input:
+
+  [Title or Filename]
+  {{ title }}
+
+  [Original Content]
+  {{ content }}
+
+  [Sub-chapters (if any)]
+  {{ children_info }}
+
+  [Outer Processing Instructions, consider as appropriate]
+  {{ instruction }}
+
+  Output Requirements:
+
+  1. semantic_title (10-30 characters):
+     - Semantic title that reflects the core theme
+     - Include the most important keywords/concept names
+     - Not recommended to keep prefixes like "Chapter X"
+
+  2. abstract (recommended length < 200 tokens): Summarize in one sentence what the document is mainly about
+     {% if context_type == "resource" %}
+     - Introduce the document's genre, length, and content scope
+     - Retain the most core concepts or other subject keywords
+     {% elif context_type == "memory" %}
+     - Summarize key subjects, processes, and conclusions
+     - Retain the most core concepts or other subject keywords
+     {% elif context_type == "skill" %}
+     - Introduce the skill's functionality and parameter scope
+     - Must include: skill name, API name, action verbs
+     {% else %}
+     - Include core terms/concept names from the content
+     - Write in a form that can be matched by user search queries
+     {% endif %}
+
+  3. overview (recommended length < 2000 tokens): Can include multiple paragraphs, describing document content in detail to present the content outline and core viewpoints to the outside world
+     {% if context_type == "resource" %}
+     - What it is: Type of material/document
+     - What it covers: Core knowledge points
+     - When to use: When this type of knowledge needs to be consulted
+     - How to use: How to reference and cite
+     - What it's for: What problems it can solve
+     - Content outline or synopsis: Describe the main content and structure of the document in detail according to its main content and structure, including information about each chapter, etc.
+     {% elif context_type == "memory" %}
+     - What it is: Type of experience/memory
+     - What it covers: What happened, what was learned
+     - When to use: When similar scenarios recur
+     - How to use: As experience reference
+     - What it's for: Avoid repeating mistakes/reuse successful experiences
+     {% elif context_type == "skill" %}
+     - What it is: Type of skill
+     - What it covers: Specific functions and parameters
+     - When to use: When certain operations need to be performed
+     - How to use: Calling method and parameters
+     - What it's for: What functionality it implements
+     {% else %}
+     - What it is: Type and nature of content
+     - What it covers: Specific points
+     - When to use: Usage scenarios
+     - How to use: Usage methods
+     - What it's for: Value and purpose
+     {% endif %}
+
+  You are required to output valid JSON directly. Double quotes in strings within the JSON must be escaped to protect JSON syntax validity. Format:
+  {"semantic_title":"title","abstract":"abstract","overview":"overview"}
+
+llm_config:
+  temperature: 0.0

@@ -1,0 +1,409 @@
+# Copyright (c) 2026 Beijing Volcano Engine Technology Co., Ltd.
+# SPDX-License-Identifier: Apache-2.0
+"""
+OpenViking Service Core.
+
+Main service class that composes all sub-services and manages infrastructure lifecycle.
+"""
+
+import os
+from typing import Any, Optional
+
+from openviking.agfs_manager import AGFSManager
+from openviking.core.directories import DirectoryInitializer
+from openviking.crypto.config import bootstrap_encryption
+from openviking.resource.watch_scheduler import WatchScheduler
+from openviking.server.identity import RequestContext, Role
+from openviking.service.debug_service import DebugService
+from openviking.service.fs_service import FSService
+from openviking.service.pack_service import PackService
+from openviking.service.relation_service import RelationService
+from openviking.service.resource_service import ResourceService
+from openviking.service.search_service import SearchService
+from openviking.service.session_service import SessionService
+from openviking.session import create_session_compressor, SessionCompressor
+from openviking.storage import VikingDBManager
+from openviking.storage.collection_schemas import init_context_collection
+from openviking.storage.queuefs.queue_manager import QueueManager, init_queue_manager
+from openviking.storage.transaction import LockManager, init_lock_manager
+from openviking.storage.viking_fs import VikingFS, init_viking_fs
+from openviking.utils.resource_processor import ResourceProcessor
+from openviking.utils.skill_processor import SkillProcessor
+from openviking_cli.exceptions import NotInitializedError
+from openviking_cli.session.user_id import UserIdentifier
+from openviking_cli.utils import get_logger
+from openviking_cli.utils.config import get_openviking_config
+from openviking_cli.utils.config.open_viking_config import initialize_openviking_config
+from openviking_cli.utils.config.storage_config import StorageConfig
+
+logger = get_logger(__name__)
+
+
+class OpenVikingService:
+    """
+    OpenViking main service class.
+
+    Composes all sub-services and manages infrastructure lifecycle.
+    """
+
+    def __init__(
+        self,
+        path: Optional[str] = None,
+        user: Optional[UserIdentifier] = None,
+    ):
+        """Initialize OpenViking service.
+
+        Args:
+            path: Local storage path (overrides ov.conf storage path).
+            user: Username for session management.
+        """
+        # Initialize config from ov.conf
+        config = initialize_openviking_config(
+            user=user,
+            path=path,
+        )
+        self._config = config
+        self._user = user or UserIdentifier(
+            config.default_account, config.default_user, config.default_agent
+        )
+
+        # Infrastructure
+        self._agfs_manager: Optional[AGFSManager] = None
+        self._agfs_client: Optional[Any] = None
+        self._queue_manager: Optional[QueueManager] = None
+        self._vikingdb_manager: Optional[VikingDBManager] = None
+        self._viking_fs: Optional[VikingFS] = None
+        self._embedder: Optional[Any] = None
+        self._resource_processor: Optional[ResourceProcessor] = None
+        self._skill_processor: Optional[SkillProcessor] = None
+        self._session_compressor: Optional[SessionCompressor] = None
+        self._lock_manager: Optional[LockManager] = None
+        self._directory_initializer: Optional[DirectoryInitializer] = None
+        self._watch_scheduler: Optional[WatchScheduler] = None
+        self._encryptor: Optional[Any] = None
+
+        # Sub-services
+        self._fs_service = FSService()
+        self._relation_service = RelationService()
+        self._pack_service = PackService()
+        self._search_service = SearchService()
+        self._resource_service = ResourceService()
+        self._session_service = SessionService()
+        self._debug_service = DebugService()
+
+        # State
+        self._initialized = False
+
+        # Initialize storage
+        self._init_storage(
+            config.storage, config.embedding.max_concurrent, config.vlm.max_concurrent
+        )
+
+        # Initialize embedder
+        self._embedder = config.embedding.get_embedder()
+        logger.info(
+            f"Initialized embedder (dim {config.embedding.dimension}, sparse {self._embedder.is_sparse})"
+        )
+
+    def _init_storage(
+        self,
+        config: StorageConfig,
+        max_concurrent_embedding: int = 10,
+        max_concurrent_semantic: int = 100,
+    ) -> None:
+        """Initialize storage resources."""
+        from openviking.utils.agfs_utils import create_agfs_client
+
+        mode = getattr(config.agfs, "mode", "http-client")
+        if mode == "http-client":
+            self._agfs_manager = AGFSManager(config=config.agfs)
+            self._agfs_manager.start()
+            agfs_url = self._agfs_manager.url
+            config.agfs.url = agfs_url
+
+        # Create AGFS client using utility
+        self._agfs_client = create_agfs_client(config.agfs)
+
+        # Initialize QueueManager with agfs_client
+        if self._agfs_client:
+            self._queue_manager = init_queue_manager(
+                agfs=self._agfs_client,
+                timeout=config.agfs.timeout,
+                max_concurrent_embedding=max_concurrent_embedding,
+                max_concurrent_semantic=max_concurrent_semantic,
+            )
+        else:
+            logger.warning("AGFS client not initialized, skipping queue manager")
+
+        # Initialize VikingDBManager with QueueManager
+        self._vikingdb_manager = VikingDBManager(
+            vectordb_config=config.vectordb, queue_manager=self._queue_manager
+        )
+
+        # Configure queues if QueueManager is available.
+        # Workers are NOT started here — start() is called after VikingFS is initialized
+        # in initialize(), so that recovered tasks don't race against VikingFS init.
+        if self._queue_manager:
+            self._queue_manager.setup_standard_queues(self._vikingdb_manager, start=False)
+
+        # Initialize LockManager (fail-fast if AGFS missing)
+        if self._agfs_client is None:
+            raise RuntimeError("AGFS client not initialized for LockManager")
+        tx_cfg = config.transaction
+        self._lock_manager = init_lock_manager(
+            agfs=self._agfs_client,
+            lock_timeout=tx_cfg.lock_timeout,
+            lock_expire=tx_cfg.lock_expire,
+        )
+
+    @property
+    def _agfs(self) -> Any:
+        """Internal access to AGFS client for APIKeyManager."""
+        return self._agfs_client
+
+    @property
+    def viking_fs(self) -> Optional[VikingFS]:
+        """Get VikingFS instance."""
+        return self._viking_fs
+
+    @property
+    def vikingdb_manager(self) -> Optional[VikingDBManager]:
+        """Get VikingDBManager instance."""
+        return self._vikingdb_manager
+
+    @property
+    def lock_manager(self) -> Optional[LockManager]:
+        """Get LockManager instance."""
+        return self._lock_manager
+
+    @property
+    def session_compressor(self) -> Optional[SessionCompressor]:
+        """Get SessionCompressor instance."""
+        return self._session_compressor
+
+    @property
+    def watch_scheduler(self) -> Optional[WatchScheduler]:
+        """Get WatchScheduler instance."""
+        return self._watch_scheduler
+
+    @property
+    def fs(self) -> FSService:
+        """Get FSService instance."""
+        return self._fs_service
+
+    @property
+    def relations(self) -> RelationService:
+        """Get RelationService instance."""
+        return self._relation_service
+
+    @property
+    def pack(self) -> PackService:
+        """Get PackService instance."""
+        return self._pack_service
+
+    @property
+    def search(self) -> SearchService:
+        """Get SearchService instance."""
+        return self._search_service
+
+    @property
+    def user(self) -> UserIdentifier:
+        """Get current user identifier."""
+        return self._user
+
+    @property
+    def resources(self) -> ResourceService:
+        """Get ResourceService instance."""
+        return self._resource_service
+
+    @property
+    def sessions(self) -> SessionService:
+        """Get SessionService instance."""
+        return self._session_service
+
+    @property
+    def debug(self) -> DebugService:
+        """Get DebugService instance."""
+        return self._debug_service
+
+    async def initialize(self) -> None:
+        """Initialize OpenViking storage and indexes."""
+        if self._initialized:
+            logger.debug("Already initialized")
+            return
+
+        # Acquire advisory lock on data directory to prevent multi-process
+        # contention (see https://github.com/volcengine/OpenViking/issues/473).
+        from openviking.utils.process_lock import acquire_data_dir_lock
+
+        acquire_data_dir_lock(self._config.storage.workspace)
+
+        if self._vikingdb_manager is None:
+            self._init_storage(
+                self._config.storage,
+                self._config.embedding.max_concurrent,
+                self._config.vlm.max_concurrent,
+            )
+
+        if self._embedder is None:
+            self._embedder = self._config.embedding.get_embedder()
+
+        config = get_openviking_config()
+
+        # Initialize encryption module
+        full_config = config.to_dict()
+        self._encryptor = await bootstrap_encryption(full_config)
+        if self._encryptor:
+            logger.info("Encryption module initialized")
+        else:
+            logger.info("Encryption module not enabled")
+
+        # Initialize VikingFS and VikingDB with recorder if enabled
+        enable_recorder = os.environ.get("OPENVIKING_ENABLE_RECORDER", "").lower() == "true"
+
+        # Create context collection
+        if self._vikingdb_manager is None:
+            raise RuntimeError("VikingDBManager not initialized")
+        await init_context_collection(self._vikingdb_manager)
+
+        if self._agfs_client is None:
+            raise RuntimeError("AGFS client not initialized")
+        if self._embedder is None:
+            raise RuntimeError("Embedder not initialized")
+
+        self._viking_fs = init_viking_fs(
+            agfs=self._agfs_client,
+            query_embedder=self._embedder,
+            rerank_config=config.rerank,
+            vector_store=self._vikingdb_manager,
+            enable_recorder=enable_recorder,
+            encryptor=self._encryptor,
+        )
+        if enable_recorder:
+            logger.info("VikingFS IO Recorder enabled")
+
+        # Start queue workers now that VikingFS is ready.
+        # Doing it here (rather than in _init_storage) ensures that any tasks
+        # recovered from a previous crash are not processed before VikingFS is
+        # initialized, which would cause "VikingFS not initialized" errors.
+        if self._queue_manager:
+            self._queue_manager.start()
+            logger.info("QueueManager workers started")
+
+        # Initialize directories
+        directory_initializer = DirectoryInitializer(vikingdb=self._vikingdb_manager)
+        self._directory_initializer = directory_initializer
+        default_ctx = RequestContext(user=self._user, role=Role.ROOT)
+        account_count = await directory_initializer.initialize_account_directories(default_ctx)
+        user_count = await directory_initializer.initialize_user_directories(default_ctx)
+        logger.info(
+            "Initialized preset directories account=%d user=%d",
+            account_count,
+            user_count,
+        )
+
+        # Initialize processors
+        self._resource_processor = ResourceProcessor(
+            vikingdb=self._vikingdb_manager,
+        )
+        self._skill_processor = SkillProcessor(vikingdb=self._vikingdb_manager)
+        self._session_compressor = create_session_compressor(vikingdb=self._vikingdb_manager)
+
+        # Start LockManager if initialized
+        if self._lock_manager:
+            await self._lock_manager.start()
+            logger.info("LockManager started")
+
+        self._watch_scheduler = WatchScheduler(
+            resource_service=self._resource_service,
+            viking_fs=self._viking_fs,
+        )
+        await self._watch_scheduler.start()
+        logger.info("WatchScheduler started")
+
+        # Wire up sub-services
+        self._fs_service.set_viking_fs(self._viking_fs)
+        self._relation_service.set_viking_fs(self._viking_fs)
+        self._pack_service.set_viking_fs(self._viking_fs)
+        self._search_service.set_viking_fs(self._viking_fs)
+        self._resource_service.set_dependencies(
+            vikingdb=self._vikingdb_manager,
+            viking_fs=self._viking_fs,
+            resource_processor=self._resource_processor,
+            skill_processor=self._skill_processor,
+            watch_scheduler=self._watch_scheduler,
+        )
+        self._session_service.set_dependencies(
+            vikingdb=self._vikingdb_manager,
+            viking_fs=self._viking_fs,
+            session_compressor=self._session_compressor,
+        )
+        self._debug_service.set_dependencies(
+            vikingdb=self._vikingdb_manager,
+            config=self._config,
+        )
+
+        self._initialized = True
+        logger.info("OpenVikingService initialized")
+
+    async def close(self) -> None:
+        """Close OpenViking and release resources."""
+        if self._watch_scheduler:
+            await self._watch_scheduler.stop()
+            self._watch_scheduler = None
+            logger.info("WatchScheduler stopped")
+
+        if self._lock_manager:
+            await self._lock_manager.stop()
+            self._lock_manager = None
+
+        if self._vikingdb_manager:
+            self._vikingdb_manager.mark_closing()
+
+        if self._queue_manager:
+            self._queue_manager.stop()
+            self._queue_manager = None
+            logger.info("Queue manager stopped")
+
+        if self._vikingdb_manager:
+            await self._vikingdb_manager.close()
+            self._vikingdb_manager = None
+
+        if self._agfs_manager:
+            self._agfs_manager.stop()
+            self._agfs_manager = None
+
+        self._viking_fs = None
+        self._resource_processor = None
+        self._skill_processor = None
+        self._session_compressor = None
+        self._directory_initializer = None
+        self._initialized = False
+
+        logger.info("OpenVikingService closed")
+
+    def _ensure_initialized(self) -> None:
+        """Ensure service is initialized."""
+        if not self._initialized:
+            raise NotInitializedError("OpenVikingService")
+
+    async def initialize_account_directories(self, ctx: RequestContext) -> int:
+        """Initialize account-shared preset roots."""
+        self._ensure_initialized()
+        if not self._directory_initializer:
+            return 0
+        return await self._directory_initializer.initialize_account_directories(ctx)
+
+    async def initialize_user_directories(self, ctx: RequestContext) -> int:
+        """Initialize current user's directory tree."""
+        self._ensure_initialized()
+        if not self._directory_initializer:
+            return 0
+        return await self._directory_initializer.initialize_user_directories(ctx)
+
+    async def initialize_agent_directories(self, ctx: RequestContext) -> int:
+        """Initialize current user's current-agent directory tree."""
+        self._ensure_initialized()
+        if not self._directory_initializer:
+            return 0
+        return await self._directory_initializer.initialize_agent_directories(ctx)

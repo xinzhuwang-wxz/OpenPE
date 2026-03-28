@@ -1,0 +1,59 @@
+metadata:
+  id: "parsing.chapter_analysis"
+  name: "Chapter Analysis"
+  description: "Analyze document content and divide it into reasonable chapter structure"
+  version: "1.0.0"
+  language: "en"
+  category: "parsing"
+
+variables:
+  - name: "start_page"
+    type: "int"
+    description: "Starting page number"
+    required: true
+
+  - name: "end_page"
+    type: "int"
+    description: "Ending page number"
+    required: true
+
+  - name: "total_pages"
+    type: "int"
+    description: "Total number of pages"
+    required: true
+
+  - name: "content"
+    type: "string"
+    description: "Document content"
+    required: true
+
+template: |
+  Please analyze the following document content and divide it into reasonable chapter structure.
+
+  Document Content (Pages {{ start_page }} to {{ end_page }}, total {{ total_pages }} pages):
+  {{ content }}
+
+  Please output chapter structure in JSON format:
+  {
+      "chapters": [
+          {
+              "title": "Chapter title",
+              "level": 1,
+              "start_page": 1,
+              "end_page": 5,
+              "abstract": "Concise summary (no more than 100 words), summarizing core theme",
+              "overview": "Usage scenario description (no more than 500 words), explaining when this content should be consulted"
+          }
+      ]
+  }
+
+  Requirements:
+  1. Divide chapters reasonably based on content themes
+  2. level indicates hierarchy (1=first-level heading, 2=second-level heading)
+  3. Each chapter must have a clear title
+  4. abstract: Concise summary, no more than 100 words
+  5. overview: Usage scenario description, explaining content value
+  6. start_page and end_page must be within the range of {{ start_page }} to {{ end_page }}
+
+llm_config:
+  temperature: 0.0

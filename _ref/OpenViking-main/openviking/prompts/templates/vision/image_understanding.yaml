@@ -1,0 +1,38 @@
+metadata:
+  id: "vision.image_understanding"
+  name: "Image Understanding"
+  description: "Use VLM to analyze images and generate three-layer information (L0/L1/L2)"
+  version: "1.0.0"
+  language: "en"
+  category: "vision"
+
+variables:
+  - name: "instruction"
+    type: "string"
+    description: "Processing instruction"
+    default: "Understand image content"
+    required: false
+
+  - name: "context"
+    type: "string"
+    description: "Surrounding text context"
+    default: "No context"
+    required: false
+    max_length: 500
+
+template: |
+  Please analyze this image and generate three-layer information.
+
+  Processing Instruction: {{ instruction }}
+  Surrounding Text Context: {{ context }}
+
+  Please output in JSON format:
+  {
+      "abstract": "Concise description (no more than 50 words), explaining what this image is",
+      "overview": "Detailed understanding (no more than 300 words), explaining the image's content, meaning, and important information",
+      "detail_text": "Text description that can replace the image (complete description of the information conveyed by the image, so that people who cannot see the image can also understand)"
+  }
+
+llm_config:
+  temperature: 0.0
+  supports_vision: true

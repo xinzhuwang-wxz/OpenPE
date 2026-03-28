@@ -1,0 +1,38 @@
+metadata:
+  id: "vision.page_understanding"
+  name: "Page Understanding"
+  description: "Understand document page content (for scanned PDFs)"
+  version: "1.0.0"
+  language: "en"
+  category: "vision"
+
+variables:
+  - name: "instruction"
+    type: "string"
+    description: "Processing instruction"
+    default: "Understand document content"
+    required: false
+
+  - name: "page_num"
+    type: "int"
+    description: "Page number"
+    required: true
+
+template: |
+  Please analyze the content of this document page.
+
+  Processing Instruction: {{ instruction }}
+  Page Number: Page {{ page_num }}
+
+  Please output in JSON format:
+  {
+      "abstract": "Brief page content description (no more than 50 words)",
+      "overview": "Detailed page content (no more than 500 words)",
+      "detail_text": "Complete text content of the page (OCR recognized text)",
+      "has_title": true,
+      "title": "Extract title if there is one"
+  }
+
+llm_config:
+  temperature: 0.0
+  supports_vision: true

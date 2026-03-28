@@ -1,0 +1,45 @@
+metadata:
+  id: "processing.strategy_extraction"
+  name: "Resource Usage Strategy Extraction"
+  description: "Extract usage strategies from resource addition background and intent"
+  version: "1.0.0"
+  language: "en"
+  category: "processing"
+
+variables:
+  - name: "reason"
+    type: "string"
+    description: "Background reason"
+    required: true
+
+  - name: "instruction"
+    type: "string"
+    description: "Processing instruction"
+    required: true
+
+  - name: "abstract"
+    type: "string"
+    description: "Resource abstract"
+    required: true
+
+template: |
+  Please analyze the following resource addition background and intent, and extract resource usage strategies:
+
+  Background Reason: {{ reason }}
+  Processing Intent: {{ instruction }}
+  Resource Abstract: {{ abstract }}
+
+  Please extract the following information:
+  1. Applicable scenarios (when should this resource be used)
+  2. Usage strategies (how to use this resource)
+  3. Expected outcomes (what purpose is expected to be achieved by using this resource)
+
+  Output in JSON format:
+  {
+      "applicable_scenarios": ["scenario1", "scenario2"],
+      "usage_strategies": ["strategy1", "strategy2"],
+      "expected_outcomes": ["outcome1", "outcome2"]
+  }
+
+llm_config:
+  temperature: 0.0

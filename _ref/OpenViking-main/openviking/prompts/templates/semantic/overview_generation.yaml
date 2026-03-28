@@ -1,0 +1,63 @@
+metadata:
+  id: "semantic.overview_generation"
+  name: "Directory Overview Generation"
+  description: "Generate overview (L1) for a directory based on file summaries and child directory abstracts"
+  version: "1.0.0"
+  language: "en"
+  category: "semantic"
+
+variables:
+  - name: "dir_name"
+    type: "string"
+    description: "Directory name"
+    required: true
+
+  - name: "file_summaries"
+    type: "string"
+    description: "List of files and their summaries in the directory, format: '- filename: summary'"
+    default: ""
+
+  - name: "children_abstracts"
+    type: "string"
+    description: "List of subdirectories and their abstracts, format: '- dirname/: abstract'"
+    default: ""
+
+template: |
+  Generate an overview document based on the following directory content:
+
+  [Directory Name]
+  {{ dir_name }}
+
+  [Files and Their Summaries in Directory]
+  {{ file_summaries }}
+
+  Note: Files are numbered as [1], [2], [3], etc.
+  Some entries may be code structure skeletons (showing imports, classes, functions)
+  rather than prose summaries — treat them as structural descriptions of the file.
+
+  [Subdirectories and Their Summaries]
+  {{ children_abstracts }}
+
+  Output in Markdown format, strictly following this structure:
+
+  1. **Title** (H1): Directory name
+
+  2. **Brief Description** (plain text paragraph, 50-150 words):
+     - Immediately following the title, without any H2 heading
+     - Explain what this is, what it's about, what it covers
+     - Include core keywords for easy searching
+     - Who it's suitable for
+
+  3. **Quick Navigation** (H2): Decision Tree style
+     - Guide with "What do you want to learn?" or "What do you want to do?"
+     - Use → arrow to point to specific files or directories
+     - **Use file number references**: such as [1], [2], [3]
+     - Concise keyword descriptions
+
+  4. **Detailed Description** (H2): One H3 subsection for each file/subdirectory
+     - Use the file summaries or subdirectory summaries provided above as description content
+
+  Total length: 400-800 words
+
+llm_config:
+  temperature: 0.0

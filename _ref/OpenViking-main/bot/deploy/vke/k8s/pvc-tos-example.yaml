@@ -1,0 +1,32 @@
+# TOS静态PV示例
+# 使用前请先创建TOS桶，并替换下面的配置
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: vikingbot-tos-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: tos.csi.volcengine.com
+    volumeHandle: vikingbot-tos-pv
+    volumeAttributes:
+      bucket: your-tos-bucket-name  # 替换为你的TOS桶名
+      region: cn-beijing            # 替换为你的TOS桶所在区域
+      path: /vikingbot              # 可选，桶内路径
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vikingbot-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: ""
+  volumeName: vikingbot-tos-pv

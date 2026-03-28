@@ -1,0 +1,51 @@
+metadata:
+  id: "vision.batch_filtering"
+  name: "Batch Image Filtering"
+  description: "Batch determine whether multiple images are meaningful for understanding document content"
+  version: "1.0.0"
+  language: "en"
+  category: "vision"
+
+variables:
+  - name: "document_title"
+    type: "string"
+    description: "Document topic"
+    required: true
+
+  - name: "image_count"
+    type: "int"
+    description: "Number of images"
+    required: true
+
+  - name: "images_info"
+    type: "string"
+    description: "Image list information"
+    required: true
+
+template: |
+  Please determine whether the following images are meaningful for understanding the document content.
+
+  Document Topic: {{ document_title }}
+
+  Images to Judge (Total {{ image_count }}):
+  {{ images_info }}
+
+  Judgment Criteria:
+  - Decorative images (is_meaningful=false): Logos, icons, watermarks, border decorations, dividers, advertisements, solid color blocks, header/footer decorations
+  - Meaningful images (is_meaningful=true): Charts, flowcharts, diagrams, data visualizations, product screenshots, illustrative images, images related to document content
+
+  Please output in JSON format:
+  {
+      "results": [
+          {
+              "index": 0,
+              "is_meaningful": true,
+              "reason": "Brief reason",
+              "image_type": "chart/diagram/screenshot/decorative/other"
+          }
+      ]
+  }
+
+llm_config:
+  temperature: 0.0
+  supports_vision: true
