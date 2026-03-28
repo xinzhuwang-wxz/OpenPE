@@ -11,7 +11,11 @@
 **Name**: slop-FP (First Principles)
 **Core thesis**: Any real-world event is governed by discoverable first principles. This framework starts from first principles, grows through data-driven analysis to user-specified events, then projects forward to find endgames.
 
-**Relationship to slop-X**: slop-FP is an incremental transformation of the existing slop-X HEP analysis framework. It preserves the phase-based pipeline, multi-agent review mechanism, isolation model, and pixi environment — while generalizing from particle physics to domain-agnostic first-principles reasoning.
+**Relationship to slop-X**: slop-FP is an in-place transformation of the existing slop-X HEP analysis framework. It preserves the phase-based pipeline, multi-agent review mechanism, isolation model, and pixi environment — while generalizing from particle physics to domain-agnostic first-principles reasoning.
+
+**Transformation scope**: This is an in-place modification, not a fork. The `src/` infrastructure (scaffolder, templates, agent profiles, methodology) is modified directly. Existing HEP-specific files are archived to `_archive/` before modification. No backward compatibility with slop-X HEP analyses is maintained — this is a clean transformation.
+
+**Endgame** (formal definition): The projected terminal state or steady-state outcome of the causal chain extending from the user's event of interest. An endgame may be a convergent point (all scenarios agree), a fork (scenarios diverge based on identifiable conditions), an equilibrium (self-sustaining state), or an unstable trajectory (bounded only by external constraints).
 
 ---
 
@@ -56,16 +60,60 @@ artifacts:
 
 **Explanatory Power** is the unified metric that governs chain traversal and truncation. It combines two dimensions:
 
-- **Truth** (epistemic confidence): How certain are we that this event is real? Supported by what quality of data and evidence?
-- **Relevance** (causal relevance): How much does this event influence the user's event of interest?
+- **Truth** (epistemic confidence): How certain are we that this event is real? Supported by what quality of data and evidence? Bounded in [0, 1].
+- **Relevance** (normalized causal attribution): What fraction of the variance in the target event does this edge explain? Bounded in [0, 1]. This is always a normalized fraction, not a raw effect size.
 
+**Formal definition**:
 ```
-EP = f(truth, relevance)
+EP = truth × relevance
 
+Where:
+  truth ∈ [0, 1]:
+    - Based on evidence type: DATA_SUPPORTED → [0.7, 1.0], CORRELATION → [0.3, 0.7], HYPOTHESIZED → [0.0, 0.3]
+    - Refined by data quality, sample size, replication
+
+  relevance ∈ [0, 1]:
+    - Normalized causal attribution fraction: "what share of the target event's variance does this edge explain?"
+    - Pre-analysis (Phase 0): estimated by hypothesis_agent using domain knowledge + literature
+      - Use qualitative mapping: Strong theoretical link → 0.7, Moderate → 0.4, Weak → 0.2
+    - Post-analysis (Phase 3): refined using actual R² decomposition, partial correlation, or causal effect magnitude normalized to [0,1]
+
+  EP ∈ [0, 1] (guaranteed by construction)
+```
+
+**EP thresholds are tunable parameters**, not fixed constants. Initial values:
+- Hard truncation: 0.05
+- Soft truncation: 0.15
+- Sub-chain expansion minimum: 0.30
+
+These should be calibrated through experience and stored in L0 memory.
+
+**Quadrant interpretation**:
+```
 High truth × High relevance → Strong EP → Continue expanding
 High truth × Low relevance  → Weak EP   → Truncate (true but irrelevant)
 Low truth  × High relevance → Weak EP   → Mark as hypothesis, cautious expansion
 Low truth  × Low relevance  → Minimal EP → Truncate
+```
+
+**Worked example (economics domain)**:
+```
+Question: "Why is China's birth rate declining?"
+
+Edge: urbanization → birth_rate_decline
+  truth = 0.85  (DATA_SUPPORTED: World Bank data, strong regression)
+  relevance = 0.55 (explains ~55% of variance in cross-country models)
+  EP = 0.85 × 0.55 = 0.47
+
+Edge: housing_cost → birth_rate_decline
+  truth = 0.70  (CORRELATION: observed but causal direction unclear)
+  relevance = 0.30 (partial correlation after controlling for urbanization)
+  EP = 0.70 × 0.30 = 0.21
+
+Edge: social_media_influence → birth_rate_decline
+  truth = 0.30  (HYPOTHESIZED: limited empirical evidence)
+  relevance = 0.15 (weak theoretical link)
+  EP = 0.30 × 0.15 = 0.045 → Below hard truncation threshold → truncated
 ```
 
 ### 2.3 EP Propagation and Natural Truncation
@@ -94,7 +142,26 @@ Expansion condition =
     AND (Joint_EP at expansion point still > 0.15)
 ```
 
-Expanded sub-chains run the full Phase 0→6 pipeline as an independent sub-analysis, with results fed back into the main chain.
+**Sub-chain execution protocol**:
+
+Sub-chains run a lightweight version of the Phase 0→6 pipeline:
+- **Review tier**: All sub-chain phases use 1-bot review (single logic reviewer), not full 4-bot. The parent chain's Phase 5 (Verification) covers the integrated result with full review.
+- **Maximum recursion depth**: 2 levels. Sub-chains may NOT trigger their own sub-chains. If a sub-chain identifies a branch needing expansion, it logs the finding for the parent chain's report but does not recurse.
+- **Resumption**: The parent chain resumes after the sub-chain completes Phase 3 (Analysis) — this is sufficient to update the parent's EP values. Sub-chain Phases 4-6 run asynchronously and are referenced in the parent's final report.
+
+**Sub-chain interface contract**:
+```
+Parent provides:
+  - Context: relevant Event Record from main chain
+  - EP threshold: minimum Joint_EP for the sub-chain to justify its findings
+  - Scope constraint: specific causal edge(s) to investigate
+
+Sub-chain returns:
+  - Updated EP values for the investigated edges
+  - Key findings summary (≤500 words)
+  - Causal classification for each edge
+  - Path to full sub-analysis directory (for reference in parent report)
+```
 
 ---
 
@@ -204,14 +271,36 @@ slop-X has 5 phases (with 4a/4b/4c split). slop-FP extends to 7 phases, preservi
    - Classify: `DATA_SUPPORTED` / `CORRELATION` / `HYPOTHESIZED`
 4. **EP update** → use actual test results to update node EP values
 5. **Sub-chain expansion decision** → scaffold sub-analysis for high-EP branches
-6. **Uncertainty quantification** → point estimate + confidence interval + systematic errors
+6. **Statistical model construction** (absorbed from slop-X Phase 4a):
+   - Build formal statistical model with nuisance parameters for each systematic uncertainty
+   - Construct likelihood function connecting observed data to causal parameters
+   - Run expected results: given the model and estimated parameters, what range of outcomes is expected?
+   - Signal injection tests: inject known synthetic signal to validate model sensitivity
+7. **Uncertainty quantification**:
+   - Statistical uncertainties: point estimate + confidence interval via bootstrap/profile likelihood
+   - Systematic uncertainties: identify, estimate, and propagate separately from statistical
+   - Total uncertainty: combine statistical + systematic (quadrature or profile)
+   - Every numerical result must include: central value, statistical uncertainty, systematic uncertainty, total uncertainty
 
 **Output artifacts**:
-- `ANALYSIS.md` — causal test results + EP propagation graph
+- `ANALYSIS.md` — causal test results + EP propagation graph + statistical model description
 - Causal classification labels for each edge
 - Updated DAG with empirical EP values
+- Statistical model specification (likelihood, nuisance parameters, constraints)
+- Expected results and signal injection validation
 
-**Modification from slop-X**: Merges Phase 3 (selection) and Phase 4a (expected results). Adds causal testing pipeline and EP propagation.
+**Modification from slop-X**: Merges Phase 3 (selection) and Phase 4a (expected results), including statistical model construction, signal injection, and expected results. Adds causal testing pipeline and EP propagation.
+
+**Causal testing failure modes**:
+```
+Decision tree for refutation test outcomes:
+  All 3 pass           → DATA_SUPPORTED (strong causal evidence)
+  2 pass, 1 fail       → CORRELATION (observed relationship, causal claim weakened)
+  1 pass, 2 fail       → CORRELATION (weak, note which tests failed)
+  All 3 fail           → HYPOTHESIZED (no empirical support; edge remains in DAG but EP.truth → 0.1)
+  Insufficient data    → HYPOTHESIZED (label "untestable with available data"; EP.truth → 0.2)
+  Contradictory results → DISPUTED (flag for human review; do not auto-classify)
+```
 
 **Agents**: analyst (generalized from signal_lead + background_estimator), verifier (generalized from cross_checker)
 
@@ -357,9 +446,26 @@ Non-blocking findings (Category B) are noted in the report.
 | systematics_fitter | Absorbed into analyst (as "uncertainty quantification") |
 | investigator | Absorbed into verifier (regression investigation → verification) |
 
-Retired agent prompt files are preserved in `_archive/` for reference.
+Retired agent prompt files are preserved in `_archive/agents/` for reference.
 
-### 4.2 New Agent Specification Template
+**Note on regression mechanism**: slop-X's regression protocol (re-running earlier phases when reviews find fundamental issues) is preserved in slop-FP. When a Phase N review identifies a Category A issue originating from Phase M (M < N), the orchestrator rolls back to Phase M and re-executes. The investigator's role (root cause analysis for regressions) is absorbed into the verifier agent.
+
+### 4.2 DAG Label Taxonomy
+
+Two label sets are used at different stages. They are intentionally different — one is pre-analysis (before data), the other is post-analysis (after testing):
+
+**Pre-analysis labels** (Phase 0, hypothesis_agent):
+- `LITERATURE_SUPPORTED` — Edge has published academic support
+- `THEORIZED` — Edge follows from domain theory but lacks direct empirical citation
+- `SPECULATIVE` — Edge is a novel hypothesis without theoretical or empirical basis
+
+**Post-analysis labels** (Phase 3, after refutation testing):
+- `DATA_SUPPORTED` — Edge passed all 3 refutation tests (strong causal evidence)
+- `CORRELATION` — Edge shows statistical relationship but failed ≥1 refutation test
+- `HYPOTHESIZED` — Edge untestable with available data or failed all tests
+- `DISPUTED` — Contradictory refutation results (flagged for human review)
+
+### 4.3 New Agent Specification Template
 
 All new agents follow slop-X's comprehensive agent definition standard. Example for hypothesis_agent:
 
@@ -447,6 +553,47 @@ class DataProvider:
     def metadata(source: DataSource) -> Provenance
 ```
 
+### 5.2.1 Data Acquisition Tooling (detailed specification)
+
+**Tool access**: The data_acquisition_agent uses Claude Code's built-in tools:
+- `WebSearch` — discover data sources and APIs
+- `WebFetch` — download data files and API responses
+- `Bash` (within pixi) — run Python scripts for API calls, data format conversion
+
+**Isolation policy for Phase 0**:
+- The isolation hook is relaxed for Phase 0 agents: they may write to `phase0_discovery/data/` and `/tmp/`
+- Web access is unrestricted for data acquisition (this is the agent's primary function)
+- Downloaded files are logged in `phase0_discovery/data/registry.yaml` with full provenance
+
+**Caching and reproducibility**:
+- All downloaded data is cached in `phase0_discovery/data/raw/` with immutable filenames: `{source_id}_{date}.{ext}`
+- `registry.yaml` records: URL, retrieval date, HTTP headers, file hash (SHA-256), API query parameters
+- Re-running Phase 0 on the same question uses cached data by default (override with `force_refresh=true`)
+
+**Fallback behavior**:
+- API rate-limited → retry with exponential backoff (max 3 attempts), then fall back to WebSearch for alternative source
+- Source unavailable → log in DATA_QUALITY.md as "Source unavailable: {URL}", reduce affected variable's quality to LOW
+- No data found for a required variable → explicitly state in DISCOVERY.md: "Variable X required but no public data found. Analysis cannot assess causal edge Y→Z."
+- Authentication required → skip source, log as "Requires authentication (not accessible)", search for alternative public source
+
+**Required pixi dependencies for data acquisition**:
+```toml
+[dependencies]
+pandas = ">=2.0"
+requests = ">=2.31"
+wbgapi = ">=1.0"       # World Bank API client
+fredapi = ">=0.5"      # FRED API client
+openpyxl = ">=3.1"     # Excel file reading
+pyarrow = ">=14.0"     # Parquet support
+```
+
+**Data format standardization**:
+All acquired datasets are converted to a common format before Phase 1:
+- Tabular data → Parquet files in `phase0_discovery/data/processed/`
+- Time series aligned to common temporal index
+- Missing values explicitly marked (not zero-filled)
+- Units documented in `registry.yaml`
+
 ### 5.3 Data Quality Gate
 
 ```yaml
@@ -473,42 +620,67 @@ gate_decision:
 
 ### 5.4 Artifact Directory Structure
 
+**Directory naming convention**: Follow slop-X's semantic suffix pattern: `phase{N}_{name}/`. This ensures every template path reference, orchestrator loop, and CLAUDE.md remains consistent with the existing convention.
+
 ```
 analyses/my_analysis/
-├── .analysis_config          # Input mode + data path
+├── .analysis_config          # Input mode + data path + input_mode (A/B/C)
 ├── STATE.md                  # Progress tracking (reused from slop-X)
-├── phase0/
+├── analysis_config.yaml      # Analysis metadata (reused from slop-X)
+├── memory/                   # Analysis-local memory snapshot (copied from global at start)
+├── phase0_discovery/
+│   ├── CLAUDE.md             # Phase 0 instructions for agents
 │   ├── exec/
 │   ├── DISCOVERY.md
 │   ├── DATA_QUALITY.md
-│   ├── data/
+│   ├── data/                 # Acquired raw data + metadata
+│   │   ├── raw/              # Original downloaded files
+│   │   ├── processed/        # Cleaned/aligned data
+│   │   └── registry.yaml     # Data provenance registry
 │   └── review/
-├── phase1/
+├── phase1_strategy/
+│   ├── CLAUDE.md
+│   ├── exec/
 │   ├── STRATEGY.md
 │   ├── figures/
 │   └── review/
-├── phase2/
-│   ├── exploration/
+├── phase2_exploration/
+│   ├── CLAUDE.md
+│   ├── exec/
+│   ├── scripts/
 │   ├── figures/
-│   └── scripts/
-├── phase3/
+│   └── review/               # Self-review only
+├── phase3_analysis/
+│   ├── CLAUDE.md
+│   ├── exec/
 │   ├── ANALYSIS.md
 │   ├── scripts/
 │   ├── figures/
 │   ├── sub_analyses/         # Sub-chain expansions (if any)
 │   └── review/
-├── phase4/
+├── phase4_projection/
+│   ├── CLAUDE.md
+│   ├── exec/
 │   ├── PROJECTION.md
 │   ├── figures/
 │   └── review/
-├── phase5/
+├── phase5_verification/
+│   ├── CLAUDE.md
+│   ├── exec/
 │   ├── VERIFICATION.md
 │   └── review/
-└── phase6/
+└── phase6_documentation/
+    ├── CLAUDE.md
+    ├── exec/
     ├── REPORT.md
     ├── REPORT.pdf
     └── audit_trail/
 ```
+
+**Input mode classification**: The `input_mode` field in `.analysis_config` is set by the orchestrator at analysis start based on what the user provides:
+- `input_mode=A` — question only (default)
+- `input_mode=B` — question + user data (user data path in `user_data_dir`)
+- `input_mode=C` — question + user context/hypotheses (context file path in `user_context`)
 
 ---
 
@@ -629,11 +801,16 @@ Subsequent analyses in the same domain automatically receive this as L1 context.
 ## 8. Implementation Priority
 
 ### Sprint 1 — Foundation (Phase 0 + scaffolding changes)
-- Generalize scaffolder to support slop-FP phase structure (0→6)
-- Build hypothesis_agent, data_acquisition_agent, data_quality_agent
+- Modify `src/scaffold_analysis.py` to create `phase0_discovery/` through `phase6_documentation/` directories
+- Create new `src/templates/root_claude.md` with updated orchestrator loop (phase sequence `[0, 1, 2, 3, 4, 5, 6]`)
+- Create new `src/templates/phase0_claude.md` for Phase 0 instructions
+- Update all existing phase CLAUDE.md templates (`phase1` through `phase5` → renumbered)
+- Build hypothesis_agent, data_acquisition_agent, data_quality_agent profiles in `.claude/agents/`
 - Implement DataAcquisitionLayer (WebSearch + FRED + WorldBank providers)
 - Implement Data Quality Gate
-- Generalize terminology in methodology docs
+- Update `pixi.toml` template with slop-FP dependencies (pandas, dowhy, wbgapi, fredapi, etc.)
+- Archive existing HEP-specific agent profiles to `_archive/agents/`
+- Update `.analysis_config` schema to include `input_mode` field
 - End-to-end test: question → data acquired → quality assessed
 
 ### Sprint 2 — Core Analysis (Phase 1–3)
