@@ -35,6 +35,7 @@ openpyxl = ">=3.1"       # Excel reading
 # --- Causal inference ---
 dowhy = ">=0.11"
 causal-learn = ">=0.1"   # PC algorithm for causal structure discovery
+pdfplumber = ">=0.10"    # PDF table extraction
 
 # --- Uncomment as needed ---
 # scikit-learn = ">=1.3"
