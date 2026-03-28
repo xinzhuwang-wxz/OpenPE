@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """EP decay and projection visualizations for OpenPE.
 
 The EP decay chart is the core visualization of OpenPE — it shows

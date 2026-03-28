@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """Persistent causal knowledge graph for OpenPE.
 
 Stores established causal relationships across analyses with confidence

@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """Causal DAG utilities for OpenPE.
 
 Provides CausalEdge and CausalDAG for building, serializing, and

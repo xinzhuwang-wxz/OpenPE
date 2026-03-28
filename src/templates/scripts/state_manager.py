@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """STATE.md manager for OpenPE analysis pipeline.
 
 Reads, writes, and updates the analysis state file that tracks

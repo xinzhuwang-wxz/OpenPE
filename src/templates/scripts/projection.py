@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """Scenario simulation and endgame detection for OpenPE Phase 4.
 
 Provides Monte Carlo scenario simulation from causal parameter

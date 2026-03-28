@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """Structured experiment log writer for OpenPE.
 
 Appends timestamped, phase-tagged entries to experiment_log.md

@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """Verification utilities for OpenPE Phase 5.
 
 Automated checks that the verifier agent calls to independently

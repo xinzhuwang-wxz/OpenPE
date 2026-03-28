@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """Report generator for OpenPE Phase 6.
 
 Collects artifacts from all phases and assembles a structured

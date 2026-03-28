@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """Cross-analysis memory store for OpenPE.
 
 Tiered L0/L1/L2 memory system with confidence scoring and decay.

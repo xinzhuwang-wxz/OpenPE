@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """Sub-chain expansion utility for OpenPE.
 
 When a main-chain event has EP > 0.3 and Joint_EP > 0.15,

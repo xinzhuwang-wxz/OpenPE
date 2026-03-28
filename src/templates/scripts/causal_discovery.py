@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """Causal structure discovery for OpenPE.
 
 Discovers causal DAG structure from observational data using the

@@ -1,3 +1,6 @@
+# Copyright 2025 OpenPE Contributors — Licensed under GPL-3.0
+# Modified by Max en Wong, 2026
+
 """Structured data extraction from unstructured sources for OpenPE.
 
 Extracts numerical values from text, tables from PDFs, and builds
