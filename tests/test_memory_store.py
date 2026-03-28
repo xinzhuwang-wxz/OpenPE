@@ -208,3 +208,53 @@ def test_forget_keeps_recent():
     forgotten = store.forget()
     assert "keeper" not in forgotten
     assert "keeper" in store.entries
+
+
+def test_archive_cold_l2():
+    store = MemoryStore(TMP / "memory")
+    store.add(MemoryEntry(
+        memory_id="cold_l2", content="Old detail", domain="test",
+        memory_type="domain", tier="L2", confidence=0.3,
+        active_count=0, updated="2020-01-01T00:00:00",
+    ))
+    archived = store.archive(threshold=0.5)
+    assert "cold_l2" in archived
+    assert "cold_l2" not in store.entries
+    assert (TMP / "memory" / "L2" / "_archive" / "cold_l2.yaml").exists()
+
+
+def test_archive_skips_non_l2():
+    store = MemoryStore(TMP / "memory")
+    store.add(MemoryEntry(
+        memory_id="l1_entry", content="L1 finding", domain="test",
+        memory_type="domain", tier="L1", confidence=0.1,
+        active_count=0, updated="2020-01-01T00:00:00",
+    ))
+    archived = store.archive(threshold=0.99)
+    assert "l1_entry" not in archived
+
+
+def test_find_similar_matches():
+    store = MemoryStore(TMP / "memory")
+    store.add(MemoryEntry(
+        memory_id="m1", content="Bootstrap confidence intervals for small samples",
+        domain="statistics", memory_type="method", tier="L1",
+    ))
+    store.add(MemoryEntry(
+        memory_id="m2", content="Completely unrelated topic about cooking recipes",
+        domain="cooking", memory_type="domain", tier="L1",
+    ))
+    results = store.find_similar("bootstrap confidence interval estimation", threshold=0.2)
+    assert len(results) >= 1
+    assert results[0][0].memory_id == "m1"
+    assert results[0][1] > 0.2
+
+
+def test_find_similar_empty():
+    store = MemoryStore(TMP / "memory")
+    store.add(MemoryEntry(
+        memory_id="m1", content="Alpha beta gamma",
+        domain="test", memory_type="domain", tier="L1",
+    ))
+    results = store.find_similar("completely different words xyz")
+    assert len(results) == 0
