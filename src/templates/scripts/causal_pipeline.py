@@ -29,8 +29,8 @@ class RefutationResult:
     def to_dict(self) -> dict:
         return {
             "test_name": self.test_name,
-            "passed": self.passed,
-            "p_value": self.p_value,
+            "passed": bool(self.passed),  # cast numpy.bool_ for JSON
+            "p_value": float(self.p_value) if self.p_value is not None else None,
             "details": self.details,
         }
 
