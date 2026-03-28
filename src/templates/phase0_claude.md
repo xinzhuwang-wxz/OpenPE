@@ -275,6 +275,38 @@ each edge.
 a `user_provided: true` flag in the registry. Run the same quality checks
 in Step 0.5 — no trust privilege.
 
+### Data Callback Protocol
+
+Later phases (especially Phase 3) may discover they need additional data
+not anticipated during initial acquisition. The orchestrator can invoke a
+**data callback** — a re-run of Steps 0.3-0.5 for specific variables.
+
+**Callback triggers (orchestrator decides):**
+- A causal edge with EP > 0.30 cannot be tested due to missing data
+- Phase 2 EDA reveals a confounding variable not in the original DAGs
+- A reviewer flags a data gap as Category A
+
+**Callback guards (prevent infinite loops):**
+- Maximum 2 callbacks per analysis (hard cap)
+- Each callback must justify: what new data is needed, which DAG edge it
+  supports, and why Phase 0 didn't acquire it
+- Re-acquired data goes through the same quality gate (Step 0.5)
+- Callback data is appended to `registry.yaml`, never overwrites existing
+
+**Multi-strategy search (before declaring "no data found"):**
+When a required variable cannot be found through the primary source, the
+data acquisition agent MUST try these fallback strategies in order:
+
+1. **Alternative APIs:** World Bank, FRED, OECD, UN, IMF, national stats
+2. **Proxy variables:** Find a measurable proxy for the unmeasurable concept
+3. **Academic datasets:** Search data repositories (Harvard Dataverse, Zenodo, Kaggle)
+4. **Report extraction:** Use `scripts/data_extractor.py` to extract numbers
+   from PDF/web reports with confidence labeling
+5. **Composite indicators:** Construct from available sub-components
+
+Only after exhausting all 5 strategies may the agent declare "no data found."
+Document each failed strategy in the experiment log.
+
 **Output:** Populated `data/` directory and complete `registry.yaml`.
 
 ---

@@ -91,6 +91,20 @@ quantification) should be split into separate subagent invocations. The
 step 6-7 subagent reads the causal testing artifact from disk. This prevents
 context exhaustion during the most compute-intensive phase.
 
+**Data callbacks.** If Phase 2 or 3 agents report that a high-EP edge
+(EP > 0.30) cannot be tested due to missing data, the orchestrator MAY
+invoke a data callback:
+
+1. Spawn `data_acquisition_agent` with the specific variable request
+2. The agent runs Steps 0.3-0.4 for the requested variable only
+3. Spawn `data_quality_agent` for the new data (Step 0.5)
+4. Append results to `phase0_discovery/data/registry.yaml`
+5. Resume the requesting phase with the new data available
+
+**Guards:** Maximum 2 callbacks per analysis. Each callback gets logged
+in `experiment_log.md` with justification. If 2 callbacks have already
+been used, log the data gap as a limitation instead.
+
 **EP monitoring at sub-chain expansion.** During Phase 3, when an event or
 edge triggers sub-chain expansion, the orchestrator checks Joint_EP. If an
 event's individual EP > 0.3 and the chain's Joint_EP > 0.15, scaffold a
