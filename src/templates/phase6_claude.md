@@ -138,6 +138,10 @@ technical backbone, and (2) REPORT.md — the polished stakeholder deliverable.
 
 **Writing standards:**
 
+- **Never hand-number headings.** Write `# First Principles` not
+  `# 1. First Principles`. Pandoc's `--number-sections` flag generates all
+  section numbers automatically. Hand-numbered headings produce double
+  numbering in the PDF (e.g., "2  1. First Principles").
 - Every factual claim must cite its data source (dataset ID from registry.yaml)
 - Every inferential step must reference the statistical test that supports it
 - Uncertainty ranges appear with every quantitative claim — never bare numbers

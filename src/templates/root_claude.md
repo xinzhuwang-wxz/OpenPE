@@ -445,6 +445,8 @@ The analysis note (`ANALYSIS_NOTE.md`) must be **pandoc-compatible markdown**:
   Never use `[-@fig:...]`.
 - **Citations:** `[@key]` with a `references.bib` BibTeX file. `build-pdf` uses `--citeproc`.
 - **Sections:** `#`, `##`, `###` — pandoc adds numbering with `--number-sections`.
+  **Never hand-number headings** (write `# First Principles` not
+  `# 1. First Principles`). Hand-numbering causes double numbering in PDF.
 
 Required AN sections — see `methodology/03-phases.md` → Phase 6 for the full list.
 
