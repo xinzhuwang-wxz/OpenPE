@@ -15,7 +15,7 @@ This analysis evaluated three competing causal explanations: direct reduction th
 Forward projections show demographic decline, not policy, driving the spending trajectory. The birth rate ranks first in sensitivity analysis with more than twice the impact of income growth and four times the impact of policy persistence. The useful projection horizon is 2029; beyond that, uncertainty bands exceed the signal. The most probable scenario ("Status Quo / Displacement," 45--55% probability) projects spending approximately flat at **3,108 yuan by 2035**, with families continuing to redirect resources toward in-school expenses and informal tutoring.
 
 
-# 1. First Principles Identified {#sec:principles}
+# First Principles Identified {#sec:principles}
 
 ## The Question and Its Domain
 
@@ -64,7 +64,7 @@ Table: Explanatory Power summary for all tested causal edges, ordered by EP. No 
 The highest-EP edge (Policy $\to$ Industry Collapse, EP = 0.56) reflects what everyone already knew: the tutoring industry did collapse. The policy-relevant question --- whether that collapse translated into lower total spending --- sits at EP = 0.20, classified CORRELATION, meaning the statistical association exists but causation has not been established.
 
 
-# 2. Data Foundation {#sec:data}
+# Data Foundation {#sec:data}
 
 ## What We Had to Work With
 
@@ -101,7 +101,7 @@ Nine data quality constraints, identified in Phase 0, propagated through all dow
 Additional constraints include: the primary outcome is a proxy (noted above), underground tutoring is inherently unmeasurable (cash-based, illegal, systematically underreported), per-student spending was already declining pre-policy (from 10,372 to 6,090 yuan between 2017 and 2019 per CIEFR-HS), back-calculated 2016--2018 data carry approximately $\pm 2$--$3\%$ error, and CPI deflation is mandatory (cumulative education-category inflation of 16.8% over the period).
 
 
-# 3. Analysis Findings {#sec:analysis}
+# Analysis Findings {#sec:analysis}
 
 ## The Headline: No Detectable Per-Child Spending Reduction
 
@@ -109,7 +109,7 @@ The policy did not produce a detectable reduction in per-child education spendin
 
 The rest of this section walks through each causal edge: what was tested, how, what the result was, and what could make it wrong.
 
-## 3.1 Policy $\to$ Industry Collapse {#sec:edge-industry}
+## Policy → Industry Collapse {#sec:edge-industry}
 
 - **Classification:** CORRELATION
 - **EP:** 0.56 (95% CI: 0.41--0.71)
@@ -123,7 +123,7 @@ The classification remains CORRELATION rather than DATA_SUPPORTED because the cl
 
 What could make this wrong: very little. The industry collapse is one of the best-documented regulatory effects in recent Chinese economic history. The remaining uncertainty is about completeness --- some firms may have restructured rather than closed, and the "closure" definition varies across sources.
 
-## 3.2 Industry Collapse $\to$ Reduced Tutoring Spending {#sec:edge-tutoring-spending}
+## Industry Collapse → Reduced Tutoring Spending {#sec:edge-tutoring-spending}
 
 - **Classification:** CORRELATION
 - **EP:** 0.15 (95% CI: 0.05--0.25)
@@ -139,7 +139,7 @@ The low EP (0.15) reflects two problems. First, the outcome variable is a proxy 
 
 What could make this wrong: post-2021 household microdata could show a sharp decline in tutoring spending that the aggregate proxy masks. The CIEFR-HS Wave 3, if released, would directly resolve this.
 
-## 3.3 Policy $\to$ Aggregate Spending: The ITS Model {#sec:edge-aggregate}
+## Policy → Aggregate Spending: The ITS Model {#sec:edge-aggregate}
 
 - **Classification:** CORRELATION
 - **EP:** 0.20 (95% CI: 0.08--0.32)
@@ -169,7 +169,7 @@ An independent cross-check using an OLS income-conditioned counterfactual (which
 
 What could make this wrong: if the proxy correction factor (education's share of the bundled category) is at the low end of its plausible range (60% rather than the assumed 75%), the true education-specific shift could be larger. Conversely, if post-COVID recovery in culture and recreation spending is faster than assumed, the education-specific shift could be zero.
 
-## 3.4 Refutation Tests: Three Passes, One Critical Failure {#sec:refutation}
+## Refutation Tests: Three Passes, One Critical Failure {#sec:refutation}
 
 Refutation tests check whether a statistical result holds up under different assumptions --- they stress-test the finding by asking "would we get this result even if the policy had nothing to do with it?" Each series underwent four tests. @tbl:refutation summarizes the national results; @fig:refutation visualizes them.
 
@@ -186,7 +186,7 @@ Table: Refutation battery results for the national series. The COVID-date placeb
 
 The three core tests pass, which would normally support a DATA_SUPPORTED classification. The COVID-date placebo failure overrides this. If a researcher had placed the intervention at 2020 instead of 2021, they would have found a "policy effect" that is 22% larger and 10 times more statistically significant --- except there was no policy in 2020. A permutation test across all possible break dates finds that the 2021 break is not uniquely the largest ($p = 0.14$). This is why the classification remains CORRELATION: the observed break is real, but it cannot be confidently attributed to the policy rather than COVID.
 
-## 3.5 The Per-Birth Normalization: The Decisive Test {#sec:per-birth}
+## The Per-Birth Normalization: The Decisive Test {#sec:per-birth}
 
 - **Classification:** DATA_SUPPORTED (for the demographic explanation)
 - **EP for demographic confounding:** effectively 1.0 (the normalization eliminates the signal)
@@ -201,7 +201,7 @@ This aligns with household-level evidence from @chen2025bans, who found that fam
 
 What could make this wrong: the per-birth normalization is crude. Births in year $t$ do not translate into education spending in year $t$ --- there is a 6--7 year lag before children enter compulsory education. Enrollment data (which are stable at 157--161 million) would be a better denominator, but enrollment-normalized spending shows a similar pattern.
 
-## 3.6 The Compositional Ceiling: An Arithmetic Inconsistency {#sec:compositional-ceiling}
+## The Compositional Ceiling: An Arithmetic Inconsistency {#sec:compositional-ceiling}
 
 - **Classification:** DATA_SUPPORTED (for the arithmetic fact)
 
@@ -211,7 +211,7 @@ The observed aggregate decline of **23.7%** from the counterfactual trend substa
 
 The arithmetic is simple: if tutoring was 12% of spending, and the policy eliminated all of it with zero substitution, spending could fall by at most 12%. The observed 24% decline is twice that ceiling. At least half the decline must therefore originate from non-policy sources --- COVID disruption, demographic decline, or macroeconomic deceleration. This arithmetic inconsistency independently confirms that the aggregate spending decline cannot be predominantly policy-driven.
 
-## 3.7 Urban-Rural Differential {#sec:urban-rural}
+## Urban-Rural Differential {#sec:urban-rural}
 
 - **Classification:** CORRELATION
 - **EP:** 0.42
@@ -222,7 +222,7 @@ The urban ITS level shift ($-711$ yuan) is **3.7 times** larger than the rural s
 
 However, this comparison is descriptive, not causal. The parallel trends assumption (that urban and rural spending would have moved together absent the policy) is violated: urban spending had a compound annual growth rate (CAGR) of $-0.31\%$ over 2016--2020 versus $+3.36\%$ for rural. The 2022 urban dip could reflect the Shanghai lockdown (a COVID effect) rather than the tutoring ban. The differential is suggestive but inconclusive.
 
-## 3.8 Underground Market and Price Effects {#sec:underground}
+## Underground Market and Price Effects {#sec:underground}
 
 - **Classification:** HYPOTHESIZED
 - **EP:** 0.14 (underground existence); 0.08 (price increase)
@@ -231,7 +231,7 @@ Underground tutoring is inherently unmeasurable. Cash transactions, underreporti
 
 These edges remain HYPOTHESIZED because no quantitative dataset exists to test them. The underground market almost certainly exists --- regulatory displacement is a well-documented phenomenon across domains from drug policy to financial regulation --- but its size relative to the pre-policy formal market is unknown. This is not testable with available data. Resolution would require either systematic enforcement data (which governments rarely release) or survey designs specifically targeting underground activity.
 
-## 3.9 Public Spending Crowding-In {#sec:crowding-in}
+## Public Spending Crowding-In {#sec:crowding-in}
 
 - **Classification:** HYPOTHESIZED
 - **EP:** 0.12
@@ -240,7 +240,7 @@ These edges remain HYPOTHESIZED because no quantitative dataset exists to test t
 
 The evidence is macro-level correlation only. Public education expenditure and household education expenditure both trended upward over 2016--2023, but so did most fiscal and consumption categories. No causal test was feasible with available data. The mechanism is plausible on theoretical grounds and consistent with the micro-level findings of @chen2025bans, who documented increased in-school spending offsetting tutoring reductions.
 
-## 3.10 Uncertainty Decomposition {#sec:uncertainty}
+## Uncertainty Decomposition {#sec:uncertainty}
 
 Systematic uncertainty dominates the analysis. @tbl:uncertainty shows the full breakdown for the national ITS level shift. COVID handling specification alone accounts for **60.9%** of variance --- meaning the way the analyst handles the 2020 data point matters more than everything else combined.
 
@@ -260,20 +260,20 @@ Table: Uncertainty breakdown for the national ITS level shift ($-483$ yuan). COV
 
 The practical implication: additional years of data will reduce statistical uncertainty but will not address the dominant systematic sources. The proxy problem and COVID confounding are structural, not statistical. Only new data types --- household microdata, sub-category NBS breakdowns --- can materially improve the analysis.
 
-## 3.11 DAG Discrimination {#sec:dag-discrimination}
+## DAG Discrimination {#sec:dag-discrimination}
 
 The aggregate data cannot distinguish DAG 2 (displacement) from DAG 3 (compositional irrelevance) because both predict small or zero decline in total spending. The data reject DAG 1 (direct reduction) on two independent grounds: the per-birth normalization null result (@sec:per-birth) and the compositional ceiling inconsistency (@sec:compositional-ceiling).
 
 The results are most consistent with a combination of DAGs 2 and 3: the formal tutoring industry collapsed, but the policy's scope was too narrow (targeting only 12% of spending) and substitution effects too strong to produce a detectable reduction in total per-child education expenditure. @chen2025bans reached the same conclusion using household-level panel data: tutoring spending declined but was offset by increased in-school spending.
 
-## 3.12 Model Diagnostics {#sec:diagnostics}
+## Model Diagnostics {#sec:diagnostics}
 
 The ITS model passes standard diagnostics: Durbin-Watson statistics near 2 (no significant autocorrelation), Shapiro-Wilk $p > 0.36$ (normality not rejected), Breusch-Pagan $p > 0.07$ (no significant heteroscedasticity), and $R^2 > 0.89$ for all series. Signal injection tests (injecting known artificial effects and checking recovery) confirm model validity --- all injected signals were recovered within $2\sigma$.
 
 These diagnostics are necessary but insufficient. With only 9 observations and 3 parameters, all diagnostic tests have very low statistical power (the ability to detect violations when they exist). The model could be misspecified in ways these tests cannot detect.
 
 
-# 4. Forward Projection {#sec:projection}
+# Forward Projection {#sec:projection}
 
 ## Demographics, Not Policy, Will Drive the Spending Trajectory
 
@@ -345,7 +345,7 @@ The EP decay visualization in @fig:ep-decay is the core epistemic message of thi
 Table: Chain-level Joint EP values. All multi-step chains fall below hard truncation (0.05). Even the single-edge DAG 3 chain is below soft truncation. No chain-level causal claim is supportable with available data. {#tbl:chain-ep}
 
 
-# 5. Audit Trail {#sec:audit}
+# Audit Trail {#sec:audit}
 
 ## Data Provenance
 
