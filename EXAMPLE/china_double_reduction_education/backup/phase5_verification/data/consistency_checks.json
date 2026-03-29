@@ -1,0 +1,21 @@
+{
+  "its_consistency": {
+    "total_unc_check": true,
+    "significance_check": true
+  },
+  "uncertainty_breakdown": {
+    "fraction_sum": 1.002,
+    "sum_matches": true
+  },
+  "projection_base": {
+    "computed_real_2025": 2986.134885313249,
+    "reported": 2986
+  },
+  "scenario_probs": {
+    "min_total": 0.85,
+    "max_total": 1.15,
+    "brackets_one": true
+  },
+  "issues": [],
+  "overall": "PASS"
+}

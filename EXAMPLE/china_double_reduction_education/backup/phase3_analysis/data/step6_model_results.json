@@ -1,0 +1,374 @@
+{
+  "national": {
+    "model": {
+      "level_shift": -483.2204434718792,
+      "level_shift_se": 159.24756059575574,
+      "level_shift_pvalue": 0.02296765677994672,
+      "trend": 182.74805172417527,
+      "intercept": 1763.8591331718433,
+      "r_squared": 0.947182715206535,
+      "adj_r_squared": 0.9295769536087133,
+      "aic": 111.03417779342112,
+      "bic": 111.62585152542978,
+      "df_resid": 6,
+      "n_obs": 9
+    },
+    "bootstrap": {
+      "n_boot": 2000,
+      "n_valid": 2000,
+      "boot_mean": -479.03035328905844,
+      "boot_se": 127.07729638503186,
+      "ci_68": [
+        -601.6598640987454,
+        -357.0137051698528
+      ],
+      "ci_90": [
+        -689.6796313578567,
+        -265.8165881620441
+      ],
+      "ci_95": [
+        -737.3180398199936,
+        -228.71628377137273
+      ]
+    },
+    "diagnostics": {
+      "durbin_watson": 2.513391701836795,
+      "dw_interpretation": "Possible autocorrelation",
+      "shapiro_stat": 0.9280645427264081,
+      "shapiro_p": 0.4631375070545004,
+      "shapiro_interpretation": "Normal",
+      "bp_f": 3.0297660880021104,
+      "bp_p": 0.12315792675412966,
+      "bp_interpretation": "Homoscedastic",
+      "residual_mean": 5.052748343182935e-13,
+      "residual_std": 87.810851312077,
+      "max_abs_residual": 182.85042699133646
+    },
+    "sensitivity": {
+      "primary_2021_excl2020": {
+        "level_shift": -483.2204434718792,
+        "level_shift_se": 159.24756059575574,
+        "level_shift_pvalue": 0.02296765677994672
+      },
+      "intervention_2022": {
+        "level_shift": -292.13503280497594,
+        "level_shift_se": 185.66292368988434,
+        "level_shift_pvalue": 0.16667369873041443
+      },
+      "include_2020": {
+        "level_shift": -40.46303534782778,
+        "level_shift_se": 266.686221000733,
+        "level_shift_pvalue": 0.883683897259892
+      },
+      "covid_indicator": {
+        "level_shift": -483.2204434718798,
+        "level_shift_se": 159.24756059575552,
+        "level_shift_pvalue": 0.022967656779946485
+      },
+      "short_preperiod_2018_2019": {
+        "level_shift": -499.2292143918772,
+        "level_shift_se": 198.45573216972892,
+        "level_shift_pvalue": 0.06566610713668346
+      }
+    },
+    "signal_injection": {
+      "observed_magnitude": {
+        "injected": -483.2204434718792,
+        "recovered": -461.95573761700473,
+        "recovered_se": 79.53264627910974,
+        "within_1sigma": true,
+        "within_2sigma": true,
+        "deviation_pct": 4.40062214712817
+      },
+      "double_magnitude": {
+        "injected": -966.4408869437584,
+        "recovered": -773.8421791953422,
+        "recovered_se": 122.34301140515335,
+        "within_1sigma": false,
+        "within_2sigma": true,
+        "deviation_pct": 19.928658891645632
+      },
+      "null_injection": {
+        "injected": 0.0,
+        "recovered": 40.189894286922446,
+        "recovered_se": 127.95834944927276,
+        "within_1sigma": true,
+        "within_2sigma": true,
+        "deviation_pct": 40.189894286922446
+      }
+    },
+    "effect_size": {
+      "level_shift_yuan": -483.2204434718792,
+      "level_shift_boot_se": 127.07729638503186,
+      "level_shift_boot_ci_68": [
+        -601.6598640987454,
+        -357.0137051698528
+      ],
+      "level_shift_boot_ci_90": [
+        -689.6796313578567,
+        -265.8165881620441
+      ],
+      "level_shift_boot_ci_95": [
+        -737.3180398199936,
+        -228.71628377137273
+      ],
+      "pre_policy_mean": 2037.981210758107,
+      "pre_policy_std": 231.2842091830458,
+      "post_policy_mean": 2559.8750517691915,
+      "pct_effect": -23.710740850850456,
+      "pct_effect_ci_95": [
+        -36.178843844478784,
+        -11.222688539228127
+      ],
+      "cohens_d": 2.089292845277833
+    }
+  },
+  "urban": {
+    "model": {
+      "level_shift": -710.6105332422824,
+      "level_shift_se": 233.89547427299374,
+      "level_shift_pvalue": 0.022857022561757655,
+      "trend": 212.93843570684822,
+      "intercept": 2398.5972990107653,
+      "r_squared": 0.8964072583614755,
+      "adj_r_squared": 0.8618763444819674,
+      "aic": 117.95363606040044,
+      "bic": 118.5453097924091,
+      "df_resid": 6,
+      "n_obs": 9
+    },
+    "bootstrap": {
+      "n_boot": 2000,
+      "n_valid": 2000,
+      "boot_mean": -713.5266406379562,
+      "boot_se": 196.7592466502598,
+      "ci_68": [
+        -907.991013812479,
+        -517.2047614018568
+      ],
+      "ci_90": [
+        -1039.4080732974905,
+        -385.3399136991816
+      ],
+      "ci_95": [
+        -1112.215531864712,
+        -325.0294637717252
+      ]
+    },
+    "diagnostics": {
+      "durbin_watson": 2.490568970660863,
+      "dw_interpretation": "No autocorrelation",
+      "shapiro_stat": 0.9166214511563227,
+      "shapiro_p": 0.3650028883267783,
+      "shapiro_interpretation": "Normal",
+      "bp_f": 3.9891516127376088,
+      "bp_p": 0.07908431905238329,
+      "bp_interpretation": "Homoscedastic",
+      "residual_mean": 3.5369238402280543e-13,
+      "residual_std": 128.97252954530327,
+      "max_abs_residual": 254.98815853783344
+    },
+    "sensitivity": {
+      "primary_2021_excl2020": {
+        "level_shift": -710.6105332422824,
+        "level_shift_se": 233.89547427299374,
+        "level_shift_pvalue": 0.022857022561757655
+      },
+      "intervention_2022": {
+        "level_shift": -475.532630253576,
+        "level_shift_se": 259.8359511724617,
+        "level_shift_pvalue": 0.11696764714196524
+      },
+      "include_2020": {
+        "level_shift": -98.27379488215955,
+        "level_shift_se": 373.61790792858795,
+        "level_shift_pvalue": 0.8000991805567768
+      },
+      "covid_indicator": {
+        "level_shift": -710.6105332422844,
+        "level_shift_se": 233.89547427299374,
+        "level_shift_pvalue": 0.0228570225617574
+      },
+      "short_preperiod_2018_2019": {
+        "level_shift": -710.0247221246492,
+        "level_shift_se": 294.09551886609165,
+        "level_shift_pvalue": 0.07321587288553234
+      }
+    },
+    "signal_injection": {
+      "observed_magnitude": {
+        "injected": -710.6105332422824,
+        "recovered": -730.3676113504703,
+        "recovered_se": 194.03451061158574,
+        "within_1sigma": true,
+        "within_2sigma": true,
+        "deviation_pct": 2.780296264121338
+      },
+      "double_magnitude": {
+        "injected": -1421.2210664845647,
+        "recovered": -1442.1154091965802,
+        "recovered_se": 169.54653617556215,
+        "within_1sigma": true,
+        "within_2sigma": true,
+        "deviation_pct": 1.4701683787799673
+      },
+      "null_injection": {
+        "injected": 0.0,
+        "recovered": -114.36860446436046,
+        "recovered_se": 151.6197406432538,
+        "within_1sigma": true,
+        "within_2sigma": true,
+        "deviation_pct": 114.36860446436046
+      }
+    },
+    "effect_size": {
+      "level_shift_yuan": -710.6105332422824,
+      "level_shift_boot_se": 196.7592466502598,
+      "level_shift_boot_ci_68": [
+        -907.991013812479,
+        -517.2047614018568
+      ],
+      "level_shift_boot_ci_90": [
+        -1039.4080732974905,
+        -385.3399136991816
+      ],
+      "level_shift_boot_ci_95": [
+        -1112.215531864712,
+        -325.0294637717252
+      ],
+      "pre_policy_mean": 2718.0049525710388,
+      "pre_policy_std": 295.0745570175284,
+      "post_policy_mean": 3178.5558157164205,
+      "pct_effect": -26.144563591398,
+      "pct_effect_ci_95": [
+        -40.92029084835314,
+        -11.958383794123353
+      ],
+      "cohens_d": 2.408240616964037
+    }
+  },
+  "rural": {
+    "model": {
+      "level_shift": -190.9416949012082,
+      "level_shift_se": 70.5879205663583,
+      "level_shift_pvalue": 0.03533929285237752,
+      "trend": 126.93200144591101,
+      "intercept": 1004.8422553065157,
+      "r_squared": 0.9853168039504978,
+      "adj_r_squared": 0.9804224052673304,
+      "aic": 96.38936081603272,
+      "bic": 96.98103454804138,
+      "df_resid": 6,
+      "n_obs": 9
+    },
+    "bootstrap": {
+      "n_boot": 2000,
+      "n_valid": 2000,
+      "boot_mean": -192.76462365249787,
+      "boot_se": 57.604702359800754,
+      "ci_68": [
+        -250.94334725182293,
+        -134.32778022175904
+      ],
+      "ci_90": [
+        -288.6246787983886,
+        -101.14308360474918
+      ],
+      "ci_95": [
+        -308.29046521029517,
+        -83.22935256894024
+      ]
+    },
+    "diagnostics": {
+      "durbin_watson": 2.0232300217744843,
+      "dw_interpretation": "No autocorrelation",
+      "shapiro_stat": 0.9205123722331663,
+      "shapiro_p": 0.39649871361807515,
+      "shapiro_interpretation": "Normal",
+      "bp_f": 0.7601094966564068,
+      "bp_p": 0.5078813766095968,
+      "bp_interpretation": "Homoscedastic",
+      "residual_mean": 6.063298011819521e-13,
+      "residual_std": 38.92295350768715,
+      "max_abs_residual": 79.75847736374544
+    },
+    "sensitivity": {
+      "primary_2021_excl2020": {
+        "level_shift": -190.9416949012082,
+        "level_shift_se": 70.5879205663583,
+        "level_shift_pvalue": 0.03533929285237752
+      },
+      "intervention_2022": {
+        "level_shift": -67.6140942535107,
+        "level_shift_se": 87.27066573294047,
+        "level_shift_pvalue": 0.46790317388537583
+      },
+      "include_2020": {
+        "level_shift": 28.06278526819182,
+        "level_shift_se": 129.22997878831376,
+        "level_shift_pvalue": 0.8342820723462853
+      },
+      "covid_indicator": {
+        "level_shift": -190.9416949012083,
+        "level_shift_se": 70.58792056635829,
+        "level_shift_pvalue": 0.03533929285237742
+      },
+      "short_preperiod_2018_2019": {
+        "level_shift": -217.0780448190595,
+        "level_shift_se": 71.60204738851297,
+        "level_shift_pvalue": 0.038714805475701004
+      }
+    },
+    "signal_injection": {
+      "observed_magnitude": {
+        "injected": -190.9416949012082,
+        "recovered": -204.32276057716098,
+        "recovered_se": 57.25909842297017,
+        "within_1sigma": true,
+        "within_2sigma": true,
+        "deviation_pct": 7.007932805287
+      },
+      "double_magnitude": {
+        "injected": -381.8833898024164,
+        "recovered": -465.3402438195612,
+        "recovered_se": 43.41785166766626,
+        "within_1sigma": false,
+        "within_2sigma": true,
+        "deviation_pct": 21.854015190428875
+      },
+      "null_injection": {
+        "injected": 0.0,
+        "recovered": -53.45629341948014,
+        "recovered_se": 64.26493330997569,
+        "within_1sigma": true,
+        "within_2sigma": true,
+        "deviation_pct": 53.45629341948014
+      }
+    },
+    "effect_size": {
+      "level_shift_yuan": -190.9416949012082,
+      "level_shift_boot_se": 57.604702359800754,
+      "level_shift_boot_ci_68": [
+        -250.94334725182293,
+        -134.32778022175904
+      ],
+      "level_shift_boot_ci_90": [
+        -288.6246787983886,
+        -101.14308360474918
+      ],
+      "level_shift_boot_ci_95": [
+        -308.29046521029517,
+        -83.22935256894024
+      ],
+      "pre_policy_mean": 1195.2402574753828,
+      "pre_policy_std": 139.7510254582528,
+      "post_policy_mean": 1702.4245705266853,
+      "pct_effect": -15.975172665663065,
+      "pct_effect_ci_95": [
+        -25.793179511998222,
+        -6.963399370829378
+      ],
+      "cohens_d": 1.3662990613134882
+    }
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "final_results": {
+    "national": {
+      "central_value": -483.2204434718792,
+      "stat_unc": 127.07729638503186,
+      "syst_unc": 253.7540816585366,
+      "total_unc": 283.7953016082128,
+      "pct_effect": -23.710740850850456,
+      "pct_total_unc": 13.925314919986137,
+      "significance_sigma": 1.7027076936565295,
+      "classification": "CORRELATION",
+      "boot_ci_95": [
+        -737.3180398199936,
+        -228.71628377137273
+      ],
+      "boot_ci_90": [
+        -689.6796313578567,
+        -265.8165881620441
+      ],
+      "boot_ci_68": [
+        -601.6598640987454,
+        -357.0137051698528
+      ]
+    },
+    "urban": {
+      "central_value": -710.6105332422824,
+      "stat_unc": 196.7592466502598,
+      "syst_unc": 346.01063134079135,
+      "total_unc": 398.0421562387969,
+      "pct_effect": -26.144563591398,
+      "pct_total_unc": 14.644644258733871,
+      "significance_sigma": 1.7852645055413847,
+      "classification": "CORRELATION",
+      "boot_ci_95": [
+        -1112.215531864712,
+        -325.0294637717252
+      ],
+      "boot_ci_90": [
+        -1039.4080732974905,
+        -385.3399136991816
+      ],
+      "boot_ci_68": [
+        -907.991013812479,
+        -517.2047614018568
+      ]
+    },
+    "rural": {
+      "central_value": -190.9416949012082,
+      "stat_unc": 57.604702359800754,
+      "syst_unc": 128.1863937953555,
+      "total_unc": 140.5348828163997,
+      "pct_effect": -15.975172665663065,
+      "pct_total_unc": 11.757877291820899,
+      "significance_sigma": 1.3586782944890767,
+      "classification": "CORRELATION",
+      "boot_ci_95": [
+        -308.29046521029517,
+        -83.22935256894024
+      ],
+      "boot_ci_90": [
+        -288.6246787983886,
+        -101.14308360474918
+      ],
+      "boot_ci_68": [
+        -250.94334725182293,
+        -134.32778022175904
+      ]
+    }
+  },
+  "uncertainty_breakdown_national": {
+    "Statistical (bootstrap)": {
+      "shift": 127.07729638503186,
+      "frac_of_total_var_pct": 20.050514934331115
+    },
+    "Method disagreement": {
+      "shift": 50.52908223461236,
+      "frac_of_total_var_pct": 3.1700960277846746
+    },
+    "COVID handling": {
+      "shift": 221.378704062026,
+      "frac_of_total_var_pct": 60.85009760508932
+    },
+    "Intervention date": {
+      "shift": 95.54270533345164,
+      "frac_of_total_var_pct": 11.334038051086036
+    },
+    "Proxy variable": {
+      "shift": 60.4025554339849,
+      "frac_of_total_var_pct": 4.530021078183028
+    },
+    "CPI deflator": {
+      "shift": 7.248306652078188,
+      "frac_of_total_var_pct": 0.06523230352583559
+    }
+  },
+  "ep_summary": {
+    "Policy -> Industry Collapse": {
+      "phase0_ep": 0.6,
+      "phase1_ep": 0.6,
+      "phase3_ep": 0.7,
+      "classification": "DATA_SUPPORTED",
+      "change_reason": "Industry collapse is documented in all references (92-96% closures). No refutation needed."
+    },
+    "Industry Collapse -> Reduced Tutoring": {
+      "phase0_ep": 0.2,
+      "phase1_ep": 0.2,
+      "phase3_ep": 0.15,
+      "classification": "CORRELATION",
+      "change_reason": "Compositional analysis shows education share dropped 0.7pp but z-score is only -1.05 (not unique among categories). Direction is consistent but effect is not distinguishable from general shifts."
+    },
+    "Reduced Tutoring -> Total Expenditure": {
+      "phase0_ep": 0.2,
+      "phase1_ep": 0.1,
+      "phase3_ep": 0.02,
+      "classification": "HYPOTHESIZED",
+      "change_reason": "Per-birth normalization eliminates the apparent level shift (p=0.48). Any aggregate decline is attributable to demographic decline, not per-child spending reduction."
+    },
+    "Policy -> Underground Market": {
+      "phase0_ep": 0.5,
+      "phase1_ep": 0.2,
+      "phase3_ep": 0.21,
+      "classification": "HYPOTHESIZED",
+      "change_reason": "Beyond analytical horizon: no systematic data to test"
+    },
+    "Underground -> Higher Prices": {
+      "phase0_ep": 0.2,
+      "phase1_ep": 0.1,
+      "phase3_ep": 0.12,
+      "classification": "HYPOTHESIZED",
+      "change_reason": "Beyond analytical horizon: no systematic data to test"
+    },
+    "Competitive Pressure -> Inelastic Demand": {
+      "phase0_ep": 0.5,
+      "phase1_ep": 0.4,
+      "phase3_ep": 0.42,
+      "classification": "CORRELATION",
+      "change_reason": "Not directly tested. CIEFR-HS evidence is pre-policy only."
+    },
+    "Income -> Differential Access": {
+      "phase0_ep": 0.4,
+      "phase1_ep": 0.3,
+      "phase3_ep": 0.42,
+      "classification": "CORRELATION",
+      "change_reason": "Urban ITS shift (-711) is 3.7x larger than rural (-191), consistent with higher urban exposure. But parallel trends are violated, so this is descriptive only."
+    },
+    "Public Spending -> Crowding-In": {
+      "phase0_ep": 0.3,
+      "phase1_ep": 0.2,
+      "phase3_ep": 0.24,
+      "classification": "HYPOTHESIZED",
+      "change_reason": "Lightweight assessment only. Public spending maintained above 4% GDP but no causal test possible."
+    },
+    "Policy -> Aggregate Spending (net)": {
+      "phase0_ep": 0.3,
+      "phase1_ep": 0.3,
+      "phase3_ep": 0.2,
+      "classification": "CORRELATION",
+      "change_reason": "CORRELATION: 2/3 core refutation tests passed, jackknife FAIL (max dev 51.9%), COVID placebo FAIL. ITS & BSTS agree in direction (-23.7% vs -18.8%) but COVID confounding is severe. Relevance decreased due to COVID confounding."
+    }
+  },
+  "sanity_checks": {
+    "national": {
+      "total_unc_smaller_than_effect": true,
+      "effect_over_total_unc": 1.7027076936565295,
+      "syst_dominant": true,
+      "stat_frac": 20.050514934331115,
+      "syst_frac": 79.9494850656689
+    },
+    "urban": {
+      "total_unc_smaller_than_effect": true,
+      "effect_over_total_unc": 1.7852645055413847,
+      "syst_dominant": true,
+      "stat_frac": 24.434989781513387,
+      "syst_frac": 75.56501021848662
+    },
+    "rural": {
+      "total_unc_smaller_than_effect": true,
+      "effect_over_total_unc": 1.3586782944890767,
+      "syst_dominant": true,
+      "stat_frac": 16.801482434179484,
+      "syst_frac": 83.19851756582052
+    }
+  },
+  "demographic_caveat": "Per-birth normalization eliminates the ITS level shift (p=0.48). This means the aggregate spending decline is at least partially attributable to demographic decline (47% fewer births 2016-2024). The demographic confound is not included in the quadrature sum because it questions the existence of the effect itself, rather than shifting its magnitude. If the effect does not exist, the uncertainty envelope is irrelevant."
+}

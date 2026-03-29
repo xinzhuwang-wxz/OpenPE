@@ -1,0 +1,146 @@
+analysis_name: china_double_reduction_education
+generated: '2026-03-29'
+overall_status: PASS
+veracity:
+- relation_id: V01
+  relation_type: CAUSAL_CLAIM
+  dependent_claims:
+  - C01
+  - C02
+  - C10
+  synthesis_prose: >
+    The ITS level shift of -483 yuan was reproduced exactly using an independent
+    numpy-based OLS implementation. All 4 refutation test outcomes were independently
+    confirmed. However, the COVID-date placebo FAIL downgrades classification from
+    DATA_SUPPORTED to CORRELATION: the level shift is not uniquely attributable to
+    the policy.
+  audit_status: VERIFIED_LOGIC
+  timestamp: '2026-03-29'
+
+- relation_id: V02
+  relation_type: CAUSAL_CLAIM
+  dependent_claims:
+  - C03
+  - C04
+  synthesis_prose: >
+    Per-birth normalization eliminates the aggregate signal (p=0.48), and the
+    observed 23.7% decline exceeds the 12% compositional ceiling. These two
+    independent pieces of evidence both indicate the aggregate decline cannot be
+    solely policy-driven. Demographic decline is the dominant explanation.
+  audit_status: VERIFIED_LOGIC
+  timestamp: '2026-03-29'
+
+- relation_id: V03
+  relation_type: INFERENCE
+  dependent_claims:
+  - C06
+  - C16
+  synthesis_prose: >
+    The tutoring industry collapse (92-96% closure rate) is well-documented but
+    does not translate to measurable household spending reduction. Underground
+    tutoring evidence is anecdotal (LOW quality data). The supply-side destruction
+    is unambiguous; the demand-side response is untestable with available data.
+  audit_status: VERIFIED_LOGIC
+  timestamp: '2026-03-29'
+
+- relation_id: V04
+  relation_type: INFERENCE
+  dependent_claims:
+  - C12
+  - C13
+  - C14
+  - C15
+  synthesis_prose: >
+    Forward projections are conditional on scenario assumptions. Monte Carlo
+    parameters are internally consistent. EP decay applies CORRELATION squared
+    multipliers correctly. The useful horizon of 2029 is justified by EP falling
+    below hard truncation at the mid-term tier. Demographic decline dominates
+    sensitivity, ranking first with more than twice the impact of income growth.
+  audit_status: INSUFFICIENT_PREMISE
+  timestamp: '2026-03-29'
+
+- relation_id: V05
+  relation_type: SUMMARY
+  dependent_claims:
+  - C07
+  - C08
+  synthesis_prose: >
+    The urban-rural differential (3.7x) is directionally consistent with
+    differential exposure but cannot be interpreted causally due to violated
+    parallel trends. Systematic uncertainty dominates (80%), with COVID handling
+    as the largest single source (60.9%). These are descriptive findings only.
+  audit_status: VERIFIED_LOGIC
+  timestamp: '2026-03-29'
+
+- relation_id: V06
+  relation_type: INFERENCE
+  dependent_claims:
+  - C11
+  - C15
+  synthesis_prose: >
+    The endgame is fork-dependent because all causal chains are below hard EP
+    truncation. The fork condition (per-child spending vs demographic artifact)
+    cannot be resolved without post-2021 household microdata (CFPS or CIEFR-HS
+    Wave 3). This is the single most important unresolved question.
+  audit_status: INSUFFICIENT_PREMISE
+  timestamp: '2026-03-29'
+
+verification_programs:
+- program: "Program 1: Result Reproduction"
+  status: PASS
+  details: >
+    ITS level shift (-483 yuan national, -711 urban, -191 rural) reproduced
+    exactly using independent numpy OLS. All refutation test outcomes confirmed.
+
+- program: "Program 2: Data Provenance Audit"
+  status: PASS
+  details: >
+    SHA-256 hashes matched for all 13 acquired datasets. 5/5 spot-check values
+    confirmed. 3 minor Category C notes on row count bookkeeping.
+
+- program: "Program 3: Baseline Validation"
+  status: N/A
+  details: >
+    Pre-trend coefficients verified as part of Program 1. No untreated control
+    regions exist in this national-level analysis.
+
+- program: "Program 4: Auxiliary Distributions"
+  status: N/A
+  details: >
+    With 9 annual observations and ITS design, auxiliary distribution checks
+    are already covered by Phase 2 exploration and Phase 3 compositional analysis.
+
+- program: "Program 5: Signal Injection"
+  status: PARTIAL
+  details: >
+    Signal injection results reviewed from Phase 3 output. All injections
+    recovered within 2 sigma. Not independently re-run by verifier.
+
+- program: "Program 6: Logic Audit"
+  status: PASS
+  details: >
+    All causal language appropriate. No inappropriate causal claims found.
+    Downscoping documented. DAG has no cycles. All data quality warnings
+    carry through to downstream artifacts.
+
+- program: "Program 7: EP Verification"
+  status: PASS
+  details: >
+    All 9 edge EP values consistent across Phase 3 and Phase 4. All 3 chain
+    Joint EP values arithmetically correct. EP decay schedule with CORRELATION
+    squared multipliers verified.
+
+- program: "Program 8: Consistency Checks"
+  status: PASS
+  details: >
+    Uncertainty decomposition arithmetic verified. Projection base value
+    confirmed. Scenario probabilities sum to 100%. Compositional ceiling
+    logic sound.
+
+category_a_issues: 0
+category_b_issues: 0
+category_c_issues: 3
+category_c_details:
+- "Registry row count bookkeeping (ds_002, ds_004, ds_011)"
+- "CPI deflation warning not explicit in PROJECTION.md"
+- "Causal language instance in ANALYSIS.md (negation context, appropriate)"

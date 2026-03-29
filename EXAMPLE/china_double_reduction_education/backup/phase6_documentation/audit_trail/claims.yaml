@@ -1,0 +1,171 @@
+analysis_name: china_double_reduction_education
+generated: '2026-03-29'
+total_claims: 16
+claims:
+- claim_id: C01
+  text: >
+    The ITS level shift for national real education/culture/recreation spending
+    is -483 yuan (real 2015 terms) with total uncertainty of +/-284 yuan
+    (1.7 sigma significance when systematic uncertainties are included).
+  source_type: analysis
+  source_ref: phase3_analysis/exec/ANALYSIS.md, ITS Results
+  evidence_type: CORRELATION
+  confidence: 0.20
+  phase: Phase 3
+
+- claim_id: C02
+  text: >
+    The COVID-date placebo test produces a larger and more significant break
+    at 2020 (-591 yuan, p=0.002) than the policy break at 2021 (-483 yuan,
+    p=0.023).
+  source_type: analysis
+  source_ref: phase3_analysis/exec/ANALYSIS.md, Refutation Battery
+  evidence_type: CORRELATION
+  confidence: 0.20
+  phase: Phase 3
+
+- claim_id: C03
+  text: >
+    Per-birth normalization eliminates the ITS level shift entirely: the
+    per-birth level shift is +13 yuan (p=0.48).
+  source_type: analysis
+  source_ref: phase3_analysis/exec/ANALYSIS.md, Per-Birth Normalization
+  evidence_type: DATA_SUPPORTED
+  confidence: 0.56
+  phase: Phase 3
+
+- claim_id: C04
+  text: >
+    The observed aggregate decline of 23.7% exceeds the 12% compositional
+    ceiling implied by the pre-policy share of tutoring in total education
+    spending.
+  source_type: data
+  source_ref: ds_002 (CIEFR-HS), ds_001 (NBS Education Expenditure)
+  evidence_type: DATA_SUPPORTED
+  confidence: 0.56
+  phase: Phase 3
+
+- claim_id: C05
+  text: >
+    Off-campus tutoring and extracurricular spending constituted only
+    approximately 12% of total household education expenditure in 2019,
+    with in-school expenses at approximately 73%.
+  source_type: data
+  source_ref: ds_002 (CIEFR-HS Spending Decomposition)
+  evidence_type: DATA_SUPPORTED
+  confidence: 0.58
+  phase: Phase 0
+
+- claim_id: C06
+  text: >
+    Tutoring industry closure rates of 92-96% for offline tutoring centers
+    and revenue declines of 50-70% for major firms (New Oriental, TAL
+    Education) are documented post-policy.
+  source_type: data
+  source_ref: ds_004 (Tutoring Industry Collapse Indicators)
+  evidence_type: CORRELATION
+  confidence: 0.56
+  phase: Phase 3
+
+- claim_id: C07
+  text: >
+    Urban ITS level shift (-711 yuan) is 3.7 times larger than rural shift
+    (-191 yuan), directionally consistent with differential tutoring
+    participation (urban 47% vs rural 18% pre-policy).
+  source_type: analysis
+  source_ref: phase3_analysis/exec/ANALYSIS.md, Urban-Rural Differential
+  evidence_type: CORRELATION
+  confidence: 0.42
+  phase: Phase 3
+
+- claim_id: C08
+  text: >
+    Systematic uncertainty dominates at 80% of total variance, with COVID
+    handling specification alone accounting for 60.9% of national-level
+    variance.
+  source_type: analysis
+  source_ref: phase3_analysis/exec/ANALYSIS.md, Uncertainty Decomposition
+  evidence_type: DATA_SUPPORTED
+  confidence: 0.85
+  phase: Phase 3
+
+- claim_id: C09
+  text: >
+    Births fell 47% from 17.86 million (2016) to 9.54 million (2024).
+  source_type: data
+  source_ref: ds_006 (China Demographics and Education Enrollment)
+  evidence_type: DATA_SUPPORTED
+  confidence: 0.78
+  phase: Phase 2
+
+- claim_id: C10
+  text: >
+    Three core refutation tests PASS (placebo treatment, random common cause,
+    data subset) but the supplementary COVID-date placebo FAILS.
+  source_type: analysis
+  source_ref: phase3_analysis/exec/ANALYSIS.md, Refutation Battery
+  evidence_type: CORRELATION
+  confidence: 0.20
+  phase: Phase 3
+
+- claim_id: C11
+  text: >
+    All seven multi-step causal chains produce Joint EP values below the hard
+    truncation threshold of 0.05.
+  source_type: analysis
+  source_ref: phase3_analysis/exec/ANALYSIS.md, Formal Downscoping
+  evidence_type: DATA_SUPPORTED
+  confidence: 0.85
+  phase: Phase 3
+
+- claim_id: C12
+  text: >
+    Under Scenario B (Status Quo/Displacement, 45-55% probability), median
+    spending is 3,108 yuan by 2035 (+4%, CAGR +0.4%).
+  source_type: projection
+  source_ref: phase4_projection/exec/PROJECTION.md, Scenario Comparison
+  evidence_type: HYPOTHESIZED
+  confidence: 0.098
+  phase: Phase 4
+
+- claim_id: C13
+  text: >
+    Demographic decline rate has the largest absolute sensitivity impact
+    (853 yuan range at 2030), exceeding income growth (385 yuan) by more
+    than 2x and policy persistence (193 yuan) by more than 4x.
+  source_type: analysis
+  source_ref: phase4_projection/exec/PROJECTION.md, Sensitivity Analysis
+  evidence_type: HYPOTHESIZED
+  confidence: 0.098
+  phase: Phase 4
+
+- claim_id: C14
+  text: >
+    The useful projection horizon is 2029 (4 years), beyond which EP falls
+    below hard truncation (0.05).
+  source_type: analysis
+  source_ref: phase4_projection/exec/PROJECTION.md, EP Decay
+  evidence_type: HYPOTHESIZED
+  confidence: 0.032
+  phase: Phase 4
+
+- claim_id: C15
+  text: >
+    The endgame is classified as Fork-dependent. The fork condition is whether
+    the aggregate spending dip represents a real per-child spending reduction
+    or is entirely explained by demographics and COVID.
+  source_type: analysis
+  source_ref: phase4_projection/exec/PROJECTION.md, Endgame Classification
+  evidence_type: HYPOTHESIZED
+  confidence: 0.20
+  phase: Phase 4
+
+- claim_id: C16
+  text: >
+    Approximately 3,000 illegal tutoring operations were detected in Q2 2022,
+    with underground tutoring prices reportedly increasing 43-50%.
+  source_type: data
+  source_ref: ds_011 (Underground Tutoring Price and Activity Indicators)
+  evidence_type: HYPOTHESIZED
+  confidence: 0.14
+  phase: Phase 3

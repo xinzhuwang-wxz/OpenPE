@@ -1,0 +1,224 @@
+{
+  "national": {
+    "true_shift": -483.2204434718792,
+    "true_se": 159.24756059575574,
+    "true_pvalue": 0.02296765677994672,
+    "placebo": {
+      "details": {
+        "2017": {
+          "level_shift": 41.42954351394221,
+          "level_shift_se": 201.62975865903084,
+          "level_shift_pvalue": 0.8439962538384825
+        },
+        "2018": {
+          "level_shift": 40.84002223551387,
+          "level_shift_se": 184.98001701238772,
+          "level_shift_pvalue": 0.832584366316796
+        },
+        "2019": {
+          "level_shift": -29.480921740489993,
+          "level_shift_se": 205.2863961972204,
+          "level_shift_pvalue": 0.8905112399553977
+        }
+      },
+      "any_significant": false,
+      "true_larger_than_all": true,
+      "pass": true
+    },
+    "random_common_cause": {
+      "true_shift": -483.2204434718792,
+      "mean_with_random": -486.18365005626305,
+      "std_with_random": 83.41725840637307,
+      "pct_change": 0.6132204513313979,
+      "frac_exceed_true": 0.515,
+      "pass": true
+    },
+    "data_subset": {
+      "n_obs": 9,
+      "n_drop": 2,
+      "n_iterations": 200,
+      "mean_shift": -501.76879196621917,
+      "std_shift": 151.5546989473773,
+      "median_shift": -476.53204556213996,
+      "pct_deviation": 3.838485880496357,
+      "frac_same_sign": 1.0,
+      "frac_within_50pct": 0.82,
+      "pass": true
+    },
+    "jackknife": {
+      "estimates": {
+        "2016": -499.42079814580063,
+        "2017": -484.8151199220067,
+        "2018": -504.4179375630569,
+        "2019": -455.20255825629476,
+        "2021": -733.9459329480069,
+        "2022": -341.9269317058465,
+        "2023": -475.821167329269,
+        "2024": -481.3086041096062,
+        "2025": -422.4567133761734
+      },
+      "range": 392.01900124216036,
+      "max_deviation": 250.72548947612768,
+      "max_deviation_pct": 51.88635805114039,
+      "note": "Supplementary diagnostic only; not part of core refutation battery."
+    },
+    "covid_placebo": {
+      "shift": -591.0410998225589,
+      "se": 127.14409414869455,
+      "pvalue": 0.00234575409964471,
+      "similar_magnitude": true,
+      "significant": true,
+      "pass": false
+    },
+    "tests_passed": 3,
+    "classification": "CORRELATION"
+  },
+  "urban": {
+    "true_shift": -710.6105332422824,
+    "true_se": 233.89547427299374,
+    "true_pvalue": 0.022857022561757655,
+    "placebo": {
+      "details": {
+        "2017": {
+          "level_shift": 124.92188769064245,
+          "level_shift_se": 293.0021207377491,
+          "level_shift_pvalue": 0.6847240589285087
+        },
+        "2018": {
+          "level_shift": 121.87380247736048,
+          "level_shift_se": 268.4237065902891,
+          "level_shift_pvalue": 0.6657646452571849
+        },
+        "2019": {
+          "level_shift": -8.522282234259063,
+          "level_shift_se": 302.23935609144394,
+          "level_shift_pvalue": 0.9784194052321237
+        }
+      },
+      "any_significant": false,
+      "true_larger_than_all": true,
+      "pass": true
+    },
+    "random_common_cause": {
+      "true_shift": -710.6105332422824,
+      "mean_with_random": -708.6622864452759,
+      "std_with_random": 108.78482596071504,
+      "pct_change": 0.27416520103034425,
+      "frac_exceed_true": 0.515,
+      "pass": true
+    },
+    "data_subset": {
+      "n_obs": 9,
+      "n_drop": 2,
+      "n_iterations": 200,
+      "mean_shift": -749.8686766779803,
+      "std_shift": 237.24228438269006,
+      "median_shift": -700.6396894216634,
+      "pct_deviation": 5.524565370087589,
+      "frac_same_sign": 1.0,
+      "frac_within_50pct": 0.79,
+      "pass": true
+    },
+    "jackknife": {
+      "estimates": {
+        "2016": -714.0677892487113,
+        "2017": -713.4976901399999,
+        "2018": -726.8731124493951,
+        "2019": -640.7898642409955,
+        "2021": -1122.3304577047838,
+        "2022": -513.5742289175932,
+        "2023": -697.7525325239476,
+        "2024": -711.281085082473,
+        "2025": -636.5084719985571
+      },
+      "range": 608.7562287871906,
+      "max_deviation": 411.71992446250147,
+      "max_deviation_pct": 57.93889974919999,
+      "note": "Supplementary diagnostic only; not part of core refutation battery."
+    },
+    "covid_placebo": {
+      "shift": -829.1678146848883,
+      "se": 179.75193096115214,
+      "pvalue": 0.0024467319677378184,
+      "similar_magnitude": true,
+      "significant": true,
+      "pass": false
+    },
+    "tests_passed": 3,
+    "classification": "CORRELATION"
+  },
+  "rural": {
+    "true_shift": -190.9416949012082,
+    "true_se": 70.5879205663583,
+    "true_pvalue": 0.03533929285237752,
+    "placebo": {
+      "details": {
+        "2017": {
+          "level_shift": -36.31845919341941,
+          "level_shift_se": 82.60859813742502,
+          "level_shift_pvalue": 0.6755872814332938
+        },
+        "2018": {
+          "level_shift": -34.254263806362744,
+          "level_shift_se": 75.75989949524111,
+          "level_shift_pvalue": 0.6670525445146248
+        },
+        "2019": {
+          "level_shift": -40.89993797749014,
+          "level_shift_se": 83.64764925668582,
+          "level_shift_pvalue": 0.6422314765832616
+        }
+      },
+      "any_significant": false,
+      "true_larger_than_all": true,
+      "pass": true
+    },
+    "random_common_cause": {
+      "true_shift": -190.9416949012082,
+      "mean_with_random": -189.16718008855594,
+      "std_with_random": 35.62340054499372,
+      "pct_change": 0.9293490421619947,
+      "frac_exceed_true": 0.5,
+      "pass": true
+    },
+    "data_subset": {
+      "n_obs": 9,
+      "n_drop": 2,
+      "n_iterations": 200,
+      "mean_shift": -194.3096560509951,
+      "std_shift": 48.95028509267751,
+      "median_shift": -203.27787581385695,
+      "pct_deviation": 1.7638688875834405,
+      "frac_same_sign": 1.0,
+      "frac_within_50pct": 0.95,
+      "pass": true
+    },
+    "jackknife": {
+      "estimates": {
+        "2016": -214.1111184290528,
+        "2017": -191.15996206464501,
+        "2018": -211.16051352119084,
+        "2019": -203.9036228717723,
+        "2021": -245.23035435545376,
+        "2022": -129.31014421104055,
+        "2023": -190.31594784329377,
+        "2024": -186.3519579020699,
+        "2025": -159.8971632187231
+      },
+      "range": 115.9202101444132,
+      "max_deviation": 61.63155069016764,
+      "max_deviation_pct": 32.27768074545235,
+      "note": "Supplementary diagnostic only; not part of core refutation battery."
+    },
+    "covid_placebo": {
+      "shift": -278.99636304416043,
+      "se": 66.69061435078358,
+      "pvalue": 0.004119547498440939,
+      "similar_magnitude": true,
+      "significant": true,
+      "pass": false
+    },
+    "tests_passed": 3,
+    "classification": "CORRELATION"
+  }
+}

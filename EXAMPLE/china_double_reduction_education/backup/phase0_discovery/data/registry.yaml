@@ -1,0 +1,607 @@
+datasets:
+- id: ds_001
+  name: NBS Per Capita Consumption Expenditure on Education, Culture and Recreation
+  source_url: https://www.stats.gov.cn/english/PressRelease/
+  source_authority: National Bureau of Statistics of China (NBS)
+  api_endpoint: N/A - manual extraction from press releases
+  query_params:
+    category: education_culture_recreation
+    level: national_urban_rural
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/nbs_education_expenditure_2016_2025.csv
+  processed_file: data/processed/nbs_education_expenditure.parquet
+  sha256_raw: 5a171093e9dddac6d644903a3101dabd44e4c78e220bec5b56dc92554d270f9f
+  sha256_processed: 25f9b69727f213e5bb286f08f9be94f4131a7fc83883459e7196a3ac0a7e71cd
+  variables:
+  - name: education_culture_recreation_national_yuan
+    description: Per capita consumption expenditure on education, culture and recreation
+      (national)
+    unit: yuan/year
+    dag_variable: Total household education expenditure (proxy)
+  - name: education_culture_recreation_urban_yuan
+    description: Per capita consumption expenditure on education, culture and recreation
+      (urban)
+    unit: yuan/year
+    dag_variable: Total household education expenditure (urban)
+  - name: education_culture_recreation_rural_yuan
+    description: Per capita consumption expenditure on education, culture and recreation
+      (rural)
+    unit: yuan/year
+    dag_variable: Total household education expenditure (rural)
+  - name: education_share_national_pct
+    description: Education spending as share of total consumption
+    unit: percent
+    dag_variable: Education spending share
+  temporal_coverage:
+    start: '2016-01-01'
+    end: '2025-12-31'
+    frequency: annual
+  observations: 10
+  missing_pct: 0.0
+  license: Public domain (Chinese government statistics)
+  notes: NBS reports 'education, culture and recreation' as a combined category. Not
+    pure education spending. Years 2016-2018 back-calculated from 2019 values using
+    reported YoY growth rates. This is a PROXY for household education expenditure
+    -- it includes culture and recreation components that are not education-related.
+  status: acquired
+- id: ds_002
+  name: CIEFR-HS Education Spending Decomposition
+  source_url: https://journals.sagepub.com/doi/10.1177/20965311241243389
+  source_authority: China Institute for Educational Finance Research (CIEFR), Peking
+    University
+  api_endpoint: N/A - extracted from published paper and VoxChina summary
+  query_params:
+    paper: Wei (2024)
+    voxchina_url: https://voxchina.org/show-3-346.html
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/ciefr_hs_spending_decomposition.json
+  processed_file: data/processed/ciefr_spending_composition.parquet
+  sha256_raw: edc41108e66bc50c9a9b137c03215fb34cd6a5f9d5480ead6be1d8b1372dc944
+  sha256_processed: 7b3c0af23231d66461e4f80c05fe68ac6e3ca7b08f28a9f2561a9ceaa56140ff
+  variables:
+  - name: share_of_total_pct
+    description: Share of total education spending by category
+    unit: percent
+    dag_variable: In-school fees / Off-campus tutoring expenditure
+  - name: education_pct_of_income
+    description: Education spending as % of income by quartile
+    unit: percent
+    dag_variable: Household income effect modifier
+  - name: participation_rate_pct
+    description: Tutoring participation rate by area
+    unit: percent
+    dag_variable: Tutoring demand indicator
+  - name: avg_expenditure_yuan
+    description: Average education expenditure by level/category
+    unit: yuan/year
+    dag_variable: Total household education expenditure
+  temporal_coverage:
+    start: '2017-01-01'
+    end: '2019-12-31'
+    frequency: survey_wave
+  observations: 13
+  missing_pct: 5.0
+  license: Published academic research (CC-BY or similar)
+  notes: Summary statistics from CIEFR-HS survey. Microdata requires application to
+    Peking University ISSS. The 73/12/15 spending composition split is the key finding
+    for DAG 3. Pre-Double Reduction only (2017, 2019 waves). No post-2021 CIEFR-HS
+    data publicly available.
+  status: acquired
+- id: ds_003
+  name: World Bank Education Indicators - China
+  source_url: https://data.worldbank.org/indicator/SE.XPD.TOTL.GD.ZS?locations=CN
+  source_authority: World Bank
+  api_endpoint: wbgapi Python library
+  query_params:
+    economy: CHN
+    indicators:
+    - SE.XPD.TOTL.GD.ZS
+    - SE.XPD.TOTL.GB.ZS
+    - NY.GDP.PCAP.CN
+    - SP.POP.0014.TO.ZS
+    - SE.PRM.ENRR
+    - SE.SEC.ENRR
+    time: 2010-2025
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/worldbank_china_education_2010_2025.csv
+  processed_file: data/processed/worldbank_education_indicators.parquet
+  sha256_raw: 1d35a22d1242a8673429c0f590cd6b9e72f41df20f82373235c445284b98b16e
+  sha256_processed: 6daeffb5726529092cad1bd34d83182381338647744974cb6a27a8c4f0b49796
+  variables:
+  - name: govt_education_spending_pct_gdp
+    description: Government expenditure on education as % of GDP
+    unit: percent
+    dag_variable: Public education expenditure
+  - name: govt_education_spending_pct_govt_expenditure
+    description: Government expenditure on education as % of total government expenditure
+    unit: percent
+    dag_variable: Public education expenditure
+  - name: gdp_per_capita_cny
+    description: GDP per capita in local currency
+    unit: yuan
+    dag_variable: Household income (macro proxy)
+  - name: population_0_14_pct
+    description: Population ages 0-14 as % of total
+    unit: percent
+    dag_variable: Number of children (demographic)
+  temporal_coverage:
+    start: '2010-01-01'
+    end: '2024-12-31'
+    frequency: annual
+  observations: 15
+  missing_pct: 38.1
+  license: CC-BY 4.0 (World Bank Open Data)
+  notes: World Bank data has 1-2 year reporting lag. Education spending indicators
+    may not extend past 2022. Demographic data (population 0-14) is a proxy for 'number
+    of children' variable. Temporal coverage end corrected to 2024 (GDP per capita
+    data extends through 2024).
+  status: acquired
+- id: ds_004
+  name: Tutoring Industry Collapse Indicators
+  source_url: https://www.sciencedirect.com/science/article/abs/pii/S014759672500054X
+  source_authority: 'Multiple sources: academic papers, Ministry of Education, SEC
+    filings'
+  api_endpoint: N/A - manual extraction from published sources
+  query_params: {}
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/tutoring_industry_data.json
+  processed_file: data/processed/tutoring_industry_metrics.parquet
+  sha256_raw: c4ca7c2a84f75e76b970b2eeb533b2ac18202f9902e2b33a8e83be337a195414
+  sha256_processed: 65cc04a78d61d243714f28ec3f25a4153222c760aa2831f53e4eeaa16df34e8c
+  variables:
+  - name: k12_tutoring_market_size
+    description: K-12 after-school tutoring market size
+    unit: billion USD
+    dag_variable: Tutoring industry revenue
+  - name: tutoring_job_posting_decline
+    description: Decline in tutoring job postings post-policy
+    unit: percent
+    dag_variable: Formal tutoring industry collapse
+  - name: illegal_tutoring_operations_q2
+    description: Illegal tutoring operations detected Q2 2022
+    unit: count
+    dag_variable: Underground tutoring activity indicators
+  - name: revenue_billion_usd
+    description: Company revenue (New Oriental, TAL)
+    unit: billion USD
+    dag_variable: Tutoring industry revenue
+  temporal_coverage:
+    start: '2019-01-01'
+    end: '2024-12-31'
+    frequency: annual
+  observations: 19
+  missing_pct: 0.0
+  license: Mixed (academic papers, public SEC filings, government reports)
+  notes: Collection of industry-level metrics from multiple sources. Some figures
+    are approximations from media reports. Company financial data uses fiscal years
+    which do not align with calendar years. Market size estimates vary widely across
+    sources ($70-300 billion range).
+  status: acquired
+- id: ds_005
+  name: Double Reduction Policy Enforcement Timeline
+  source_url: https://en.wikipedia.org/wiki/Double_Reduction_Policy
+  source_authority: Multiple (State Council, Ministry of Education, media reports)
+  api_endpoint: N/A - manual compilation from public sources
+  query_params: {}
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/policy_timeline.json
+  processed_file: data/processed/policy_timeline.parquet
+  sha256_raw: 262c2d67ba0fe39e11cc4166099b389147919e2d3ecef2f6866b9f09defcf69d
+  sha256_processed: f9e55a59e61d31695addc2a8cabc56c9e00756d08371c77381f559c5a42bb15c
+  variables:
+  - name: date
+    description: Date of policy event
+    unit: ISO 8601
+    dag_variable: Policy enforcement timeline
+  - name: type
+    description: Type of policy event
+    unit: categorical
+    dag_variable: Policy enforcement intensity
+  temporal_coverage:
+    start: '2021-07-24'
+    end: '2024-10-01'
+    frequency: event_based
+  observations: 8
+  missing_pct: 0.0
+  license: Public domain (government policy documents)
+  notes: Manually compiled from policy documents, media reports, and Wikipedia. Does
+    not capture regional variation in enforcement timing.
+  status: acquired
+- id: ds_006
+  name: China Demographics and Education Enrollment
+  source_url: https://www.stats.gov.cn/english/PressRelease/
+  source_authority: National Bureau of Statistics of China (NBS)
+  api_endpoint: N/A - extracted from NBS statistical communiques
+  query_params: {}
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/china_demographics_2016_2024.csv
+  processed_file: data/processed/china_demographics.parquet
+  sha256_raw: 0e31428ba693518e1079f02436a0a5439422fae9145027401d3acd57a67ffb46
+  sha256_processed: 8533361941c77323c68c1e26cd5b66ca7edf49d066f911517a85f2509650a5b6
+  variables:
+  - name: births_millions
+    description: Annual births
+    unit: millions
+    dag_variable: Demographic decline confounder
+  - name: birth_rate_per_1000
+    description: Birth rate per 1,000 population
+    unit: per 1,000
+    dag_variable: Demographic decline confounder
+  - name: compulsory_education_enrollment_millions
+    description: Students enrolled in compulsory education (grades 1-9)
+    unit: millions
+    dag_variable: Number of children per household (proxy)
+  temporal_coverage:
+    start: '2016-01-01'
+    end: '2024-12-31'
+    frequency: annual
+  observations: 9
+  missing_pct: 6.7
+  license: Public domain (Chinese government statistics)
+  notes: Birth data from NBS statistical communiques. Enrollment data from Ministry
+    of Education annual reports. Enrollment data missing for 2016-2017 and 2024.
+  status: acquired
+- id: ds_007
+  name: China Public Education Expenditure
+  source_url: https://english.www.gov.cn/archive/statistics/202407/23/content_WS669ee6e0c6d0868f4e8e95a8.html
+  source_authority: Ministry of Finance / NBS
+  api_endpoint: N/A - from official statistics and press releases
+  query_params: {}
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/china_public_education_expenditure_2016_2023.csv
+  processed_file: data/processed/public_education_expenditure.parquet
+  sha256_raw: 4135cfb54fe566688f0063b403363195fbb4715db9d97690ccb7a7a88b27dd28
+  sha256_processed: b5941540c8d81cd1d4653f1531596ddfc0b91879fbed06e11b2ffbfd1c1601de
+  variables:
+  - name: total_education_spending_trillion_yuan
+    description: Total national expenditure on education
+    unit: trillion yuan
+    dag_variable: Public education expenditure
+  - name: pct_of_gdp
+    description: Education spending as percentage of GDP
+    unit: percent
+    dag_variable: Public education expenditure
+  temporal_coverage:
+    start: '2016-01-01'
+    end: '2023-12-31'
+    frequency: annual
+  observations: 8
+  missing_pct: 0.0
+  license: Public domain (Chinese government statistics)
+  notes: Total national education expenditure includes all government spending on
+    education. China has maintained >4% of GDP target since 2012. The 2023 figure
+    of 6.46 trillion yuan includes compulsory education (2.84T), higher education
+    (1.76T), high school (1.02T), preschool (0.54T).
+  status: acquired
+- id: ds_008
+  name: NBS Per Capita Consumption - All 8 Categories
+  source_url: https://www.stats.gov.cn/english/PressRelease/
+  source_authority: National Bureau of Statistics of China (NBS)
+  api_endpoint: N/A - from NBS press releases
+  query_params: {}
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/nbs_all_consumption_categories_2019_2025.csv
+  processed_file: data/processed/nbs_consumption_categories.parquet
+  sha256_raw: 2bdcacf10ed22767127eafa07005ba1898ec08aa213147c30c8a1960ebd8cdff
+  sha256_processed: 2f9c8423b91b6affb87fcacb5bc70646b4d4a656f6d739397279de6d32445779
+  variables:
+  - name: education_culture_recreation
+    description: Education, culture and recreation spending
+    unit: yuan/year
+    dag_variable: Total household education expenditure (proxy)
+  - name: education_culture_recreation_share_pct
+    description: Education share of total consumption
+    unit: percent
+    dag_variable: Education spending composition
+  temporal_coverage:
+    start: '2019-01-01'
+    end: '2025-12-31'
+    frequency: annual
+  observations: 7
+  missing_pct: 0.0
+  license: Public domain (Chinese government statistics)
+  notes: All 8 NBS consumption categories. Useful for detecting compositional shifts
+    in spending. The 'education, culture and recreation' category is broader than
+    pure education spending.
+  status: acquired
+- id: ds_009
+  name: NBS Per Capita Disposable Income
+  source_url: https://www.stats.gov.cn/english/PressRelease/
+  source_authority: National Bureau of Statistics of China (NBS)
+  api_endpoint: N/A - from NBS press releases
+  query_params: {}
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/nbs_per_capita_income_2016_2025.csv
+  processed_file: data/processed/nbs_disposable_income.parquet
+  sha256_raw: 66d2e08e99cbec5c4e43900b91bf5f2fbd9e6061491cf5a6ec8ccd27f92c9c7a
+  sha256_processed: 3afc16f0c5ae20fd7b16fcb3fd00db0266a7d4b16d55bca8a8006b61eb219fc4
+  variables:
+  - name: national_yuan
+    description: Per capita disposable income (national)
+    unit: yuan/year
+    dag_variable: Household income level
+  - name: urban_yuan
+    description: Per capita disposable income (urban)
+    unit: yuan/year
+    dag_variable: Household income level (urban)
+  - name: rural_yuan
+    description: Per capita disposable income (rural)
+    unit: yuan/year
+    dag_variable: Household income level (rural)
+  - name: urban_rural_ratio
+    description: Urban to rural income ratio
+    unit: ratio
+    dag_variable: Urban/rural classification (income proxy)
+  temporal_coverage:
+    start: '2016-01-01'
+    end: '2025-12-31'
+    frequency: annual
+  observations: 10
+  missing_pct: 0.0
+  license: Public domain (Chinese government statistics)
+  notes: Per capita disposable income from NBS annual household surveys. This is a
+    macro-level proxy for household income. For income-stratified analysis, microdata
+    (CFPS) would be needed.
+  status: acquired
+- id: ds_010
+  name: International Comparison of Household Education Spending
+  source_url: https://voxchina.org/show-3-346.html
+  source_authority: VoxChina / CIEFR-HS
+  api_endpoint: N/A
+  query_params: {}
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/international_education_spending_comparison.csv
+  processed_file: data/processed/international_comparison.parquet
+  sha256_raw: d35cef3d2deef1534def7a0fec45b9dad2e8435cf36e0755138dc7ce545fc219
+  sha256_processed: 011bcabd3116bc891dc4b9034e89f58b71b8ad7264e46b35a1ffbf2c3d5f55bb
+  variables:
+  - name: education_pct_household_expenditure
+    description: Education as % of household expenditure
+    unit: percent
+    dag_variable: International comparison benchmark
+  temporal_coverage:
+    start: '2019-01-01'
+    end: '2019-12-31'
+    frequency: snapshot
+  observations: 5
+  missing_pct: 0.0
+  license: Published academic summary
+  notes: Approximate comparison. Japan, Mexico, and USA values are approximate ranges
+    from VoxChina summary. China figure from CIEFR-HS 2019 wave.
+  status: acquired
+- id: ds_011
+  name: Underground Tutoring Price and Activity Indicators
+  source_url: https://www.scmp.com/tech/policy/article/3186924/
+  source_authority: Multiple media sources (SCMP, The Star, RFA, Bloomberg)
+  api_endpoint: N/A - manually extracted from news reports
+  query_params: {}
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/underground_tutoring_indicators.json
+  processed_file: data/processed/underground_tutoring_prices.parquet
+  sha256_raw: bf69c5b7aa768fc54514267f14dee4d28fa32078919d5335fc9fbf59e2ad2fb2
+  sha256_processed: c8e14d7505b03a6a20235cce05b08646a5d5c13f4dfc28483d2a19d7ea2affba
+  variables:
+  - name: value_yuan
+    description: Tutoring price per session/hour
+    unit: yuan
+    dag_variable: Underground tutoring price indices
+  - name: value
+    description: Count of tutoring centers / operations
+    unit: count
+    dag_variable: Underground tutoring activity indicators
+  temporal_coverage:
+    start: '2021-07-01'
+    end: '2024-09-01'
+    frequency: event_based
+  observations: 14
+  missing_pct: 0.0
+  license: News reports (fair use for research)
+  notes: 'Prices from individual cases reported in media -- not systematic survey
+    data. Underground tutoring prices are inherently difficult to measure systematically.
+    These are anecdotal data points that indicate the direction and approximate magnitude
+    of price changes. The 43-50% average increase is corroborated across multiple
+    independent sources. Caution: selection bias in reporting -- extreme cases more
+    likely to be covered.'
+  status: acquired
+- id: ds_012
+  name: Crowding-In Effect Evidence (Academic Literature)
+  source_url: https://www.sciencedirect.com/science/article/abs/pii/S1049007825001848
+  source_authority: Peer-reviewed academic papers
+  api_endpoint: N/A
+  query_params: {}
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/crowding_in_evidence.json
+  processed_file: data/processed/crowding_in_evidence.parquet
+  sha256_raw: 5735a5fff35e739413cbb0d6b5e948d3ef216b9099deeda839cb89457293d008
+  sha256_processed: 563700f77ea2e9e37252036e4a2b528301bde4c817d7f1b9c54bf8911308432f
+  variables:
+  - name: finding
+    description: Key empirical finding
+    unit: text
+    dag_variable: Crowding-in effect (DAG 3)
+  - name: effect_primary
+    description: Direction of effect
+    unit: categorical
+    dag_variable: Public education expenditure effect
+  temporal_coverage:
+    start: '2019-01-01'
+    end: '2025-01-01'
+    frequency: study_publication
+  observations: 3
+  missing_pct: 0.0
+  license: Academic publications (citation use)
+  notes: Qualitative evidence compilation from peer-reviewed literature. These studies
+    provide the empirical basis for DAG 3's crowding-in mechanism. The ScienceDirect
+    2025 finding is particularly important as it uses CHIP data with county-level
+    matching.
+  status: acquired
+- id: ds_013
+  name: NBS Consumer Price Index (Overall and Education Sub-Index)
+  source_url: https://www.stats.gov.cn/english/PressRelease/
+  source_authority: National Bureau of Statistics of China (NBS)
+  api_endpoint: N/A - compiled from NBS annual statistical communiques and CPI category
+    breakdowns
+  query_params:
+    categories:
+    - overall_cpi
+    - education_culture_recreation_cpi
+    base_year: 2015
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: data/raw/nbs_cpi_2016_2025.csv
+  processed_file: data/processed/nbs_cpi_deflator.parquet
+  sha256_raw: d9c454c67ecac8980629bcb9723526bcb7c1c3fd3ea471f36510a7c19429df7c
+  sha256_processed: ed870522aa36ccfeec7e9fccb635e3b12ed40d35e5e5c9db25f373ed92f43992
+  variables:
+  - name: cpi_overall_index
+    description: Consumer Price Index, overall (2015=100)
+    unit: index (2015=100)
+    dag_variable: CPI deflator for real spending comparisons
+  - name: cpi_education_culture_recreation_index
+    description: CPI sub-index for education, culture and recreation category (2015=100)
+    unit: index (2015=100)
+    dag_variable: Education-specific CPI deflator
+  - name: cpi_overall_yoy_pct
+    description: Year-over-year CPI change, overall
+    unit: percent
+    dag_variable: Inflation rate
+  - name: cpi_education_yoy_pct
+    description: Year-over-year CPI change, education/culture/recreation
+    unit: percent
+    dag_variable: Education price inflation
+  - name: deflator_overall
+    description: Deflator to convert nominal yuan to real 2015 yuan (overall CPI)
+    unit: ratio
+    dag_variable: CPI deflator for real spending comparisons
+  - name: deflator_education
+    description: Deflator to convert nominal yuan to real 2015 yuan (education CPI)
+    unit: ratio
+    dag_variable: Education-specific CPI deflator
+  temporal_coverage:
+    start: '2016-01-01'
+    end: '2025-12-31'
+    frequency: annual
+  observations: 10
+  missing_pct: 0.0
+  license: Public domain (Chinese government statistics)
+  notes: Overall CPI and education/culture/recreation sub-index compiled from NBS
+    annual statistical communiques. Index constructed from published YoY changes with
+    base year 2015=100. The education sub-index tracks the NBS CPI basket category
+    "Education, Culture and Recreation" which matches the NBS expenditure classification.
+    Cumulative overall inflation 2016-2025 is 15.3%; cumulative education category
+    inflation is 16.8%. 2025 values are preliminary estimates based on early-year
+    data. All nominal spending comparisons in this analysis MUST use these deflators
+    to produce real (CPI-adjusted) values.
+  status: acquired
+- id: ds_014
+  name: CFPS Microdata (Post-2021)
+  source_url: https://www.isss.pku.edu.cn/cfps/en/
+  source_authority: Peking University ISSS
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: N/A
+  processed_file: N/A
+  status: failed
+  variables:
+  - name: household_education_expenditure_post_2021
+    dag_variable: Total household education expenditure
+  notes: CFPS microdata requires formal application through Peking University ISSS.
+    The 2020 wave is the latest publicly accessible. Post-2021 waves (which would
+    capture Double Reduction effects) are not yet publicly available. This is a CRITICAL
+    data gap -- no household-level microdata exists in the public domain for the post-policy
+    period.
+- id: ds_015
+  name: CIEFR-HS Wave 3 (2021-2022) Microdata
+  source_url: https://opendata.pku.edu.cn/dataverse/ciefrhs
+  source_authority: CIEFR, Peking University
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: N/A
+  processed_file: N/A
+  status: failed
+  variables:
+  - name: post_policy_education_spending_decomposition
+    dag_variable: Off-campus tutoring expenditure / In-school fees
+  notes: The 3rd CIEFR-HS wave was conducted in 2021-2022 (post-policy), but results
+    have not yet been published. When available, this will be the most important dataset
+    for testing all three DAGs, as it provides spending decomposition before and after
+    the policy.
+- id: ds_016
+  name: Underground Tutoring Systematic Survey
+  source_url: N/A
+  source_authority: N/A
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: N/A
+  processed_file: N/A
+  status: failed
+  variables:
+  - name: underground_tutoring_participation_rate
+    dag_variable: Underground tutoring activity indicators
+  - name: underground_tutoring_total_spending
+    dag_variable: Underground tutoring price indices
+  notes: No systematic survey of underground tutoring activity exists. By definition,
+    underground market activity is difficult to measure. Available data comes from
+    enforcement reports (supply-side detection) and anecdotal media reports. The Ministry
+    of Education's ~3,000 illegal operations detected in Q2 2022 is a lower bound.
+    This is the SINGLE LARGEST data challenge for testing DAG 2.
+- id: ds_017
+  name: Regional Enforcement Intensity Index
+  source_url: N/A
+  source_authority: N/A
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: N/A
+  processed_file: N/A
+  status: failed
+  variables:
+  - name: enforcement_intensity_by_province
+    dag_variable: Policy enforcement intensity by locality
+  notes: No standardized enforcement intensity index exists across provinces. Some
+    academic papers have constructed indices from policy documents and media reports,
+    but no publicly available dataset provides this. This limits the ability to exploit
+    enforcement variation for identification.
+- id: ds_018
+  name: Non-Academic Enrichment Spending Time Series
+  source_url: N/A
+  source_authority: N/A
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: N/A
+  processed_file: N/A
+  status: failed
+  variables:
+  - name: non_academic_enrichment_spending
+    dag_variable: Non-academic enrichment spending
+  notes: No public time series tracks non-academic enrichment spending (arts, sports,
+    STEM camps) separately from academic tutoring. The CIEFR-HS interest-oriented
+    tutoring data (Table 6) provides a 2019 snapshot but no post-policy comparison.
+    Media reports suggest growth in this category but no quantification exists.
+- id: ds_019
+  name: Parental Anxiety / Subjective Burden Index
+  source_url: N/A
+  source_authority: N/A
+  retrieval_date: '2026-03-29'
+  access_date: '2026-03-29'
+  raw_file: N/A
+  processed_file: N/A
+  status: failed
+  variables:
+  - name: parental_anxiety_index
+    dag_variable: Parental anxiety indices
+  notes: No public standardized index exists. Some academic surveys (e.g., PMC 2022
+    study on education anxiety) provide cross-sectional data but no pre-post comparison
+    with the same instrument. Beijing Normal University survey (83.5% not taking tutoring)
+    provides one data point but is self-reported compliance, not anxiety measurement.

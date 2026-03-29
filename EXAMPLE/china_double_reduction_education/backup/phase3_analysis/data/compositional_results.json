@@ -1,0 +1,64 @@
+{
+  "share_changes": {
+    "Clothing": {
+      "pre_2019": 6.2,
+      "post_avg": 5.45,
+      "val_2025": 5.3,
+      "change_pp": -0.75
+    },
+    "Residence": {
+      "pre_2019": 23.4,
+      "post_avg": 22.650000000000002,
+      "val_2025": 21.7,
+      "change_pp": -0.7499999999999964
+    },
+    "Education/culture/rec": {
+      "pre_2019": 11.7,
+      "post_avg": 11.0,
+      "val_2025": 11.8,
+      "change_pp": -0.6999999999999993
+    },
+    "Household facilities": {
+      "pre_2019": 5.9,
+      "post_avg": 5.675,
+      "val_2025": 5.7,
+      "change_pp": -0.22500000000000053
+    },
+    "Healthcare": {
+      "pre_2019": 8.8,
+      "post_avg": 8.875,
+      "val_2025": 8.7,
+      "change_pp": 0.07499999999999929
+    },
+    "Miscellaneous": {
+      "pre_2019": 2.4,
+      "post_avg": 2.65,
+      "val_2025": 2.9,
+      "change_pp": 0.25
+    },
+    "Transport/telecom": {
+      "pre_2019": 13.3,
+      "post_avg": 13.825000000000001,
+      "val_2025": 14.6,
+      "change_pp": 0.5250000000000004
+    },
+    "Food/tobacco/liquor": {
+      "pre_2019": 28.2,
+      "post_avg": 29.849999999999998,
+      "val_2025": 29.3,
+      "change_pp": 1.6499999999999986
+    }
+  },
+  "education_z_score": -1.0521443911768247,
+  "education_change_pp": -0.6999999999999993,
+  "synthetic_ratio_pre": 0.4534883720930233,
+  "synthetic_ratio_post_avg": 0.4198578139795085,
+  "synthetic_ratio_change": -0.033630558113514786,
+  "perbirth_its": {
+    "level_shift": 12.998157045627579,
+    "level_shift_se": 16.898497264934782,
+    "level_shift_pvalue": 0.47652515347591695,
+    "trend": 22.864498362916738,
+    "r_squared": 0.9875164980237449
+  }
+}

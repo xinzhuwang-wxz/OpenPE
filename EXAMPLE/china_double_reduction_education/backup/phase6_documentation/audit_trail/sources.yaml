@@ -1,0 +1,200 @@
+analysis_name: china_double_reduction_education
+generated: '2026-03-29'
+sources:
+- id: ds_001
+  name: NBS Per Capita Consumption Expenditure on Education, Culture and Recreation
+  source_type: dataset
+  uri: https://www.stats.gov.cn/english/PressRelease/
+  location: National, urban, rural; 2016-2025; annual
+  chunk_id: ds_001
+  verification_status: VERIFIED
+  notes: >
+    Primary outcome variable (proxy). SHA-256 hash matched. 5/5 spot-check values
+    confirmed. Back-calculated 2016-2018 data has +/-2-3% error.
+
+- id: ds_002
+  name: CIEFR-HS Education Spending Decomposition
+  source_type: dataset
+  uri: https://journals.sagepub.com/doi/10.1177/20965311241243389
+  location: National; 2017, 2019; survey wave
+  chunk_id: ds_002
+  verification_status: VERIFIED
+  notes: >
+    Pre-policy spending composition (73/12/15 split). Key structural constraint
+    for DAG 3. SHA-256 hash matched.
+
+- id: ds_003
+  name: World Bank Education Indicators - China
+  source_type: dataset
+  uri: https://data.worldbank.org/indicator/SE.XPD.TOTL.GD.ZS?locations=CN
+  location: China; 2010-2024; annual
+  chunk_id: ds_003
+  verification_status: VERIFIED
+  notes: >
+    Government education spending and demographic indicators. 38.1% missing
+    due to 1-2 year reporting lag. SHA-256 hash matched.
+
+- id: ds_004
+  name: Tutoring Industry Collapse Indicators
+  source_type: dataset
+  uri: https://www.sciencedirect.com/science/article/abs/pii/S014759672500054X
+  location: National; 2019-2024; annual
+  chunk_id: ds_004
+  verification_status: VERIFIED
+  notes: >
+    Supply-side evidence for industry collapse (92-96% closure rate).
+    Mixed sources (academic papers, SEC filings, government reports).
+    SHA-256 hash matched.
+
+- id: ds_005
+  name: Double Reduction Policy Enforcement Timeline
+  source_type: dataset
+  uri: https://en.wikipedia.org/wiki/Double_Reduction_Policy
+  location: National; 2021-2024; event-based
+  chunk_id: ds_005
+  verification_status: VERIFIED
+  notes: >
+    Manually compiled policy timeline. Does not capture regional enforcement
+    variation. SHA-256 hash matched.
+
+- id: ds_006
+  name: China Demographics and Education Enrollment
+  source_type: dataset
+  uri: https://www.stats.gov.cn/english/PressRelease/
+  location: National; 2016-2024; annual
+  chunk_id: ds_006
+  verification_status: VERIFIED
+  notes: >
+    Critical confounder data. Births declined 47% (17.86M to 9.54M).
+    Enrollment data missing for 2016-2017 and 2024. SHA-256 hash matched.
+
+- id: ds_007
+  name: China Public Education Expenditure
+  source_type: dataset
+  uri: https://english.www.gov.cn/archive/statistics/202407/23/content_WS669ee6e0c6d0868f4e8e95a8.html
+  location: National; 2016-2023; annual
+  chunk_id: ds_007
+  verification_status: VERIFIED
+  notes: >
+    Government education spending for crowding-in analysis. SHA-256 hash matched.
+
+- id: ds_008
+  name: NBS Per Capita Consumption - All 8 Categories
+  source_type: dataset
+  uri: https://www.stats.gov.cn/english/PressRelease/
+  location: National; 2019-2025; annual
+  chunk_id: ds_008
+  verification_status: VERIFIED
+  notes: >
+    Compositional analysis across all consumption categories.
+    SHA-256 hash matched.
+
+- id: ds_009
+  name: NBS Per Capita Disposable Income
+  source_type: dataset
+  uri: https://www.stats.gov.cn/english/PressRelease/
+  location: National, urban, rural; 2016-2025; annual
+  chunk_id: ds_009
+  verification_status: VERIFIED
+  notes: >
+    Income control variable for OLS counterfactual. SHA-256 hash matched.
+
+- id: ds_010
+  name: International Comparison of Household Education Spending
+  source_type: dataset
+  uri: https://voxchina.org/show-3-346.html
+  location: 5 countries; 2019; snapshot
+  chunk_id: ds_010
+  verification_status: VERIFIED
+  notes: >
+    Context only. Approximate comparison values. SHA-256 hash matched.
+
+- id: ds_011
+  name: Underground Tutoring Price and Activity Indicators
+  source_type: dataset
+  uri: https://www.scmp.com/tech/policy/article/3186924/
+  location: National; 2021-2024; event-based
+  chunk_id: ds_011
+  verification_status: VERIFIED
+  notes: >
+    Anecdotal evidence only. LOW quality (score 33). Prices from individual
+    media reports, not systematic survey. SHA-256 hash matched.
+
+- id: ds_012
+  name: Crowding-In Effect Evidence (Academic Literature)
+  source_type: dataset
+  uri: https://www.sciencedirect.com/science/article/abs/pii/S1049007825001848
+  location: National; 2019-2025; study publication
+  chunk_id: ds_012
+  verification_status: VERIFIED
+  notes: >
+    Qualitative evidence for DAG 3 crowding-in mechanism. SHA-256 hash matched.
+
+- id: ds_013
+  name: NBS Consumer Price Index (Overall and Education Sub-Index)
+  source_type: dataset
+  uri: https://www.stats.gov.cn/english/PressRelease/
+  location: National; 2016-2025; annual
+  chunk_id: ds_013
+  verification_status: VERIFIED
+  notes: >
+    CPI deflators for real value conversion. Cumulative overall inflation
+    15.3%, education category 16.8%. SHA-256 hash matched.
+
+- id: ds_014
+  name: CFPS Microdata (Post-2021)
+  source_type: dataset
+  uri: https://www.isss.pku.edu.cn/cfps/en/
+  location: N/A
+  chunk_id: ds_014
+  verification_status: NOT_ACQUIRED
+  notes: >
+    CRITICAL data gap. Requires formal application through Peking University.
+    Post-2021 waves not publicly available. Would resolve the fork variable.
+
+- id: ds_015
+  name: CIEFR-HS Wave 3 (2021-2022) Microdata
+  source_type: dataset
+  uri: https://opendata.pku.edu.cn/dataverse/ciefrhs
+  location: N/A
+  chunk_id: ds_015
+  verification_status: NOT_ACQUIRED
+  notes: >
+    Wave conducted but not published. Would provide first direct post-policy
+    spending decomposition.
+
+- id: ds_016
+  name: Underground Tutoring Systematic Survey
+  source_type: dataset
+  uri: N/A
+  location: N/A
+  chunk_id: ds_016
+  verification_status: NOT_ACQUIRED
+  notes: No systematic survey exists. Inherently unmeasurable.
+
+- id: ds_017
+  name: Regional Enforcement Intensity Index
+  source_type: dataset
+  uri: N/A
+  location: N/A
+  chunk_id: ds_017
+  verification_status: NOT_ACQUIRED
+  notes: No standardized enforcement intensity index exists across provinces.
+
+- id: ds_018
+  name: Non-Academic Enrichment Spending Time Series
+  source_type: dataset
+  uri: N/A
+  location: N/A
+  chunk_id: ds_018
+  verification_status: NOT_ACQUIRED
+  notes: No public time series tracks non-academic enrichment spending separately.
+
+- id: ds_019
+  name: Parental Anxiety / Subjective Burden Index
+  source_type: dataset
+  uri: N/A
+  location: N/A
+  chunk_id: ds_019
+  verification_status: NOT_ACQUIRED
+  notes: No public standardized index exists for pre-post comparison.

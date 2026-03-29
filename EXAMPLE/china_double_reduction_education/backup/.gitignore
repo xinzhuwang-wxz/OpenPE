@@ -1,0 +1,13 @@
+# pixi
+.pixi/
+pixi.lock
+
+# Python
+__pycache__/
+*.pyc
+
+# SLURM logs
+.slurm_*.out
+
+# Raw data (large files, not tracked)
+phase0_discovery/data/raw/

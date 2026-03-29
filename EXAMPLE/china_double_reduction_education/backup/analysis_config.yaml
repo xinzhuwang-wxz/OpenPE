@@ -1,0 +1,13 @@
+analysis_name: china_double_reduction_education
+analysis_type: analysis
+input_mode: A
+question: '中国双减政策是否真正减少了家庭教育支出？(Did China''s Double Reduction policy truly reduce household education expenditure?)'
+domain: 'education policy / public economics'
+model_tier: auto
+ep_thresholds:
+  hard_truncation: 0.05
+  soft_truncation: 0.15
+  subchain_expansion: 0.30
+cost_controls:
+  max_review_iterations: 10
+  review_warn_threshold: 3

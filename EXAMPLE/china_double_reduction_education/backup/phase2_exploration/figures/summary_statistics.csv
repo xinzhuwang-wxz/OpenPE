@@ -1,0 +1,9 @@
+Variable,Unit,N,Mean,Std,Min,Max,Missing
+Real edu/culture/rec (national),2015 yuan,10,2281,389,1796,2986,0
+Real edu/culture/rec (urban),2015 yuan,10,2914,423,2376,3679,0
+Real edu/culture/rec (rural),2015 yuan,10,1449,315,1051,1987,0
+Disposable income (national),nominal yuan,10,33663,6567,23821,43145,0
+Disposable income (urban),nominal yuan,10,45447,7645,33616,56311,0
+Disposable income (rural),nominal yuan,10,18196,4166,12363,24525,0
+Education share of consumption (national),%,10,10.9,0.7,9.6,11.8,0
+Annual births,millions,9,12.9,3.5,9.0,17.9,0

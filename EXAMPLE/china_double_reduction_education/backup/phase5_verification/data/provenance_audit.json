@@ -1,0 +1,224 @@
+{
+  "hash_results": {
+    "ds_001": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "5a171093e9dddac6...",
+      "expected": "5a171093e9dddac6..."
+    },
+    "ds_002": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "edc41108e66bc50c...",
+      "expected": "edc41108e66bc50c..."
+    },
+    "ds_003": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "1d35a22d1242a867...",
+      "expected": "1d35a22d1242a867..."
+    },
+    "ds_004": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "c4ca7c2a84f75e76...",
+      "expected": "c4ca7c2a84f75e76..."
+    },
+    "ds_005": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "262c2d67ba0fe39e...",
+      "expected": "262c2d67ba0fe39e..."
+    },
+    "ds_006": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "0e31428ba693518e...",
+      "expected": "0e31428ba693518e..."
+    },
+    "ds_007": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "4135cfb54fe56668...",
+      "expected": "4135cfb54fe56668..."
+    },
+    "ds_008": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "2bdcacf10ed22767...",
+      "expected": "2bdcacf10ed22767..."
+    },
+    "ds_009": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "66d2e08e99cbec5c...",
+      "expected": "66d2e08e99cbec5c..."
+    },
+    "ds_010": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "d35cef3d2deef153...",
+      "expected": "d35cef3d2deef153..."
+    },
+    "ds_011": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "bf69c5b7aa768fc5...",
+      "expected": "bf69c5b7aa768fc5..."
+    },
+    "ds_012": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "5735a5fff35e7394...",
+      "expected": "5735a5fff35e7394..."
+    },
+    "ds_013": {
+      "status": "MATCH",
+      "match": true,
+      "computed": "d9c454c67ecac898...",
+      "expected": "d9c454c67ecac898..."
+    },
+    "ds_014": {
+      "status": "SKIPPED (failed acquisition)",
+      "match": null
+    },
+    "ds_015": {
+      "status": "SKIPPED (failed acquisition)",
+      "match": null
+    },
+    "ds_016": {
+      "status": "SKIPPED (failed acquisition)",
+      "match": null
+    },
+    "ds_017": {
+      "status": "SKIPPED (failed acquisition)",
+      "match": null
+    },
+    "ds_018": {
+      "status": "SKIPPED (failed acquisition)",
+      "match": null
+    },
+    "ds_019": {
+      "status": "SKIPPED (failed acquisition)",
+      "match": null
+    }
+  },
+  "spot_checks": [
+    {
+      "dataset": "ds_001",
+      "check": "2025 national education/culture/rec spending",
+      "expected": 3489,
+      "found": 3489.0,
+      "match": "True"
+    },
+    {
+      "dataset": "ds_001",
+      "check": "2020 national (COVID dip)",
+      "expected": 2032,
+      "found": 2032.0,
+      "match": "True"
+    },
+    {
+      "dataset": "ds_006",
+      "check": "2024 births (millions)",
+      "expected": 9.54,
+      "found": 9.54,
+      "match": "True"
+    },
+    {
+      "dataset": "ds_009",
+      "check": "2025 national disposable income",
+      "expected": 43145,
+      "found": 43145.0,
+      "match": "True"
+    },
+    {
+      "dataset": "ds_013",
+      "check": "2025 overall CPI index",
+      "expected": 115.3,
+      "found": 115.31,
+      "match": "True"
+    }
+  ],
+  "row_checks": [
+    {
+      "dataset": "ds_001",
+      "expected": 10,
+      "actual": 10,
+      "match": true
+    },
+    {
+      "dataset": "ds_002",
+      "expected": 13,
+      "actual": 3,
+      "match": false
+    },
+    {
+      "dataset": "ds_003",
+      "expected": 15,
+      "actual": 15,
+      "match": true
+    },
+    {
+      "dataset": "ds_004",
+      "expected": 19,
+      "actual": 10,
+      "match": false
+    },
+    {
+      "dataset": "ds_005",
+      "expected": 8,
+      "actual": 8,
+      "match": true
+    },
+    {
+      "dataset": "ds_006",
+      "expected": 9,
+      "actual": 9,
+      "match": true
+    },
+    {
+      "dataset": "ds_007",
+      "expected": 8,
+      "actual": 8,
+      "match": true
+    },
+    {
+      "dataset": "ds_008",
+      "expected": 7,
+      "actual": 7,
+      "match": true
+    },
+    {
+      "dataset": "ds_009",
+      "expected": 10,
+      "actual": 10,
+      "match": true
+    },
+    {
+      "dataset": "ds_010",
+      "expected": 5,
+      "actual": 5,
+      "match": true
+    },
+    {
+      "dataset": "ds_011",
+      "expected": 14,
+      "actual": 9,
+      "match": false
+    },
+    {
+      "dataset": "ds_012",
+      "expected": 3,
+      "actual": 3,
+      "match": true
+    },
+    {
+      "dataset": "ds_013",
+      "expected": 10,
+      "actual": 10,
+      "match": true
+    }
+  ],
+  "overall": "FLAG"
+}

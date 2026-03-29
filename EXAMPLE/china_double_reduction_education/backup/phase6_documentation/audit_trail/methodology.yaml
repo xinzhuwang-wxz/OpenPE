@@ -1,0 +1,71 @@
+analysis_name: china_double_reduction_education
+generated: '2026-03-29'
+total_choices: 5
+choices:
+- choice_id: M01
+  description: Interrupted Time Series (ITS) over Difference-in-Differences (DiD)
+  alternatives_considered:
+  - Difference-in-Differences (DiD) with regional variation
+  - Synthetic control method
+  - Regression discontinuity (temporal)
+  justification: >
+    No untreated control group exists; the Double Reduction policy was nationwide.
+    DiD requires parallel trends, which are violated for urban-rural comparisons
+    (urban CAGR -0.31% vs rural +3.36% over 2016-2020). ITS is the standard
+    approach for evaluating nationwide policy interventions with pre-post data.
+  phase: Phase 3
+
+- choice_id: M02
+  description: Exclude year 2020 from ITS estimation to avoid COVID contamination
+  alternatives_considered:
+  - Include 2020 with a COVID indicator variable
+  - Include 2020 without adjustment
+  - Use 6-parameter ITS with COVID and policy breaks
+  justification: >
+    The 2020 COVID disruption (-19.1%) and 2021 rebound (+27.9%) overlap temporally
+    with the policy. Excluding 2020 preserves degrees of freedom (9 observations
+    with 3 parameters = 6 df). A COVID indicator variable was tested as sensitivity
+    check and produces algebraically identical results. The 6-parameter model with
+    both COVID and policy breaks has only 3 df and risks overfitting.
+  phase: Phase 3
+
+- choice_id: M03
+  description: Edge-level assessment over chain-level causal claims
+  alternatives_considered:
+  - Full chain-level causal claims with Joint EP
+  - DAG-level aggregate assessment
+  justification: >
+    All seven multi-step causal chains produce Joint EP values below the hard
+    truncation threshold of 0.05. The highest chain Joint EP is DAG 2's demand
+    chain at 0.08. Making chain-level causal claims (e.g., 'the policy caused X%
+    reduction') would be epistemically dishonest given the multiplicative EP decay
+    through chains with MEDIUM/LOW quality data and proxy outcomes.
+  phase: Phase 3
+
+- choice_id: M04
+  description: Three scenarios (Policy Succeeds, Status Quo, Rebound) with Monte Carlo simulation
+  alternatives_considered:
+  - Single best-estimate projection
+  - Five scenarios with regional variants
+  - Bayesian posterior predictive
+  justification: >
+    The fork-dependent endgame classification requires multiple scenarios to capture
+    structural uncertainty. Monte Carlo (10,000 iterations, seed 42) captures
+    parametric uncertainty within each scenario. Three scenarios cover the plausible
+    outcome space: policy effect real and persistent (15-25%), displacement/no net
+    effect (45-55%), and rebound (25-35%).
+  phase: Phase 4
+
+- choice_id: M05
+  description: Education CPI sub-index for deflation over overall CPI
+  alternatives_considered:
+  - Overall CPI deflator
+  - GDP deflator
+  - No deflation (nominal values)
+  justification: >
+    The education/culture/recreation CPI sub-index is the closest proxy for
+    education cost inflation and matches the NBS expenditure classification. Overall
+    CPI was tested as sensitivity; cumulative difference is 1.5 pp (15.3% overall
+    vs 16.8% education over 2016-2025). Using nominal values would confound real
+    spending changes with inflation.
+  phase: Phase 3

@@ -1,0 +1,101 @@
+{
+  "edge_verification": {
+    "Policy -> Industry Collapse": {
+      "phase0_ep": 0.6,
+      "phase1_ep": 0.6,
+      "phase3_ep": 0.56,
+      "classification": "CORRELATION",
+      "note": "Literature only; truth=0.8, relevance=0.7 => 0.56"
+    },
+    "Industry Collapse -> Reduced Tutoring": {
+      "phase0_ep": 0.2,
+      "phase1_ep": 0.2,
+      "phase3_ep": 0.15,
+      "classification": "CORRELATION",
+      "note": "z-score -1.05; relevance decreased"
+    },
+    "Reduced Tutoring -> Total Expenditure": {
+      "phase0_ep": 0.2,
+      "phase1_ep": 0.1,
+      "phase3_ep": 0.02,
+      "classification": "HYPOTHESIZED",
+      "note": "Per-birth normalization eliminates shift (p=0.48)"
+    },
+    "Policy -> Underground Market": {
+      "phase0_ep": 0.5,
+      "phase1_ep": 0.2,
+      "phase3_ep": 0.14,
+      "classification": "HYPOTHESIZED",
+      "note": "Mechanical truth update: min(0.3, 0.3-0.1)=0.2"
+    },
+    "Underground -> Higher Prices": {
+      "phase0_ep": 0.2,
+      "phase1_ep": 0.1,
+      "phase3_ep": 0.08,
+      "classification": "HYPOTHESIZED",
+      "note": "Mechanical truth update"
+    },
+    "Competitive Pressure -> Inelastic Demand": {
+      "phase0_ep": 0.5,
+      "phase1_ep": 0.4,
+      "phase3_ep": 0.42,
+      "classification": "CORRELATION",
+      "note": "Pre-policy evidence only"
+    },
+    "Income -> Differential Access": {
+      "phase0_ep": 0.4,
+      "phase1_ep": 0.3,
+      "phase3_ep": 0.42,
+      "classification": "CORRELATION",
+      "note": "Urban 3.7x > Rural; parallel trends violated"
+    },
+    "Public Spending -> Crowding-In": {
+      "phase0_ep": 0.3,
+      "phase1_ep": 0.2,
+      "phase3_ep": 0.12,
+      "classification": "HYPOTHESIZED",
+      "note": "Mechanical truth update"
+    },
+    "Policy -> Aggregate Spending (net)": {
+      "phase0_ep": 0.3,
+      "phase1_ep": 0.3,
+      "phase3_ep": 0.2,
+      "classification": "CORRELATION",
+      "note": "3/3 core pass, COVID placebo FAIL; 1.7 sigma with systematics"
+    }
+  },
+  "chain_verification": {
+    "DAG 1: Policy -> Industry -> Tutoring -> Total": {
+      "computed_joint_ep": 0.00168,
+      "reported_joint_ep": 0.0017
+    },
+    "DAG 2: Policy -> Underground -> Prices": {
+      "computed_joint_ep": 0.011200000000000002,
+      "reported_joint_ep": 0.011
+    },
+    "DAG 3: Public -> Crowding-In": {
+      "computed_joint_ep": 0.12,
+      "reported_joint_ep": 0.12
+    }
+  },
+  "decay_verification": {
+    "Empirical (Phase 3)": {
+      "multiplier": 1.0,
+      "expected_ep": 0.2
+    },
+    "Near-term (1-3 yr)": {
+      "multiplier": 0.49,
+      "expected_ep": 0.098
+    },
+    "Mid-term (3-7 yr)": {
+      "multiplier": 0.16,
+      "expected_ep": 0.032
+    },
+    "Long-term (7-10 yr)": {
+      "multiplier": 0.04,
+      "expected_ep": 0.008
+    }
+  },
+  "issues": [],
+  "overall": "PASS"
+}

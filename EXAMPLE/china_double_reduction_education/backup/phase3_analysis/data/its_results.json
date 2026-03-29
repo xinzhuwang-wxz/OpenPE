@@ -1,0 +1,95 @@
+{
+  "national": {
+    "primary": {
+      "level_shift": -483.2204434718792,
+      "level_shift_se": 159.24756059575574,
+      "level_shift_pvalue": 0.02296765677994672,
+      "level_shift_ci_90": [
+        -792.6671629417178,
+        -173.77372400204064
+      ],
+      "level_shift_ci_95": [
+        -872.8851867595621,
+        -93.55570018419633
+      ],
+      "trend": 182.74805172417527,
+      "r_squared": 0.947182715206535,
+      "df_resid": 6,
+      "n_obs": 9
+    },
+    "covid_sensitivity": {
+      "level_shift": -483.2204434718798,
+      "level_shift_se": 159.24756059575552,
+      "level_shift_pvalue": 0.022967656779946485,
+      "level_shift_ci_90": [
+        -792.6671629417178,
+        -173.77372400204166
+      ]
+    },
+    "permutation_pvalue": 0.14285714285714285,
+    "pre_policy_mean": 2037.981210758107,
+    "effect_pct": -23.710740850850456
+  },
+  "urban": {
+    "primary": {
+      "level_shift": -710.6105332422824,
+      "level_shift_se": 233.89547427299374,
+      "level_shift_pvalue": 0.022857022561757655,
+      "level_shift_ci_90": [
+        -1165.1116065513384,
+        -256.1094599332263
+      ],
+      "level_shift_ci_95": [
+        -1282.9321411700462,
+        -138.28892531451845
+      ],
+      "trend": 212.93843570684822,
+      "r_squared": 0.8964072583614755,
+      "df_resid": 6,
+      "n_obs": 9
+    },
+    "covid_sensitivity": {
+      "level_shift": -710.6105332422844,
+      "level_shift_se": 233.89547427299374,
+      "level_shift_pvalue": 0.0228570225617574,
+      "level_shift_ci_90": [
+        -1165.1116065513406,
+        -256.1094599332283
+      ]
+    },
+    "permutation_pvalue": 0.14285714285714285,
+    "pre_policy_mean": 2718.0049525710388,
+    "effect_pct": -26.144563591398
+  },
+  "rural": {
+    "primary": {
+      "level_shift": -190.9416949012082,
+      "level_shift_se": 70.5879205663583,
+      "level_shift_pvalue": 0.03533929285237752,
+      "level_shift_ci_90": [
+        -328.1067501883364,
+        -53.77663961408004
+      ],
+      "level_shift_ci_95": [
+        -363.6641142827107,
+        -18.21927551970566
+      ],
+      "trend": 126.93200144591101,
+      "r_squared": 0.9853168039504978,
+      "df_resid": 6,
+      "n_obs": 9
+    },
+    "covid_sensitivity": {
+      "level_shift": -190.9416949012083,
+      "level_shift_se": 70.58792056635829,
+      "level_shift_pvalue": 0.03533929285237742,
+      "level_shift_ci_90": [
+        -328.10675018833643,
+        -53.77663961408018
+      ]
+    },
+    "permutation_pvalue": 0.14285714285714285,
+    "pre_policy_mean": 1195.2402574753828,
+    "effect_pct": -15.975172665663065
+  }
+}
