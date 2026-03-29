@@ -132,6 +132,9 @@ effective. The agent roster and phase-to-agent mapping is in the table above.
 - Skipping EP assessment for causal edges — every edge must have EP values
 - Ignoring data quality gate warnings from Phase 0 in downstream artifacts
 - Expanding sub-chains beyond recursion depth 2 without orchestrator approval
+- Treating REPORT.md as a symlink or copy of ANALYSIS_NOTE.md — they are distinct documents
+- Skipping the audit trail (Step 6.3) — `audit_trail/` with claims.yaml, methodology.yaml, provenance.yaml, verification.yaml is mandatory
+- Skipping `generate_audit.py` in `phase6_documentation/scripts/` — the audit trail must be reproducible
 
 **What the orchestrator does NOT do:**
 - Read full scripts or data files (subagents do this)
@@ -240,7 +243,7 @@ phase begins. No exceptions.
 | 3 | `phase3_analysis/exec/ANALYSIS.md` | 4-bot |
 | 4 | `phase4_projection/exec/PROJECTION.md` | 4-bot |
 | 5 | `phase5_verification/exec/VERIFICATION.md` | 4-bot + Human Gate |
-| 6 | `phase6_documentation/exec/ANALYSIS_NOTE.md` | 5-bot (4 + rendering) |
+| 6 | `phase6_documentation/exec/ANALYSIS_NOTE.md` + `phase6_documentation/exec/REPORT.md` + `phase6_documentation/audit_trail/` + `REPORT.pdf` | 5-bot (4 + rendering) |
 
 **Review before advancing.** After each artifact, spawn a reviewer subagent.
 Self-review is only acceptable for Phase 2 (exploration). All other phases
@@ -398,6 +401,34 @@ If unsure, the methodology selection in Phase 1 determines which file applies.
 Read the "When this applies" section of each candidate file to confirm.
 Ignore `conventions/TEMPLATE.md` — it is a skeleton for spec developers
 creating new conventions files.
+
+---
+
+## Phase 6 Dual-Document Requirement
+
+Phase 6 produces TWO distinct documents in `phase6_documentation/exec/`:
+
+| Document | Purpose | Style |
+|----------|---------|-------|
+| **ANALYSIS_NOTE.md** | Logic-focused technical artifact | Quantitative, reasoning chain, EP arithmetic, refutation details |
+| **REPORT.md** | Final stakeholder deliverable | Writing Style Guide: "so what" leads, named scenarios, analogies, no LLM-speak |
+
+**ANALYSIS_NOTE.md is written first** (the analytical backbone). **REPORT.md
+is then written independently** — rewriting the prose per the Writing Style
+Guide while preserving all facts and numbers from the ANALYSIS_NOTE. REPORT.md
+is NEVER a symlink or copy of ANALYSIS_NOTE.md.
+
+**The audit trail (`audit_trail/`) is mandatory.** It must contain:
+- `claims.yaml` — every factual claim mapped to its data source
+- `methodology.yaml` — every analytical choice with justification
+- `provenance.yaml` — registry.yaml with verification status
+- `verification.yaml` — Phase 5 results summary
+- `audit_trail_section.md` — human-readable audit narrative
+
+**`scripts/generate_audit.py`** must exist and be capable of regenerating
+the audit trail from upstream artifacts.
+
+**`REPORT.pdf`** is compiled from REPORT.md and placed at the analysis root.
 
 ---
 

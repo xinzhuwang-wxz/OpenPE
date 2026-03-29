@@ -31,11 +31,17 @@ If human gate approval is not documented, halt and request Phase 5 completion.
 
 | Artifact | Path | Contents |
 |----------|------|----------|
-| **REPORT.md** | `exec/REPORT.md` | Complete analysis report in pandoc-compatible markdown |
-| **REPORT.pdf** | `REPORT.pdf` | Rendered PDF via pandoc |
-| **Audit trail** | `audit_trail/` | Per-claim source links, per-step methodology records |
+| **ANALYSIS_NOTE.md** | `exec/ANALYSIS_NOTE.md` | Logic-focused technical artifact: quantitative results, EP arithmetic, refutation details, reasoning chain |
+| **REPORT.md** | `exec/REPORT.md` | Final stakeholder deliverable: rewritten per Writing Style Guide with "so what" leads, named scenarios, analogies |
+| **REPORT.pdf** | `REPORT.pdf` (analysis root) | Rendered PDF compiled from REPORT.md via pandoc |
+| **Audit trail** | `audit_trail/` | Per-claim source links, per-step methodology records, `generate_audit.py` script |
 
-All three must exist for the analysis to be considered complete.
+**All four must exist for the analysis to be considered complete.**
+
+> **CRITICAL:** REPORT.md is NEVER a symlink or copy of ANALYSIS_NOTE.md.
+> They are independently written documents with different prose styles.
+> ANALYSIS_NOTE.md emphasizes logic and quantitative rigor.
+> REPORT.md transforms this into polished prose following the Writing Style Guide.
 
 ---
 
@@ -51,10 +57,19 @@ beginning each step:
 
 ---
 
-## Step 6.1 — Report Generation
+## Step 6.1 — Report Generation (Two Documents)
 
-**Goal:** Produce a structured, comprehensive report that synthesizes all
-analysis phases into a coherent narrative.
+**Goal:** Produce TWO documents: (1) ANALYSIS_NOTE.md — the logic-focused
+technical backbone, and (2) REPORT.md — the polished stakeholder deliverable.
+
+**Workflow:**
+1. Write `exec/ANALYSIS_NOTE.md` first. This document emphasizes quantitative
+   results, EP arithmetic, refutation test details, and the full reasoning
+   chain. It follows `methodology/analysis-note.md` format.
+2. Then write `exec/REPORT.md` as an **independent rewrite** of the same
+   content, transforming the prose per the Writing Style Guide below. Every
+   fact and number comes from ANALYSIS_NOTE.md, but the prose is completely
+   different.
 
 **The agent must write REPORT.md following this outline:**
 
@@ -305,7 +320,16 @@ the report to its evidence basis.
    auditable claims indicate either missing evidence or summary prose that
    should cite evidence.
 
-**Output:** Populated `audit_trail/` directory.
+5. **Create `scripts/generate_audit.py`.** This script must be able to
+   regenerate the audit trail from upstream artifacts (registry.yaml,
+   ANALYSIS_NOTE.md, VERIFICATION.md). It is the reproducibility guarantee
+   for the audit trail.
+
+**Output:** Populated `audit_trail/` directory AND `scripts/generate_audit.py`.
+
+> **WARNING:** Skipping Step 6.3 is a Category A violation. The audit trail
+> is not optional — it is a core deliverable that makes every claim in
+> the report machine-verifiable. Phase 6 is NOT complete without it.
 
 ---
 
@@ -338,7 +362,8 @@ the report to its evidence basis.
    automatically. Manual LaTeX conversion introduces errors and is not
    reproducible.
 
-**Output:** `REPORT.pdf` at the analysis root.
+**Output:** `REPORT.pdf` at the analysis root (compiled from `exec/REPORT.md`).
+Also generate `exec/REPORT.pdf` and `exec/ANALYSIS_NOTE.pdf` for archival.
 
 ---
 
@@ -382,6 +407,34 @@ the report to its evidence basis.
 7. **Append to the experiment log.** Document report structure decisions,
    figure selection rationale, any editorial choices about emphasis or
    framing, and PDF build results.
+
+---
+
+## Completion Checklist (Hard Gate)
+
+Before declaring Phase 6 complete, verify ALL of these exist:
+
+```
+phase6_documentation/
+  exec/
+    ANALYSIS_NOTE.md          # Logic-focused technical document
+    ANALYSIS_NOTE.pdf         # Compiled PDF of ANALYSIS_NOTE
+    REPORT.md                 # Polished stakeholder deliverable (NOT a symlink)
+    REPORT.pdf                # Compiled PDF of REPORT
+    references.bib            # Bibliography
+    figures/                  # All referenced figures
+  audit_trail/
+    claims.yaml               # Every factual claim → data source
+    methodology.yaml          # Every analytical choice → justification
+    provenance.yaml           # Data provenance with verification status
+    verification.yaml         # Phase 5 results summary
+    audit_trail_section.md    # Human-readable audit narrative
+  scripts/
+    generate_audit.py         # Reproducible audit trail generation
+REPORT.pdf                    # At analysis root (copy of exec/REPORT.pdf)
+```
+
+**Missing any of these files is a Category A finding that blocks PASS.**
 
 ---
 
