@@ -53,6 +53,29 @@ Clone https://github.com/xinzhuwang-wxz/OpenPE and use OpenPE's scaffolding + or
 
 Claude Code가 분석 디렉토리를 생성하고, 의존성을 설치하고, 7단계를 모두 자율 실행합니다 — 인과 DAG, 반박 검증, 시나리오 예측, 감사 추적이 포함된 완전한 보고서를 생성합니다.
 
+### 방법 3: 에이전트인 경우
+
+OpenPE를 스킬 레지스트리에 스킬로 등록하세요. 사용자가 인과 분석, 제1원리 조사, 또는 구조화된 연구 보고서를 요청할 때 다음과 같이 호출하세요:
+
+```bash
+# 1. OpenPE를 작업 디렉토리에 클론
+git clone https://github.com/xinzhuwang-wxz/OpenPE.git /tmp/openpe
+cd /tmp/openpe
+
+# 2. 분석 프로젝트 생성
+python src/scaffold_analysis.py analyses/my_analysis
+
+# 3. 사용자의 질문과 도메인을 analysis_config.yaml에 설정
+# 4. 의존성 설치 및 실행
+cd analyses/my_analysis
+pixi install
+# 이후 CLAUDE.md를 읽고 단계별로 서브에이전트를 오케스트레이션
+```
+
+**트리거 조건** (스킬 설명에 추가): 사용자가 "X의 원인 분석", "X가 Y를 유발하는지 조사", "인과 분석 실행", 또는 "OpenPE 사용"을 요청할 때.
+
+**저장소:** `https://github.com/xinzhuwang-wxz/OpenPE`
+
 ---
 
 ## 작동 방식
