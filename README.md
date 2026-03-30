@@ -201,51 +201,6 @@ The [ACG Protocol](https://github.com/Kos-M/acg_protocol) introduced Inline Grou
 
 [OpenViking](https://github.com/volcengine/OpenViking)'s memory lifecycle system provided the hotness scoring formula: `sigmoid(frequency) × exponential_recency`. OpenPE uses this to distinguish actively-used memories from stale ones, driving the archival and forgetting mechanisms that keep the memory system bounded.
 
----
-
-## Project Structure
-
-```
-OpenPE/
-├── src/
-│   ├── scaffold_analysis.py    # Creates analysis directories
-│   ├── templates/              # CLAUDE.md templates + shared scripts
-│   │   ├── scripts/            # EP engine, causal pipeline, memory store, ...
-│   │   └── report_template/    # Professional PDF styling
-│   ├── methodology/            # Spec documents (01-09 + appendices)
-│   ├── conventions/            # Domain knowledge (causal inference, time series, panel)
-│   └── orchestration/          # Session management spec
-├── .claude/
-│   ├── agents/                 # Agent profile definitions (15+ specialized agents)
-│   ├── hooks/                  # Isolation hook for analysis sandboxing
-│   └── skills/                 # Analysis pipeline skills
-├── CLAUDE.md                   # Project-level instructions
-├── pyproject.toml              # Root pixi config
-└── LICENSE                     # GPL-3.0
-```
-
-When you scaffold an analysis:
-
-```
-analyses/my_analysis/           # Independent git repo
-├── CLAUDE.md                   # Orchestrator protocol (self-contained)
-├── analysis_config.yaml        # Question, domain, EP thresholds
-├── STATE.md                    # Pipeline state (phase, iterations, blockers)
-├── pixi.toml                   # Environment + task graph
-├── scripts/                    # Shared modules (copied from templates)
-├── memory/                     # L0/L1/L2/causal_graph
-├── conventions/ → src/conventions  # Symlink
-├── methodology/ → src/methodology  # Symlink
-└── phase{0..6}_*/
-    ├── CLAUDE.md               # Phase-specific instructions
-    ├── exec/                   # Artifacts (DISCOVERY.md, ANALYSIS.md, ...)
-    ├── scripts/                # Phase-specific code
-    ├── figures/                # PDF + PNG plots
-    └── review/                 # REVIEW_NOTES.md
-```
-
----
-
 ## Input Modes
 
 | Mode | When | Behavior |
