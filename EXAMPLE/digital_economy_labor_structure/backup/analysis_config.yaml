@@ -1,0 +1,13 @@
+analysis_name: digital_economy_labor_structure
+analysis_type: analysis
+input_mode: A
+question: '数字经济是否推动劳动力结构变化？分析应包含基于创造效应、替代效应和中介效应的机制分析，优先使用EPS（中国经济政策模拟系统）和CFPS（中国家庭追踪调查）数据，包含以DID（双重差分）模型作为baseline对比的图表。'
+domain: '数字经济与劳动经济学'
+model_tier: auto
+ep_thresholds:
+  hard_truncation: 0.05
+  soft_truncation: 0.15
+  subchain_expansion: 0.30
+cost_controls:
+  max_review_iterations: 10
+  review_warn_threshold: 3

@@ -1,0 +1,38 @@
+{
+  "digital_economy_index_chow_2013": {
+    "F": 2.942,
+    "p": 0.0759
+  },
+  "digital_economy_index_chow_2015": {
+    "F": 2.71,
+    "p": 0.0909
+  },
+  "digital_economy_index_supwald": {
+    "max_F": 36.94,
+    "break_year": 2009
+  },
+  "employment_services_pct_chow_2013": {
+    "F": 13.544,
+    "p": 0.0002
+  },
+  "employment_services_pct_chow_2015": {
+    "F": 19.167,
+    "p": 0.0
+  },
+  "employment_services_pct_supwald": {
+    "max_F": 26.148,
+    "break_year": 2014
+  },
+  "employment_industry_pct_chow_2013": {
+    "F": 9.381,
+    "p": 0.0013
+  },
+  "employment_industry_pct_chow_2015": {
+    "F": 9.038,
+    "p": 0.0016
+  },
+  "employment_industry_pct_supwald": {
+    "max_F": 14.43,
+    "break_year": 2006
+  }
+}

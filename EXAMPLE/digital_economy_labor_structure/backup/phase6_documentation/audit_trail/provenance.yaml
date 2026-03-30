@@ -1,0 +1,41 @@
+datasets:
+- name: worldbank_china_indicators
+  quality_verdict: '75'
+  quality_score: 75
+  verification_status: See verification.yaml
+  verification_sha256: PASS
+- name: ilo_china_employment_structure
+  quality_verdict: '58'
+  quality_score: 58
+  verification_status: See verification.yaml
+  verification_sha256: PASS
+- name: smart_city_pilots_list
+  quality_verdict: '85'
+  quality_score: 85
+  verification_status: See verification.yaml
+  verification_sha256: PASS
+- name: smart_city_pilots_panel
+  quality_verdict: '83'
+  quality_score: 83
+  verification_status: See verification.yaml
+  verification_sha256: PASS
+- name: digital_economy_composite_index
+  quality_verdict: '63'
+  quality_score: 63
+  verification_status: See verification.yaml
+  verification_sha256: PASS
+- name: china_provincial_framework
+  quality_verdict: '0'
+  quality_score: 0
+  verification_status: See verification.yaml
+  verification_sha256: PASS
+- name: china_national_panel_merged
+  quality_verdict: '68'
+  quality_score: 68
+  verification_status: See verification.yaml
+  verification_sha256: PASS
+- name: nbs_provincial_availability (Availability Assessment)
+  quality_verdict: '0'
+  quality_score: 0
+  verification_status: See verification.yaml
+  verification_sha256: PASS

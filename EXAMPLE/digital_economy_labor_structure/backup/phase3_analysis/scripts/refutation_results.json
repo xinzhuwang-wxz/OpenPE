@@ -1,0 +1,391 @@
+[
+  {
+    "label": "DE -> substitution (industry emp)",
+    "cause": "digital_economy_index",
+    "effect": "employment_industry_pct",
+    "controls": null,
+    "level": "full",
+    "original_W": 7.029732861851896,
+    "original_p": 0.008016731091359586,
+    "placebo": {
+      "verdict": "PASS",
+      "n_significant": 1,
+      "n_total": 4,
+      "placebo_runs": [
+        {
+          "shift": 2,
+          "W": 0.012277005352298928,
+          "p": 0.9117736379389502
+        },
+        {
+          "shift": 3,
+          "W": 0.42571738147963545,
+          "p": 0.5140978812009873
+        },
+        {
+          "shift": 4,
+          "W": 1.1234010173848288,
+          "p": 0.28918730381674707
+        },
+        {
+          "shift": 5,
+          "W": 4.559954511619952,
+          "p": 0.03272794266907375
+        }
+      ]
+    },
+    "random_cause": {
+      "verdict": "MARGINAL",
+      "W_original": 7.029732861851896,
+      "W_mean_random": 6.309778351516342,
+      "W_std_random": 2.0292914842248,
+      "change_pct": 10.241562865674682
+    },
+    "data_subset": {
+      "verdict": "FAIL",
+      "W_original": 7.029732861851896,
+      "p_original": 0.008016731091359586,
+      "W_mean_subset": 0.9707221527838779,
+      "W_std_subset": 1.6817159185934443,
+      "change_pct": 86.19119429058712,
+      "consistency_fraction": 0.12,
+      "n_valid_subsets": 100
+    },
+    "n_pass": 1,
+    "classification": "HYPOTHESIZED"
+  },
+  {
+    "label": "DE -> creation (services emp)",
+    "cause": "digital_economy_index",
+    "effect": "employment_services_pct",
+    "controls": null,
+    "level": "moderate",
+    "original_W": 0.30718688948757533,
+    "original_p": 0.5794115744917105,
+    "placebo": {
+      "verdict": "PASS",
+      "n_significant": 1,
+      "n_total": 4,
+      "placebo_runs": [
+        {
+          "shift": 2,
+          "W": 0.6939167126294927,
+          "p": 0.4048353480583192
+        },
+        {
+          "shift": 3,
+          "W": 5.307135280284975,
+          "p": 0.021238251292445165
+        },
+        {
+          "shift": 4,
+          "W": 2.5458920650660843,
+          "p": 0.11058143857647285
+        },
+        {
+          "shift": 5,
+          "W": 2.680283206167097,
+          "p": 0.10159765871026138
+        }
+      ]
+    },
+    "random_cause": {
+      "verdict": "FAIL",
+      "W_original": 0.30718688948757533,
+      "W_mean_random": 0.44260104124142946,
+      "W_std_random": 0.4186506231655834,
+      "change_pct": 44.08200883173797
+    },
+    "data_subset": {
+      "verdict": "FAIL",
+      "W_original": 0.30718688948757533,
+      "p_original": 0.5794115744917105,
+      "W_mean_subset": 1.4740729170122306,
+      "W_std_subset": 4.647952056429155,
+      "change_pct": 379.8619236228348,
+      "consistency_fraction": 0.9,
+      "n_valid_subsets": 100
+    },
+    "n_pass": 1,
+    "classification": "HYPOTHESIZED"
+  },
+  {
+    "label": "DE -> mediation (services VA)",
+    "cause": "digital_economy_index",
+    "effect": "services_value_added_pct_gdp",
+    "controls": null,
+    "level": "lightweight",
+    "original_W": 4.053174570099096,
+    "original_p": 0.04408836146284545,
+    "placebo": {
+      "verdict": "PASS",
+      "n_significant": 1,
+      "n_total": 4,
+      "placebo_runs": [
+        {
+          "shift": 2,
+          "W": 0.09636769096629652,
+          "p": 0.7562328738609416
+        },
+        {
+          "shift": 3,
+          "W": 0.012324227428401386,
+          "p": 0.9116048191183057
+        },
+        {
+          "shift": 4,
+          "W": 0.1510400370487876,
+          "p": 0.6975434364563367
+        },
+        {
+          "shift": 5,
+          "W": 4.856108866755707,
+          "p": 0.02754840042686002
+        }
+      ]
+    },
+    "random_cause": {
+      "verdict": "MARGINAL",
+      "W_original": 4.053174570099096,
+      "W_mean_random": 3.4065616440643436,
+      "W_std_random": 1.303239797898921,
+      "change_pct": 15.953246396168511
+    },
+    "data_subset": {
+      "verdict": "FAIL",
+      "W_original": 4.053174570099096,
+      "p_original": 0.04408836146284545,
+      "W_mean_subset": 1.7826179538036078,
+      "W_std_subset": 1.9684573526229772,
+      "change_pct": 56.0192159756883,
+      "consistency_fraction": 0.23,
+      "n_valid_subsets": 100
+    },
+    "n_pass": 1,
+    "classification": "HYPOTHESIZED"
+  },
+  {
+    "label": "DEMO -> services emp (confounder)",
+    "cause": "population_15_64_pct",
+    "effect": "employment_services_pct",
+    "controls": null,
+    "level": "full",
+    "original_W": 1.7674853428457664,
+    "original_p": 0.1836935940775104,
+    "placebo": {
+      "verdict": "FAIL",
+      "n_significant": 2,
+      "n_total": 4,
+      "placebo_runs": [
+        {
+          "shift": 2,
+          "W": 2.3020602816615265,
+          "p": 0.12920251894112522
+        },
+        {
+          "shift": 3,
+          "W": 1.1361293872299922,
+          "p": 0.28647169561703145
+        },
+        {
+          "shift": 4,
+          "W": 2.8403655379966164,
+          "p": 0.09192330014831218
+        },
+        {
+          "shift": 5,
+          "W": 8.076884827556727,
+          "p": 0.004483345033306163
+        }
+      ]
+    },
+    "random_cause": {
+      "verdict": "PASS",
+      "W_original": 1.7674853428457664,
+      "W_mean_random": 1.8744706781560085,
+      "W_std_random": 1.251448803605017,
+      "change_pct": 6.052968741341231
+    },
+    "data_subset": {
+      "verdict": "FAIL",
+      "W_original": 1.7674853428457664,
+      "p_original": 0.1836935940775104,
+      "W_mean_subset": 0.8860790220793463,
+      "W_std_subset": 1.0569760697152821,
+      "change_pct": 49.86781499117263,
+      "consistency_fraction": 0.91,
+      "n_valid_subsets": 100
+    },
+    "n_pass": 1,
+    "classification": "HYPOTHESIZED"
+  },
+  {
+    "label": "DEMO -> industry emp (confounder)",
+    "cause": "population_15_64_pct",
+    "effect": "employment_industry_pct",
+    "controls": null,
+    "level": "full",
+    "original_W": 0.01620438038248989,
+    "original_p": 0.8987057879710029,
+    "placebo": {
+      "verdict": "PASS",
+      "n_significant": 0,
+      "n_total": 4,
+      "placebo_runs": [
+        {
+          "shift": 2,
+          "W": 0.21237054058439245,
+          "p": 0.6449157095492997
+        },
+        {
+          "shift": 3,
+          "W": 0.15049395465169169,
+          "p": 0.6980637638162699
+        },
+        {
+          "shift": 4,
+          "W": 0.21522174471993025,
+          "p": 0.6427050798644471
+        },
+        {
+          "shift": 5,
+          "W": 0.5589984907964127,
+          "p": 0.4546640474855279
+        }
+      ]
+    },
+    "random_cause": {
+      "verdict": "FAIL",
+      "W_original": 0.01620438038248989,
+      "W_mean_random": 0.11437060145675325,
+      "W_std_random": 0.1740081100737232,
+      "change_pct": 605.8005228039432
+    },
+    "data_subset": {
+      "verdict": "FAIL",
+      "W_original": 0.01620438038248989,
+      "p_original": 0.8987057879710029,
+      "W_mean_subset": 0.7933233853550756,
+      "W_std_subset": 1.0878705287341839,
+      "change_pct": 4795.734157242594,
+      "consistency_fraction": 0.92,
+      "n_valid_subsets": 100
+    },
+    "n_pass": 1,
+    "classification": "HYPOTHESIZED"
+  },
+  {
+    "label": "DE -> substitution (with demo ctrl)",
+    "cause": "digital_economy_index",
+    "effect": "employment_industry_pct",
+    "controls": [
+      "population_15_64_pct"
+    ],
+    "level": "full",
+    "original_W": 10.23274272701023,
+    "original_p": 0.0013796935265446564,
+    "placebo": {
+      "verdict": "PASS",
+      "n_significant": 1,
+      "n_total": 4,
+      "placebo_runs": [
+        {
+          "shift": 2,
+          "W": 0.13690474855764365,
+          "p": 0.7113777091834226
+        },
+        {
+          "shift": 3,
+          "W": 0.5096333076841065,
+          "p": 0.47529763747203224
+        },
+        {
+          "shift": 4,
+          "W": 0.9098305876255643,
+          "p": 0.34015937279843944
+        },
+        {
+          "shift": 5,
+          "W": 4.7874007082273335,
+          "p": 0.02866865838157373
+        }
+      ]
+    },
+    "random_cause": {
+      "verdict": "PASS",
+      "W_original": 7.029732861851896,
+      "W_mean_random": 6.406051849172493,
+      "W_std_random": 2.1379669305199305,
+      "change_pct": 8.872044285835091
+    },
+    "data_subset": {
+      "verdict": "FAIL",
+      "W_original": 10.23274272701023,
+      "p_original": 0.0013796935265446564,
+      "W_mean_subset": 1.41117731450848,
+      "W_std_subset": 3.185765185088431,
+      "change_pct": 86.20919774731018,
+      "consistency_fraction": 0.12,
+      "n_valid_subsets": 100
+    },
+    "n_pass": 2,
+    "classification": "CORRELATION"
+  },
+  {
+    "label": "DE -> creation (with demo ctrl)",
+    "cause": "digital_economy_index",
+    "effect": "employment_services_pct",
+    "controls": [
+      "population_15_64_pct"
+    ],
+    "level": "moderate",
+    "original_W": 0.6155228178755223,
+    "original_p": 0.43271591712768165,
+    "placebo": {
+      "verdict": "FAIL",
+      "n_significant": 2,
+      "n_total": 4,
+      "placebo_runs": [
+        {
+          "shift": 2,
+          "W": 4.002660961711221,
+          "p": 0.045428489646848536
+        },
+        {
+          "shift": 3,
+          "W": 5.084790338212089,
+          "p": 0.024136594940564193
+        },
+        {
+          "shift": 4,
+          "W": 2.5261834791854865,
+          "p": 0.11197074495174686
+        },
+        {
+          "shift": 5,
+          "W": 2.531009824363675,
+          "p": 0.11162875675474915
+        }
+      ]
+    },
+    "random_cause": {
+      "verdict": "FAIL",
+      "W_original": 0.30718688948757533,
+      "W_mean_random": 0.44932231976464687,
+      "W_std_random": 0.5050422069968347,
+      "change_pct": 46.2700183963484
+    },
+    "data_subset": {
+      "verdict": "FAIL",
+      "W_original": 0.6155228178755223,
+      "p_original": 0.43271591712768165,
+      "W_mean_subset": 1.4313207128360939,
+      "W_std_subset": 2.4152636636028904,
+      "change_pct": 132.5373928096279,
+      "consistency_fraction": 0.9,
+      "n_valid_subsets": 100
+    },
+    "n_pass": 0,
+    "classification": "DISPUTED"
+  }
+]

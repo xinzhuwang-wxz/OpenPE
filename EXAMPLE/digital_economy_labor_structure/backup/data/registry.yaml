@@ -1,0 +1,769 @@
+datasets:
+- name: worldbank_china_indicators
+  source_url: https://data.worldbank.org/
+  source_authority: World Bank (World Development Indicators)
+  api_endpoint: wbgapi.data.DataFrame
+  query_params:
+    economy: CHN
+    time: 2000-2023
+    indicators:
+    - NY.GDP.PCAP.CD
+    - NY.GDP.PCAP.PP.CD
+    - NY.GDP.MKTP.CD
+    - NV.IND.TOTL.ZS
+    - NV.SRV.TOTL.ZS
+    - NV.AGR.TOTL.ZS
+    - SL.AGR.EMPL.ZS
+    - SL.IND.EMPL.ZS
+    - SL.SRV.EMPL.ZS
+    - SL.TLF.TOTL.IN
+    - SL.UEM.TOTL.ZS
+    - SP.URB.TOTL.IN.ZS
+    - SP.POP.TOTL
+    - SP.POP.65UP.TO.ZS
+    - SP.POP.1564.TO.ZS
+    - SE.XPD.TOTL.GD.ZS
+    - SE.TER.ENRR
+    - SE.SEC.ENRR
+    - IT.NET.USER.ZS
+    - IT.CEL.SETS.P2
+    - IT.NET.BBND.P2
+    - TX.VAL.TECH.MF.ZS
+    - BX.KLT.DINV.CD.WD
+    - NE.GDI.FTOT.ZS
+    - FS.AST.PRVT.GD.ZS
+    - GB.XPD.RSDV.GD.ZS
+  fetch_date: 2026-03-29 14:06:04 UTC
+  raw_file: data/raw/worldbank_china_indicators_20260329.csv
+  processed_file: data/processed/worldbank_china_indicators.parquet
+  sha256_raw: e2bf23c7544e7188d73490fbb6ab71093f5d909ca7322167b8a92d1a36949034
+  sha256_processed: 47a056baad5a4c3f283ea7ba20e490b82d298a924156b79b34b2dfcd4b2649e6
+  variables:
+  - name: gdp_per_capita_usd
+    description: GDP per capita (current US$)
+    unit: current USD
+    dag_variable: 'Controls: GDP per capita'
+    wb_indicator: NY.GDP.PCAP.CD
+  - name: gdp_per_capita_ppp
+    description: GDP per capita, PPP (current international $)
+    unit: current intl $
+    dag_variable: 'Controls: GDP per capita (PPP)'
+    wb_indicator: NY.GDP.PCAP.PP.CD
+  - name: gdp_total_usd
+    description: GDP (current US$)
+    unit: current USD
+    dag_variable: 'Controls: GDP total'
+    wb_indicator: NY.GDP.MKTP.CD
+  - name: industry_value_added_pct_gdp
+    description: Industry (incl construction) value added (% of GDP)
+    unit: '% of GDP'
+    dag_variable: 'IND_UP: Industrial structure'
+    wb_indicator: NV.IND.TOTL.ZS
+  - name: services_value_added_pct_gdp
+    description: Services value added (% of GDP)
+    unit: '% of GDP'
+    dag_variable: 'IND_UP: Tertiary sector share'
+    wb_indicator: NV.SRV.TOTL.ZS
+  - name: agriculture_value_added_pct_gdp
+    description: Agriculture value added (% of GDP)
+    unit: '% of GDP'
+    dag_variable: 'Structural change: primary sector'
+    wb_indicator: NV.AGR.TOTL.ZS
+  - name: employment_agriculture_pct
+    description: Employment in agriculture (% of total employment, modeled ILO)
+    unit: '% of total employment'
+    dag_variable: 'LS: Primary sector employment share'
+    wb_indicator: SL.AGR.EMPL.ZS
+  - name: employment_industry_pct
+    description: Employment in industry (% of total employment, modeled ILO)
+    unit: '% of total employment'
+    dag_variable: 'LS: Secondary sector employment share'
+    wb_indicator: SL.IND.EMPL.ZS
+  - name: employment_services_pct
+    description: Employment in services (% of total employment, modeled ILO)
+    unit: '% of total employment'
+    dag_variable: 'LS: Tertiary sector employment share'
+    wb_indicator: SL.SRV.EMPL.ZS
+  - name: labor_force_total
+    description: Total labor force
+    unit: persons
+    dag_variable: 'Controls: Labor force size'
+    wb_indicator: SL.TLF.TOTL.IN
+  - name: unemployment_rate_pct
+    description: Unemployment, total (% of total labor force, modeled ILO)
+    unit: '%'
+    dag_variable: 'Controls: Unemployment'
+    wb_indicator: SL.UEM.TOTL.ZS
+  - name: urban_population_pct
+    description: Urban population (% of total population)
+    unit: '%'
+    dag_variable: 'Controls: Urbanization rate'
+    wb_indicator: SP.URB.TOTL.IN.ZS
+  - name: population_total
+    description: Total population
+    unit: persons
+    dag_variable: 'Controls: Population'
+    wb_indicator: SP.POP.TOTL
+  - name: population_65plus_pct
+    description: Population ages 65 and above (% of total)
+    unit: '%'
+    dag_variable: 'Confounder: Population aging'
+    wb_indicator: SP.POP.65UP.TO.ZS
+  - name: population_15_64_pct
+    description: Population ages 15-64 (% of total)
+    unit: '%'
+    dag_variable: 'Confounder: Working age population'
+    wb_indicator: SP.POP.1564.TO.ZS
+  - name: tertiary_enrollment_gross
+    description: School enrollment, tertiary (% gross)
+    unit: '%'
+    dag_variable: 'HC_INV: Higher education access'
+    wb_indicator: SE.TER.ENRR
+  - name: secondary_enrollment_gross
+    description: School enrollment, secondary (% gross)
+    unit: '%'
+    dag_variable: 'HC_INV: Secondary education access'
+    wb_indicator: SE.SEC.ENRR
+  - name: internet_users_pct
+    description: Individuals using the Internet (% of population)
+    unit: '% of population'
+    dag_variable: 'DE: Internet penetration'
+    wb_indicator: IT.NET.USER.ZS
+  - name: mobile_subscriptions_per100
+    description: Mobile cellular subscriptions (per 100 people)
+    unit: per 100 people
+    dag_variable: 'DE: Mobile penetration'
+    wb_indicator: IT.CEL.SETS.P2
+  - name: fixed_broadband_per100
+    description: Fixed broadband subscriptions (per 100 people)
+    unit: per 100 people
+    dag_variable: 'DE: Broadband penetration'
+    wb_indicator: IT.NET.BBND.P2
+  - name: fdi_net_inflows_usd
+    description: Foreign direct investment, net inflows (BoP, current US$)
+    unit: current USD
+    dag_variable: 'Controls: FDI'
+    wb_indicator: BX.KLT.DINV.CD.WD
+  - name: gross_fixed_capital_formation_pct_gdp
+    description: Gross fixed capital formation (% of GDP)
+    unit: '% of GDP'
+    dag_variable: 'Controls: Fixed asset investment proxy'
+    wb_indicator: NE.GDI.FTOT.ZS
+  - name: domestic_credit_private_pct_gdp
+    description: Domestic credit to private sector (% of GDP)
+    unit: '% of GDP'
+    dag_variable: 'Controls: Financial development'
+    wb_indicator: FS.AST.PRVT.GD.ZS
+  - name: rd_expenditure_pct_gdp
+    description: Research and development expenditure (% of GDP)
+    unit: '% of GDP'
+    dag_variable: 'DE: R&D intensity'
+    wb_indicator: GB.XPD.RSDV.GD.ZS
+  temporal_coverage:
+    start: '2000'
+    end: '2023'
+    frequency: annual
+  observations: 24
+  missing_pct: !!python/object/apply:numpy._core.multiarray.scalar
+  - &id001 !!python/object/apply:numpy.dtype
+    args:
+    - f8
+    - false
+    - true
+    state: !!python/tuple
+    - 3
+    - <
+    - null
+    - null
+    - null
+    - -1
+    - -1
+    - 0
+  - !!binary |
+    MzMzMzMzA0A=
+  license: Creative Commons Attribution 4.0 (CC-BY 4.0)
+  notes: 'ILO-modeled employment estimates; some indicators have reporting lags. China
+    country code: CHN.'
+  status: acquired
+- name: smart_city_pilots
+  source_url: https://www.mohurd.gov.cn/ (Ministry of Housing and Urban-Rural Development
+    announcements)
+  source_authority: MOHURD / compiled from published DID studies
+  query_params:
+    batches: 3 (Jan 2013, Aug 2013, Apr 2015)
+    treatment_years: 2013, 2014, 2015
+  fetch_date: 2026-03-29 14:06:04 UTC
+  raw_file: data/raw/smart_city_pilots_list_20260329.csv
+  processed_file: data/processed/smart_city_pilots_list.parquet
+  sha256_raw: 07d2e6acd2c1cee7d3160282824257751aa117d89de359326e9270e5721ca4e9
+  sha256_processed: 87909e83cd3844f06c9af69b48c01fe39224528713107b20e7bb70edc379dfc3
+  variables:
+  - name: city_name
+    description: Prefecture-level city name (Chinese)
+    unit: text
+    dag_variable: 'SCP: Smart city pilot treatment unit'
+  - name: batch
+    description: Pilot batch number (1, 2, or 3)
+    unit: integer
+    dag_variable: 'SCP: Batch assignment'
+  - name: treatment_year
+    description: Year treatment begins for this city
+    unit: year
+    dag_variable: 'SCP: Treatment timing'
+  - name: treated
+    description: DID treatment indicator (1 if post-treatment period)
+    unit: binary
+    dag_variable: 'SCP --> DE: DID treatment'
+  temporal_coverage:
+    start: '2008'
+    end: '2023'
+    frequency: annual (panel), static (list)
+  observations: 286
+  panel_observations: 4576
+  missing_pct: 0.0
+  license: Public domain (government policy announcements)
+  notes: Compiled from three batches of MOHURD smart city pilot announcements. City
+    names are in Chinese. Prefecture-level cities only (districts, counties, and towns
+    excluded for cleaner DID). Cross-validated against published DID studies in Nature
+    HASS, PLOS ONE, and Sustainability journals. Batch 1 announced late 2012, effective
+    2013. Batch 2 announced Aug 2013, effective 2014. Batch 3 announced Apr 2015,
+    effective 2015.
+  status: acquired
+- name: smart_city_pilots_panel
+  source_url: Derived from smart_city_pilots list
+  source_authority: MOHURD / compiled from published DID studies
+  fetch_date: 2026-03-29 14:06:04 UTC
+  raw_file: data/raw/smart_city_pilots_panel_20260329.csv
+  processed_file: data/processed/smart_city_pilots_panel.parquet
+  sha256_raw: b74b593c171391d7977cc4a9e2bca8170c44d55223c7138f24ef9a77996d0a53
+  sha256_processed: 41a1921dd8bd38325cdb73eff00a589b9fbf8071564c7a18c0269d6f8f98cf3a
+  variables:
+  - name: city_name
+    description: Prefecture-level city name
+    unit: text
+    dag_variable: Unit identifier
+  - name: year
+    description: Year
+    unit: year
+    dag_variable: Time identifier
+  - name: treated
+    description: 1 if city is treated in this year
+    unit: binary
+    dag_variable: 'SCP --> DE: DID treatment'
+  - name: post
+    description: Post-treatment period indicator
+    unit: binary
+    dag_variable: 'DID: Post period'
+  - name: batch
+    description: Pilot batch (1-3)
+    unit: integer
+    dag_variable: 'SCP: Staggered treatment'
+  temporal_coverage:
+    start: '2008'
+    end: '2023'
+    frequency: annual
+  observations: 4576
+  missing_pct: 0.0
+  license: Public domain
+  notes: Panel expansion of smart city pilot list for DID analysis. Each city x year
+    combination.
+  status: acquired
+- name: china_provincial_framework
+  source_url: Framework constructed for analysis; requires EPS data or NBS yearbook
+    to populate
+  source_authority: Analysis framework
+  fetch_date: 2026-03-29 14:06:04 UTC
+  raw_file: data/raw/china_provincial_framework_20260329.csv
+  processed_file: data/processed/china_provincial_framework.parquet
+  sha256_raw: 8f97e4c884788a830fa8efed1b3c1ce80eb17657358df06066186f9eed154351
+  sha256_processed: 71b221b37661e85560171332c919fc9b428c1af8484bda8e93bcf6cba69a9646
+  variables:
+  - name: province
+    description: Chinese province name
+    unit: text
+    dag_variable: Unit identifier (provincial level)
+  - name: year
+    description: Year
+    unit: year
+    dag_variable: Time identifier
+  temporal_coverage:
+    start: '2011'
+    end: '2023'
+    frequency: annual
+  observations: 403
+  missing_pct: 0.0
+  license: N/A (framework)
+  notes: 'Empty framework for provincial panel. Requires EPS platform data or manual
+    NBS Statistical Yearbook extraction to populate with: provincial GDP, employment
+    by sector, digital economy indicators, education expenditure, urbanization rate,
+    FDI, etc. This is documented as a data gap.'
+  status: proxy
+- name: ilo_china_employment_structure
+  source_url: https://data.worldbank.org/ (ILO modeled estimates via World Bank)
+  source_authority: International Labour Organization / World Bank
+  api_endpoint: wbgapi.data.DataFrame
+  query_params:
+    economy: CHN
+    time: 2000-2023
+    indicators:
+    - SL.TLF.ADVN.ZS
+    - SL.TLF.BASC.ZS
+    - SL.TLF.INTM.ZS
+    - SL.EMP.SELF.ZS
+    - SL.EMP.VULN.ZS
+    - SL.EMP.WORK.ZS
+    - SL.FAM.WORK.ZS
+    - SL.EMP.TOTL.SP.FE.ZS
+    - SL.UEM.1524.ZS
+  fetch_date: 2026-03-29 14:06:04 UTC
+  raw_file: data/raw/ilo_china_employment_structure_20260329.csv
+  processed_file: data/processed/ilo_china_employment_structure.parquet
+  sha256_raw: 11f49511d3ecbbb1059147057a58353e37eb824edccd04efd3a1dd3d43c959d1
+  sha256_processed: a1d21a18d8198649a99df1de7c356199d4e1470fee492ec9563c33ccfbaa1302
+  variables:
+  - name: labor_force_advanced_education_pct
+    description: Labor force with advanced education (% of total working-age population
+      with advanced education)
+    unit: '%'
+    dag_variable: 'LS: High-skill proxy'
+    wb_indicator: SL.TLF.ADVN.ZS
+  - name: labor_force_basic_education_pct
+    description: Labor force with basic education (% of total working-age population
+      with basic education)
+    unit: '%'
+    dag_variable: 'LS: Low-skill proxy'
+    wb_indicator: SL.TLF.BASC.ZS
+  - name: labor_force_intermediate_education_pct
+    description: Labor force with intermediate education (% of total working-age population
+      with intermediate education)
+    unit: '%'
+    dag_variable: 'LS: Mid-skill proxy'
+    wb_indicator: SL.TLF.INTM.ZS
+  - name: self_employed_pct
+    description: Self-employed, total (% of total employment, modeled ILO)
+    unit: '%'
+    dag_variable: 'LS: Self-employment / informal proxy'
+    wb_indicator: SL.EMP.SELF.ZS
+  - name: vulnerable_employment_pct
+    description: Vulnerable employment, total (% of total employment, modeled ILO)
+    unit: '%'
+    dag_variable: 'LS: Informal employment proxy'
+    wb_indicator: SL.EMP.VULN.ZS
+  - name: wage_salaried_workers_pct
+    description: Wage and salaried workers, total (% of total employment, modeled
+      ILO)
+    unit: '%'
+    dag_variable: 'LS: Formal employment proxy'
+    wb_indicator: SL.EMP.WORK.ZS
+  - name: contributing_family_workers_pct
+    description: Contributing family workers, total (% of total employment, modeled
+      ILO)
+    unit: '%'
+    dag_variable: 'LS: Family employment'
+    wb_indicator: SL.FAM.WORK.ZS
+  - name: employment_to_population_female_pct
+    description: Employment to population ratio, 15+, female (%, modeled ILO)
+    unit: '%'
+    dag_variable: 'Controls: Female employment ratio'
+    wb_indicator: SL.EMP.TOTL.SP.FE.ZS
+  - name: youth_unemployment_pct
+    description: Unemployment, youth total (% of total labor force ages 15-24, modeled
+      ILO)
+    unit: '%'
+    dag_variable: 'Controls: Youth unemployment'
+    wb_indicator: SL.UEM.1524.ZS
+  temporal_coverage:
+    start: '2000'
+    end: '2023'
+    frequency: annual
+  observations: 24
+  missing_pct: !!python/object/apply:numpy._core.multiarray.scalar
+  - *id001
+  - !!binary |
+    ZmZmZmbmP0A=
+  license: Creative Commons Attribution 4.0 (CC-BY 4.0)
+  notes: ILO modeled estimates. Skill-level proxied by education attainment of labor
+    force. Self-employment and vulnerable employment proxy informal sector. These
+    are NATIONAL-level estimates, not provincial.
+  status: acquired
+- name: digital_economy_composite_index
+  source_url: Derived from World Bank indicators (proxy for PKU-DFIIC)
+  source_authority: Constructed from World Bank data; proxy for PKU Digital Financial
+    Inclusion Index
+  fetch_date: 2026-03-29 14:06:04 UTC
+  raw_file: data/raw/digital_economy_composite_index_20260329.csv
+  processed_file: data/processed/digital_economy_composite_index.parquet
+  sha256_raw: 0ebe5898b16ed57024ff4c14bd3052eb5500871ed07285105a00226a920f660a
+  sha256_processed: 9e9926cee27cd9991b316bc0d75783d20da03fde5b99a896b0d44403076558db
+  variables:
+  - name: digital_economy_index
+    description: Composite digital economy index (equal-weighted, min-max normalized)
+    unit: index [0-1]
+    dag_variable: 'DE: Digital economy development level'
+  - name: internet_penetration_index
+    description: Internet penetration as proportion
+    unit: proportion [0-1]
+    dag_variable: 'DE: Internet penetration component'
+  - name: internet_users_pct
+    description: 'Raw component: internet_users_pct'
+    unit: original units
+    dag_variable: DE component
+  - name: mobile_subscriptions_per100
+    description: 'Raw component: mobile_subscriptions_per100'
+    unit: original units
+    dag_variable: DE component
+  - name: fixed_broadband_per100
+    description: 'Raw component: fixed_broadband_per100'
+    unit: original units
+    dag_variable: DE component
+  - name: rd_expenditure_pct_gdp
+    description: 'Raw component: rd_expenditure_pct_gdp'
+    unit: original units
+    dag_variable: DE component
+  temporal_coverage:
+    start: '2000'
+    end: '2023'
+    frequency: annual
+  observations: 24
+  missing_pct: !!python/object/apply:numpy._core.multiarray.scalar
+  - *id001
+  - !!binary |
+    AAAAAAAAAAA=
+  license: Derived from CC-BY 4.0 data
+  notes: 'PROXY: National-level composite index constructed from World Bank indicators.
+    NOT the actual PKU-DFIIC which provides city-level and county-level data. The
+    actual PKU-DFIIC requires registration at idf.pku.edu.cn. For city-level DID analysis,
+    the actual PKU-DFIIC is strongly preferred. This proxy is adequate for national-level
+    time series analysis only.'
+  status: proxy
+- name: nbs_provincial_availability
+  source_url: https://data.stats.gov.cn/ and https://www.stats.gov.cn/sj/ndsj/2024/indexch.htm
+  source_authority: National Bureau of Statistics of China (NBS)
+  fetch_date: 2026-03-29 22:53:59 UTC
+  raw_file: data/raw/nbs_provincial_availability_20260329.csv
+  processed_file: data/processed/nbs_provincial_availability.parquet
+  sha256_raw: 60d15250c01726d8be8e7b79a4021b48070659a7adb1f26f614eb2670148e64b
+  sha256_processed: e533eff285624883ed658eb991ec4581a94aef6e02a8bed839d229c973bd074c
+  variables:
+  - name: province
+    description: Chinese province name (English)
+    unit: text
+    dag_variable: Unit identifier (provincial level)
+  - name: year
+    description: Year
+    unit: year
+    dag_variable: Time identifier
+  - name: gdp_available
+    description: Availability flag for provincial GDP in NBS yearbook
+    unit: text (NBS_YEARBOOK or NOT_AVAILABLE)
+  - name: employment_primary_available
+    description: Availability flag for primary sector employment
+    unit: text
+  - name: employment_secondary_available
+    description: Availability flag for secondary sector employment
+    unit: text
+  - name: employment_tertiary_available
+    description: Availability flag for tertiary sector employment
+    unit: text
+  - name: internet_users_available
+    description: Availability flag for internet users by province
+    unit: text (NBS_YEARBOOK_PARTIAL)
+  - name: population_available
+    description: Availability flag for population by province
+    unit: text
+  temporal_coverage:
+    start: '2011'
+    end: '2023'
+    frequency: annual
+  observations: 403
+  missing_pct: 100.0
+  license: Public domain (NBS statistical yearbooks are publicly accessible)
+  notes: 'AVAILABILITY ASSESSMENT ONLY -- no actual data values. Documents that NBS
+    Statistical Yearbook contains provincial-level employment, GDP, population, and
+    internet usage data for 31 provinces. Automated API acquisition failed (HTTP 404
+    on data.stats.gov.cn). Yearbook website IS accessible (HTTP 200) but tables require
+    JavaScript rendering for extraction. Manual extraction or EPS platform access would
+    populate this framework. If populated: enables provincial panel (31 x 13 = 403 obs)
+    instead of national time series (T=24).'
+  status: attempted
+  failure_reason: 'NBS API returned HTTP 404 for all indicator codes (A0301, A0201,
+    A0501). Yearbook HTML tables require JavaScript rendering. Three strategies attempted:
+    (1) API query, (2) Yearbook HTML access, (3) Direct download. Only Strategy 2
+    confirmed accessibility.'
+  acquisition_script: phase0_discovery/scripts/acquire_nbs_provincial.py
+- name: cfps_microdata
+  source_url: https://opendata.pku.edu.cn/dataverse/CFPS
+  source_authority: Institute of Social Science Survey, Peking University
+  fetch_date: 2026-03-29 14:06:04 UTC
+  raw_file: NOT_ACQUIRED
+  processed_file: NOT_ACQUIRED
+  sha256_raw: N/A
+  sha256_processed: N/A
+  variables:
+  - name: employment_status
+    description: Individual employment status (employed/unemployed/inactive)
+    unit: categorical
+    dag_variable: 'LS: Employment status'
+  - name: occupation_code
+    description: Occupation classification code (maps to skill levels)
+    unit: code
+    dag_variable: 'LS: Occupation/skill composition'
+  - name: industry_code
+    description: Industry classification code
+    unit: code
+    dag_variable: 'LS: Sectoral composition'
+  - name: employment_type
+    description: Employment form (formal/informal/self-employed)
+    unit: categorical
+    dag_variable: 'LS: Employment form composition'
+  - name: annual_income
+    description: Annual income from employment
+    unit: CNY
+    dag_variable: 'LS: Wage income'
+  - name: education_years
+    description: Years of education completed
+    unit: years
+    dag_variable: 'HC_INV: Human capital measure'
+  - name: hukou_type
+    description: Household registration type (agricultural/non-agricultural)
+    unit: categorical
+    dag_variable: 'Moderator: Hukou system'
+  - name: training_participation
+    description: Job training participation
+    unit: binary
+    dag_variable: 'HC_INV: Training participation'
+  temporal_coverage:
+    start: '2010'
+    end: '2020'
+    frequency: 'biennial (waves: 2010, 2012, 2014, 2016, 2018, 2020)'
+  observations: ~16000 households per wave, ~33000 adults per wave
+  missing_pct: N/A
+  license: Academic use with registration
+  notes: 'CFPS microdata requires registration at opendata.pku.edu.cn. Free for academic
+    use after approval. Provides individual-level panel data essential for: (1) skill-level
+    employment analysis (DAG 1), (2) mediation analysis with education/training (DAG
+    2), (3) formal vs informal sector analysis (DAG 3). WITHOUT CFPS, the analysis
+    is limited to national/provincial aggregate data and cannot test individual-level
+    mechanisms. The World Bank ILO employment structure data serves as a national-level
+    aggregate proxy.'
+  status: failed
+  failure_reason: Requires registration at opendata.pku.edu.cn. Cannot be automatically
+    acquired.
+  access_instructions: 1. Visit https://opendata.pku.edu.cn/dataverse/CFPS 2. Register
+    with institutional email 3. Apply for CFPS data access 4. Download waves 2010-2020
+    5. Place in data/raw/ and re-run processing
+- name: eps_provincial_panel
+  source_url: https://www.epsnet.com.cn/
+  source_authority: EPS Data Platform (Beijing Fuxing Huijin Technology Co., Ltd.)
+  fetch_date: 2026-03-29 14:06:04 UTC
+  raw_file: NOT_ACQUIRED
+  processed_file: NOT_ACQUIRED
+  sha256_raw: N/A
+  sha256_processed: N/A
+  variables:
+  - name: provincial_gdp
+    description: Provincial GDP
+    unit: 100 million CNY
+    dag_variable: 'Controls: GDP'
+  - name: employment_by_sector
+    description: Employment by primary/secondary/tertiary sector per province
+    unit: 10,000 persons
+    dag_variable: 'LS: Sectoral employment'
+  - name: ict_employment
+    description: ICT sector employment per province
+    unit: 10,000 persons
+    dag_variable: 'CRE: ICT sector job creation'
+  - name: education_expenditure
+    description: Government education expenditure per province
+    unit: 100 million CNY
+    dag_variable: 'HC_INV: Education expenditure'
+  - name: urbanization_rate
+    description: Urban population share per province
+    unit: '%'
+    dag_variable: 'Controls: Urbanization'
+  - name: fdi_by_province
+    description: Foreign direct investment per province
+    unit: 100 million USD
+    dag_variable: 'Controls: FDI'
+  - name: tertiary_sector_share
+    description: Tertiary sector value-added as % of GDP per province
+    unit: '%'
+    dag_variable: 'IND_UP: Industrial upgrading'
+  - name: employment_by_ownership
+    description: Employment by ownership type (state/private/foreign)
+    unit: 10,000 persons
+    dag_variable: 'DAG 3: SOE employment share'
+  temporal_coverage:
+    start: '2008'
+    end: '2023'
+    frequency: annual
+  observations: 30 provinces x 16 years = ~480 (target)
+  missing_pct: N/A
+  license: Commercial (institutional subscription required)
+  notes: 'EPS provides the most comprehensive provincial-level panel data for China.
+    WITHOUT EPS, the analysis cannot conduct provincial-level panel regression or
+    city-level DID with outcome variables. The World Bank data provides national aggregate
+    proxies only. Alternative: manually extract from China Statistical Yearbook (stats.gov.cn)
+    or CEIC database.'
+  status: failed
+  failure_reason: Commercial database requiring institutional subscription at epsnet.com.cn.
+    No public API available.
+  access_instructions: '1. Obtain institutional subscription to EPS Data Platform
+    2. Export provincial panel data for 30 provinces, 2008-2023 3. Place in data/raw/
+    and re-run processing. ALTERNATIVE: Use NBS (stats.gov.cn) to manually extract
+    yearbook data.'
+- name: fred_china_supplementary
+  source_url: https://fred.stlouisfed.org/
+  source_authority: Federal Reserve Bank of St. Louis
+  fetch_date: 2026-03-29 14:06:04 UTC
+  raw_file: NOT_ACQUIRED
+  processed_file: NOT_ACQUIRED
+  status: failed
+  failure_reason: No FRED_API_KEY environment variable set. FRED data is supplementary;
+    World Bank data provides adequate coverage.
+  notes: FRED provides some China-related series (exchange rates, trade data) but
+    is not the primary source for this analysis. World Bank data is the primary source.
+- name: china_national_panel_merged
+  source_url: Merged from World Bank, ILO, and constructed indices
+  source_authority: World Bank / ILO / Derived
+  fetch_date: 2026-03-29 14:06:04 UTC
+  raw_file: data/raw/china_national_panel_merged_20260329.csv
+  processed_file: data/processed/china_national_panel_merged.parquet
+  sha256_raw: c901f94ed486b1c8107642de7fdff578bbc3440e3648d57f8a242da41759dcd7
+  sha256_processed: 3fcf4c28ed5c5d503066d21665249c647560daf8353344929170a6d8ed914f05
+  variables:
+  - name: gdp_per_capita_usd
+    description: See component datasets
+    unit: varies
+  - name: gdp_per_capita_ppp
+    description: See component datasets
+    unit: varies
+  - name: gdp_total_usd
+    description: See component datasets
+    unit: varies
+  - name: industry_value_added_pct_gdp
+    description: See component datasets
+    unit: varies
+  - name: services_value_added_pct_gdp
+    description: See component datasets
+    unit: varies
+  - name: agriculture_value_added_pct_gdp
+    description: See component datasets
+    unit: varies
+  - name: employment_agriculture_pct
+    description: See component datasets
+    unit: varies
+  - name: employment_industry_pct
+    description: See component datasets
+    unit: varies
+  - name: employment_services_pct
+    description: See component datasets
+    unit: varies
+  - name: labor_force_total
+    description: See component datasets
+    unit: varies
+  - name: unemployment_rate_pct
+    description: See component datasets
+    unit: varies
+  - name: urban_population_pct
+    description: See component datasets
+    unit: varies
+  - name: population_total
+    description: See component datasets
+    unit: varies
+  - name: population_65plus_pct
+    description: See component datasets
+    unit: varies
+  - name: population_15_64_pct
+    description: See component datasets
+    unit: varies
+  - name: tertiary_enrollment_gross
+    description: See component datasets
+    unit: varies
+  - name: secondary_enrollment_gross
+    description: See component datasets
+    unit: varies
+  - name: internet_users_pct
+    description: See component datasets
+    unit: varies
+  - name: mobile_subscriptions_per100
+    description: See component datasets
+    unit: varies
+  - name: fixed_broadband_per100
+    description: See component datasets
+    unit: varies
+  - name: fdi_net_inflows_usd
+    description: See component datasets
+    unit: varies
+  - name: gross_fixed_capital_formation_pct_gdp
+    description: See component datasets
+    unit: varies
+  - name: domestic_credit_private_pct_gdp
+    description: See component datasets
+    unit: varies
+  - name: rd_expenditure_pct_gdp
+    description: See component datasets
+    unit: varies
+  - name: labor_force_advanced_education_pct
+    description: See component datasets
+    unit: varies
+  - name: labor_force_basic_education_pct
+    description: See component datasets
+    unit: varies
+  - name: labor_force_intermediate_education_pct
+    description: See component datasets
+    unit: varies
+  - name: self_employed_pct
+    description: See component datasets
+    unit: varies
+  - name: vulnerable_employment_pct
+    description: See component datasets
+    unit: varies
+  - name: wage_salaried_workers_pct
+    description: See component datasets
+    unit: varies
+  - name: contributing_family_workers_pct
+    description: See component datasets
+    unit: varies
+  - name: employment_to_population_female_pct
+    description: See component datasets
+    unit: varies
+  - name: youth_unemployment_pct
+    description: See component datasets
+    unit: varies
+  - name: internet_users_pct_normalized
+    description: See component datasets
+    unit: varies
+  - name: mobile_subscriptions_per100_normalized
+    description: See component datasets
+    unit: varies
+  - name: fixed_broadband_per100_normalized
+    description: See component datasets
+    unit: varies
+  - name: rd_expenditure_pct_gdp_normalized
+    description: See component datasets
+    unit: varies
+  - name: digital_economy_index
+    description: See component datasets
+    unit: varies
+  - name: internet_penetration_index
+    description: See component datasets
+    unit: varies
+  temporal_coverage:
+    start: '2000'
+    end: '2023'
+    frequency: annual
+  observations: 24
+  missing_pct: !!python/object/apply:numpy._core.multiarray.scalar
+  - *id001
+  - !!binary |
+    mpmZmZmZIUA=
+  license: Derived from CC-BY 4.0 data
+  notes: Merged national-level panel combining World Bank macro indicators, ILO employment
+    structure estimates, and digital economy composite index. This is the primary
+    analysis-ready dataset for national-level time series analysis. For DID analysis,
+    city-level data (EPS + PKU-DFIIC) is needed.
+  status: acquired
+metadata:
+  fetch_date: 2026-03-29 14:06:04 UTC
+  script: phase0_discovery/scripts/acquire_data.py

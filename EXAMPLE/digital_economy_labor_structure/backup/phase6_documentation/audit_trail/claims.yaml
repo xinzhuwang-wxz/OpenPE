@@ -1,0 +1,289 @@
+# Audit Trail: Claims Registry
+# Maps every factual claim in ANALYSIS_NOTE.md to its data source.
+# Generated for analysis: digital_economy_labor_structure
+
+claims:
+  # --- Executive Summary claims ---
+  - id: C1
+    claim: "DE index positively associated with industrial employment share (ARDL LR +7.15 pp per unit DE increase, 95% CI [-0.89, 15.20])"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 6.3 ARDL Long-Run Estimates"
+    verification: "Phase 5 independent reproduction: 7.15 pp reproduced exactly (0.0% difference)"
+    classification: CORRELATION
+    ep_final: 0.315
+    report_section: "Executive Summary; Section 3 (DE->SUB)"
+
+  - id: C2
+    claim: "DE->SUB passes 2 of 3 refutation tests (placebo PASS, random common cause PASS, data subset FAIL)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.1.3 Refutation Tests (controlled specification)"
+    verification: "Phase 5 logic audit confirmed classification consistent with 2/3 PASS = CORRELATION"
+    classification: CORRELATION
+    ep_final: 0.315
+    report_section: "Section 3 (DE->SUB)"
+
+  - id: C3
+    claim: "Creation channel (DE->CRE) finds no temporal precedence, no cointegration, effect near zero (EP=0.030, below hard truncation)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.2 (DE->CRE)"
+    verification: "Phase 5 logic audit confirmed HYPOTHESIZED classification correct"
+    classification: HYPOTHESIZED
+    ep_final: 0.030
+    report_section: "Executive Summary; Section 3 (DE->CRE)"
+
+  - id: C4
+    claim: "Mediation chain DE->IND_UP classified HYPOTHESIZED (EP=0.090) after 1/3 refutation pass"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.3 (DE->IND_UP)"
+    verification: "Phase 5 EP verification: minor discrepancy (0.090 vs rule-based 0.075), Category C, no downstream impact"
+    classification: HYPOTHESIZED
+    ep_final: 0.090
+    report_section: "Executive Summary; Section 3 (DE->IND_UP)"
+
+  # --- Data Foundation claims ---
+  - id: C5
+    claim: "National time series T=24 (2000-2023)"
+    source: "phase0_discovery/exec/DATA_QUALITY.md, Section: china_national_panel_merged (24 rows x 40 columns)"
+    verification: "Phase 5 data provenance audit: 24 rows confirmed"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 2 (Data Foundation)"
+
+  - id: C6
+    claim: "DID not executable due to missing city-level outcome data"
+    source: "phase0_discovery/exec/DATA_QUALITY.md, Gate Decision item 1"
+    verification: "Phase 5 cross-artifact consistency check: confirmed across all phases"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 2 (Data Foundation)"
+
+  - id: C7
+    claim: "ILO skill-composition columns 96% missing (1/24 observations)"
+    source: "phase0_discovery/exec/DATA_QUALITY.md, Dataset: ilo_china_employment_structure, Completeness"
+    verification: "Phase 5 data provenance audit: confirmed"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 2 (Data Foundation)"
+
+  - id: C8
+    claim: "DE composite index is 4-component proxy (internet, mobile, broadband, R&D), saturated at 1.0 by 2023"
+    source: "phase0_discovery/exec/DATA_QUALITY.md, Dataset: digital_economy_composite_index"
+    verification: "Phase 5 DE index construction verification: min-max normalization and equal-weight average confirmed (max error = 0.000000)"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 2 (Data Foundation)"
+
+  - id: C9
+    claim: "Smart city pilot treatment panel: 286 cities, 3 batches (2012, 2014, 2015)"
+    source: "phase0_discovery/exec/DATA_QUALITY.md, Dataset: smart_city_pilots_list"
+    verification: "Phase 5 provenance: 286 rows confirmed, SHA-256 match"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 2 (Data Foundation)"
+
+  # --- Analysis Findings: Substitution channel ---
+  - id: C10
+    claim: "Toda-Yamamoto bivariate Granger: W=5.84, p_boot=0.087"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.1.2"
+    verification: "Phase 5 reproduction: W=6.18 (5.8% difference, acceptable methodological difference)"
+    classification: CORRELATION
+    ep_final: 0.315
+    report_section: "Section 3 (DE->SUB)"
+
+  - id: C11
+    claim: "Toda-Yamamoto with demographic control: W=13.33, p_boot=0.012"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.1.2"
+    verification: "Phase 5 reproduction: W=11.51 (13.7% difference, acceptable Wald test formulation difference)"
+    classification: CORRELATION
+    ep_final: 0.315
+    report_section: "Section 3 (DE->SUB)"
+
+  - id: C12
+    claim: "Johansen cointegration: trace=19.04 > cv95=15.49"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.1.2"
+    verification: "Phase 5 reproduction: 19.04 reproduced exactly (0.0% difference)"
+    classification: CORRELATION
+    ep_final: 0.315
+    report_section: "Section 3 (DE->SUB)"
+
+  - id: C13
+    claim: "ARDL bounds test: F=6.51 > upper bound 5.73 at 5%"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.1.2"
+    verification: "Phase 5 divergence: independent ECM yields F=1.40 (specification-dependent); cointegration confirmed by Johansen"
+    classification: CORRELATION
+    ep_final: 0.315
+    report_section: "Section 3 (DE->SUB)"
+
+  - id: C14
+    claim: "ARDL long-run coefficient with demographic control: +12.57 pp (SE=1.86, 95% CI [8.94, 16.21])"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 6.3"
+    verification: "Phase 5 not independently reproduced for controlled specification; bivariate LR (7.15) reproduced exactly"
+    classification: CORRELATION
+    ep_final: 0.315
+    report_section: "Section 3 (DE->SUB)"
+
+  - id: C15
+    claim: "Industry employment pre-trend +0.71 pp/year reversed post-2016 with -4.45 pp deviation from counterfactual (t=-11.51, p<0.001)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 2.1 Baseline Construction"
+    verification: "Phase 5 reproduction: -4.45 pp deviation reproduced exactly (0.0%)"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 3 (DE->SUB)"
+
+  - id: C16
+    claim: "Industry pre-trend R2=0.82"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 2.1 (corrected per Phase 5)"
+    verification: "Phase 5 Category B finding: originally reported 0.96, independently verified as 0.82"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 3 (DE->SUB)"
+
+  # --- Analysis Findings: Creation channel ---
+  - id: C17
+    claim: "DE does not Granger-cause services employment (W=1.16, p_boot=0.565 bivariate; W=0.38, p_boot=0.834 with control)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.2.2"
+    verification: "Phase 5 logic audit confirmed classification consistent"
+    classification: HYPOTHESIZED
+    ep_final: 0.030
+    report_section: "Section 3 (DE->CRE)"
+
+  - id: C18
+    claim: "No cointegration for creation channel (Johansen trace=4.47 < cv95=15.49; ARDL F=1.92 < lower bound)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.2.2"
+    verification: "Phase 5 logic audit confirmed"
+    classification: HYPOTHESIZED
+    ep_final: 0.030
+    report_section: "Section 3 (DE->CRE)"
+
+  - id: C19
+    claim: "Level correlation DE-services r=0.981 is spurious (common trend)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.2.2"
+    verification: "Phase 5 reproduction: 0.981 reproduced exactly"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 3 (DE->CRE)"
+
+  # --- Analysis Findings: Mediation ---
+  - id: C20
+    claim: "DE Granger-causes services VA with demographic control (W=15.81, p_boot=0.008)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.3.1"
+    verification: "Phase 5 logic audit: significant but 1/3 refutation PASS -> HYPOTHESIZED"
+    classification: HYPOTHESIZED
+    ep_final: 0.090
+    report_section: "Section 3 (DE->IND_UP)"
+
+  - id: C21
+    claim: "VAR mediation decomposition yields negative mediation shares (-90% to -95%)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.5 VAR Mediation Decomposition"
+    verification: "Phase 5 logic audit: flagged as counterintuitive, likely artifact of single-entity time series"
+    classification: HYPOTHESIZED
+    ep_final: 0.090
+    report_section: "Section 3 (DE->IND_UP)"
+
+  # --- Analysis Findings: Demographics ---
+  - id: C22
+    claim: "Demographics do not Granger-cause employment structure at annual frequency (services: W=1.93, p=0.397; industry: W=0.75, p=0.694)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 3.4"
+    verification: "Phase 5 logic audit confirmed"
+    classification: HYPOTHESIZED
+    ep_final: 0.120
+    report_section: "Section 3 (DEMO->LS)"
+
+  - id: C23
+    claim: "Reverse causality not detected: neither employment variable Granger-causes DE"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 1 (Reverse Causality)"
+    verification: "Phase 5 logic audit confirmed"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 3 (Reverse Causality)"
+
+  # --- Uncertainty Quantification ---
+  - id: C24
+    claim: "Bootstrap CI for beta_1 (bivariate substitution): [-19.8, 40.9]"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 7.1"
+    verification: "Not independently reproduced"
+    classification: CORRELATION
+    ep_final: 0.315
+    report_section: "Section 5 (Uncertainty)"
+
+  - id: C25
+    claim: "Signal injection tests all pass (observed, 2x, null recovered correctly)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 6.5"
+    verification: "Not independently reproduced"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 5 (Statistical Model)"
+
+  # --- Forward Projection ---
+  - id: C26
+    claim: "Baseline scenario: industry employment declines from 31.4% to ~27.5% median over 10 years"
+    source: "phase4_projection/exec/PROJECTION.md (via ANALYSIS_NOTE.md Section 6)"
+    verification: "Phase 5 consistency check: 2023 industry emp = 31.4% matches PROJECTION start"
+    classification: PROJECTION
+    ep_final: 0.113
+    report_section: "Section 6 (Forward Projection)"
+
+  - id: C27
+    claim: "Endgame classified Robust (CV=0.046) but reflects model insensitivity to saturated DE proxy"
+    source: "phase4_projection/exec/PROJECTION.md (via ANALYSIS_NOTE.md Section 6)"
+    verification: "Phase 5 EP decay verification: all values match exactly"
+    classification: PROJECTION
+    ep_final: 0.050
+    report_section: "Section 6 (Forward Projection)"
+
+  - id: C28
+    claim: "EP decays below hard truncation (0.05) within 3 years; useful projection horizon is 3 years"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 4; phase5_verification/exec/VERIFICATION.md, EP Decay"
+    verification: "Phase 5 EP decay verification: 0.315 -> 0.113 (1yr) -> 0.050 (3yr), all exact"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 6 (EP Decay)"
+
+  # --- Services employment acceleration ---
+  - id: C29
+    claim: "Services employment post-break deviation: +1.83 pp above counterfactual (t=5.12, p=0.001)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 2.1 Baseline Construction"
+    verification: "Phase 5 reproduction: +1.83 pp reproduced exactly (0.1% difference)"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 3 (Structural Break)"
+
+  - id: C30
+    claim: "Services VA post-break deviation: +5.89 pp (t=34.96, p<0.001)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 2.1 Baseline Construction"
+    verification: "Not independently reproduced for this specific variable"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 3 (Structural Break)"
+
+  # --- Power and sample size ---
+  - id: C31
+    claim: "Power approximately 35% for medium effects at T=24"
+    source: "phase1_strategy/exec/STRATEGY.md; phase3_analysis/exec/ANALYSIS.md"
+    verification: "Phase 5 independent calculation: 43% (different df specification); qualitative conclusion unchanged"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 2 (Data Foundation)"
+
+  # --- ILO endogeneity ---
+  - id: C32
+    claim: "ILO services employment regressed on GDP and urbanization yields R2=0.989"
+    source: "phase2_exploration/exec/EXPLORATION.md; phase3_analysis/exec/ANALYSIS.md"
+    verification: "Phase 5 reproduction: R2=0.986 (0.3% difference, likely specification difference)"
+    classification: DESCRIPTIVE
+    ep_final: null
+    report_section: "Section 2 (Data Foundation)"
+
+  # --- DID-inspired regression ---
+  - id: C33
+    claim: "DID-inspired regression with DEMO control: beta_2 (POST x d_DE) = -11.62, p=0.011 (HAC SE)"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 6.4"
+    verification: "Not independently reproduced; bootstrap CI [-34.3, 33.1] wider than HAC CI, crossing zero"
+    classification: CORRELATION
+    ep_final: 0.315
+    report_section: "Section 3 (DE->SUB, Statistical Model)"
+
+  # --- Break year sensitivity ---
+  - id: C34
+    claim: "Break interaction significant at 2013 (p=0.038) and 2015 (p=0.032), consistent with smart city timing"
+    source: "phase3_analysis/exec/ANALYSIS.md, Section 6.6 Sensitivity Analysis"
+    verification: "Not independently reproduced"
+    classification: CORRELATION
+    ep_final: 0.315
+    report_section: "Section 5 (Sensitivity)"

@@ -1,0 +1,52 @@
+overall_verdict: FLAG
+checks:
+- check: Independent reproduction
+  verdict: PASS
+  details: 7/10 metrics within 5%; 2 within 15%; 1 divergence (ARDL bounds F, explained)
+- check: Logic audit
+  verdict: FLAG
+  details: All edge classifications consistent with refutation results; 1 minor R2 reporting discrepancy
+- check: EP verification
+  verdict: PASS
+  details: 4/5 edges verified exactly; 1 minor discrepancy (DE-->IND_UP, 0.075 vs 0.090, Category C)
+reproduction_details:
+- metric: Granger W (bivariate DE-->IND)
+  primary: '5.84'
+  independent: '6.18'
+  difference: 5.8%
+  status: CLOSE
+- metric: Granger W (trivariate, DE-only restriction)
+  primary: '13.33'
+  independent: '11.51'
+  difference: 13.7%
+  status: CLOSE
+- metric: ARDL LR coefficient (bivariate)
+  primary: 7.15 pp
+  independent: 7.15 pp
+  difference: 0.0%
+  status: PASS
+- metric: ARDL LR SE (delta method)
+  primary: '4.10'
+  independent: '4.14'
+  difference: 1.1%
+  status: PASS
+- metric: Johansen trace statistic (r=0)
+  primary: '19.04'
+  independent: '19.04'
+  difference: 0.0%
+  status: PASS
+- metric: ARDL bounds F-statistic
+  primary: '6.51'
+  independent: '1.40'
+  difference: 78.5%
+  status: DIVERGE
+- metric: ILO endogeneity R2
+  primary: '0.989'
+  independent: '0.986'
+  difference: 0.3%
+  status: PASS
+- metric: Level correlation DE-services
+  primary: '0.981'
+  independent: '0.981'
+  difference: 0.0%
+  status: PASS

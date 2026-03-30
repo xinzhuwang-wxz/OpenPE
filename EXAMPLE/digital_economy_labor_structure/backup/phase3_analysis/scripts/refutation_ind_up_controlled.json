@@ -1,0 +1,57 @@
+{
+  "label": "DE -> IND_UP (controlled, with demographic)",
+  "cause": "digital_economy_index",
+  "effect": "services_value_added_pct_gdp",
+  "controls": [
+    "population_15_64_pct"
+  ],
+  "original_W": 15.80746730266624,
+  "original_p": 0.0003693618942426369,
+  "placebo": {
+    "verdict": "PASS",
+    "n_significant": 1,
+    "n_total": 4,
+    "placebo_runs": [
+      {
+        "shift": 2,
+        "W": 0.3047139601017389,
+        "p": 0.8586816937869374
+      },
+      {
+        "shift": 3,
+        "W": 0.28480373757673955,
+        "p": 0.867272656633198
+      },
+      {
+        "shift": 4,
+        "W": 1.0008849839470368,
+        "p": 0.6062623341343533
+      },
+      {
+        "shift": 5,
+        "W": 24.01848446187241,
+        "p": 6.087687733025149e-06
+      }
+    ]
+  },
+  "random_cause": {
+    "verdict": "FAIL",
+    "W_original": 15.80746730266624,
+    "W_mean_random": 11.987716575827482,
+    "W_std_random": 4.637283113924187,
+    "change_pct": 24.164217162065434
+  },
+  "data_subset": {
+    "verdict": "FAIL",
+    "W_original": 15.80746730266624,
+    "p_original": 0.0003693618942426369,
+    "W_mean_subset": 3.7828161585545717,
+    "W_std_subset": 4.793884724030526,
+    "change_pct": 76.06943550079951,
+    "consistency_fraction": 0.28,
+    "n_valid_subsets": 100
+  },
+  "n_pass": 1,
+  "n_marginal": 0,
+  "classification": "HYPOTHESIZED"
+}

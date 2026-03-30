@@ -1,0 +1,92 @@
+{
+  "shape": [
+    24,
+    40
+  ],
+  "usable_shape": [
+    24,
+    37
+  ],
+  "year_range": [
+    2000,
+    2023
+  ],
+  "missing_years": [],
+  "duplicate_rows": 0,
+  "unusable_columns": [
+    "labor_force_advanced_education_pct",
+    "labor_force_basic_education_pct",
+    "labor_force_intermediate_education_pct"
+  ],
+  "dropped_columns": [
+    "labor_force_advanced_education_pct",
+    "labor_force_basic_education_pct",
+    "labor_force_intermediate_education_pct"
+  ],
+  "missing_by_column": {
+    "secondary_enrollment_gross": {
+      "count": 13,
+      "pct": 54.17
+    },
+    "rd_expenditure_pct_gdp": {
+      "count": 1,
+      "pct": 4.17
+    },
+    "labor_force_advanced_education_pct": {
+      "count": 23,
+      "pct": 95.83
+    },
+    "labor_force_basic_education_pct": {
+      "count": 23,
+      "pct": 95.83
+    },
+    "labor_force_intermediate_education_pct": {
+      "count": 23,
+      "pct": 95.83
+    },
+    "rd_expenditure_pct_gdp_normalized": {
+      "count": 1,
+      "pct": 4.17
+    }
+  },
+  "usable_missing_rate_pct": 1.69,
+  "columns": [
+    "year",
+    "gdp_per_capita_usd",
+    "gdp_per_capita_ppp",
+    "gdp_total_usd",
+    "industry_value_added_pct_gdp",
+    "services_value_added_pct_gdp",
+    "agriculture_value_added_pct_gdp",
+    "employment_agriculture_pct",
+    "employment_industry_pct",
+    "employment_services_pct",
+    "labor_force_total",
+    "unemployment_rate_pct",
+    "urban_population_pct",
+    "population_total",
+    "population_65plus_pct",
+    "population_15_64_pct",
+    "tertiary_enrollment_gross",
+    "secondary_enrollment_gross",
+    "internet_users_pct",
+    "mobile_subscriptions_per100",
+    "fixed_broadband_per100",
+    "fdi_net_inflows_usd",
+    "gross_fixed_capital_formation_pct_gdp",
+    "domestic_credit_private_pct_gdp",
+    "rd_expenditure_pct_gdp",
+    "self_employed_pct",
+    "vulnerable_employment_pct",
+    "wage_salaried_workers_pct",
+    "contributing_family_workers_pct",
+    "employment_to_population_female_pct",
+    "youth_unemployment_pct",
+    "internet_users_pct_normalized",
+    "mobile_subscriptions_per100_normalized",
+    "fixed_broadband_per100_normalized",
+    "rd_expenditure_pct_gdp_normalized",
+    "digital_economy_index",
+    "internet_penetration_index"
+  ]
+}

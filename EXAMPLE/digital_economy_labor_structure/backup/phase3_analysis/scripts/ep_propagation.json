@@ -1,0 +1,48 @@
+{
+  "classifications": {
+    "DE->SUB": "CORRELATION",
+    "DE->CRE": "HYPOTHESIZED",
+    "DE->IND_UP": "HYPOTHESIZED",
+    "DEMO->LS": "HYPOTHESIZED",
+    "DE->LS (direct)": "HYPOTHESIZED"
+  },
+  "phase3_ep": {
+    "DE->SUB": 0.315,
+    "DE->CRE": 0.11999999999999998,
+    "DE->IND_UP": 0.09,
+    "DEMO->LS": 0.11999999999999998,
+    "DE->LS (direct)": 0.009999999999999998
+  },
+  "trajectory": {
+    "DE->SUB": [
+      0.49,
+      0.32,
+      0.32,
+      0.315
+    ],
+    "DE->CRE": [
+      0.42,
+      0.27,
+      0.27,
+      0.11999999999999998
+    ],
+    "DE->IND_UP": [
+      0.35,
+      0.23,
+      0.23,
+      0.09
+    ],
+    "DEMO->LS": [
+      0.42,
+      0.36,
+      0.36,
+      0.11999999999999998
+    ],
+    "DE->LS (direct)": [
+      0.12,
+      0.06,
+      0.06,
+      0.009999999999999998
+    ]
+  }
+}

@@ -1,0 +1,462 @@
+{
+  "johansen": [
+    {
+      "variables": [
+        "digital_economy_index",
+        "employment_services_pct"
+      ],
+      "T": 24,
+      "k_ar_diff": 1,
+      "trace_stats": [
+        4.472015268617594,
+        1.0190688109364898
+      ],
+      "trace_cv95": [
+        15.4943,
+        3.8415
+      ],
+      "max_stats": [
+        3.452946457681104,
+        1.0190688109364898
+      ],
+      "max_cv95": [
+        14.2639,
+        3.8415
+      ],
+      "rank_trace": 0,
+      "rank_max": 0,
+      "eigenvectors": [
+        [
+          18.99701120960797,
+          -12.976992263686329
+        ],
+        [
+          -0.9516260448971102,
+          0.43047042857488477
+        ]
+      ],
+      "label": "creation"
+    },
+    {
+      "variables": [
+        "digital_economy_index",
+        "employment_industry_pct"
+      ],
+      "T": 24,
+      "k_ar_diff": 1,
+      "trace_stats": [
+        19.03664796939528,
+        0.3361457960916376
+      ],
+      "trace_cv95": [
+        15.4943,
+        3.8415
+      ],
+      "max_stats": [
+        18.700502173303644,
+        0.3361457960916376
+      ],
+      "max_cv95": [
+        14.2639,
+        3.8415
+      ],
+      "rank_trace": 2,
+      "rank_max": 2,
+      "eigenvectors": [
+        [
+          3.70391478814178,
+          -8.652022632236903
+        ],
+        [
+          -0.6351609635150524,
+          0.5701752443322795
+        ]
+      ],
+      "label": "substitution"
+    },
+    {
+      "variables": [
+        "digital_economy_index",
+        "services_value_added_pct_gdp"
+      ],
+      "T": 24,
+      "k_ar_diff": 1,
+      "trace_stats": [
+        16.71506435145343,
+        1.4787020414637764
+      ],
+      "trace_cv95": [
+        15.4943,
+        3.8415
+      ],
+      "max_stats": [
+        15.236362309989657,
+        1.4787020414637764
+      ],
+      "max_cv95": [
+        14.2639,
+        3.8415
+      ],
+      "rank_trace": 2,
+      "rank_max": 2,
+      "eigenvectors": [
+        [
+          15.137490892951712,
+          -0.22805731946715946
+        ],
+        [
+          -0.7841555297563365,
+          0.2230264438934231
+        ]
+      ],
+      "label": "mediation_link1"
+    },
+    {
+      "variables": [
+        "digital_economy_index",
+        "employment_services_pct",
+        "population_15_64_pct"
+      ],
+      "T": 24,
+      "k_ar_diff": 1,
+      "trace_stats": [
+        52.63981131011946,
+        11.6597126532423,
+        0.014885608287757023
+      ],
+      "trace_cv95": [
+        29.7961,
+        15.4943,
+        3.8415
+      ],
+      "max_stats": [
+        40.98009865687716,
+        11.644827044954543,
+        0.014885608287757023
+      ],
+      "max_cv95": [
+        21.1314,
+        14.2639,
+        3.8415
+      ],
+      "rank_trace": 3,
+      "rank_max": 3,
+      "eigenvectors": [
+        [
+          0.7427271871138797,
+          -17.407927777986394,
+          -16.430414450692
+        ],
+        [
+          -0.07313563820577694,
+          1.107941307089494,
+          0.312107460618498
+        ],
+        [
+          -0.8270487249137867,
+          0.11730176551995959,
+          -0.5498602446362808
+        ]
+      ],
+      "label": "creation_with_demo"
+    },
+    {
+      "variables": [
+        "digital_economy_index",
+        "employment_industry_pct",
+        "population_15_64_pct"
+      ],
+      "T": 24,
+      "k_ar_diff": 1,
+      "trace_stats": [
+        41.341090557488194,
+        17.997775248562483,
+        1.0666352424148378
+      ],
+      "trace_cv95": [
+        29.7961,
+        15.4943,
+        3.8415
+      ],
+      "max_stats": [
+        23.343315308925717,
+        16.931140006147643,
+        1.0666352424148378
+      ],
+      "max_cv95": [
+        21.1314,
+        14.2639,
+        3.8415
+      ],
+      "rank_trace": 3,
+      "rank_max": 3,
+      "eigenvectors": [
+        [
+          3.6470283974678424,
+          -17.928560093867887,
+          11.383086303835704
+        ],
+        [
+          -0.5403540347861223,
+          1.7185888007994075,
+          -0.004635548640947138
+        ],
+        [
+          -0.5575869694107095,
+          -1.7572768322243797,
+          0.9178030563507157
+        ]
+      ],
+      "label": "substitution_with_demo"
+    }
+  ],
+  "vecm": [
+    {
+      "variables": [
+        "digital_economy_index",
+        "employment_industry_pct"
+      ],
+      "coint_rank": 1,
+      "beta": [
+        [
+          1.0
+        ],
+        [
+          -0.17284311994097326
+        ]
+      ],
+      "beta_normalized": [
+        1.0,
+        -0.17284311994097326
+      ],
+      "alpha": [
+        -0.014809975184694233,
+        1.2516140316939772
+      ],
+      "k_ar_diff": 1,
+      "col_names": [
+        "digital_economy_index",
+        "employment_industry_pct"
+      ],
+      "label": "substitution"
+    },
+    {
+      "variables": [
+        "digital_economy_index",
+        "services_value_added_pct_gdp"
+      ],
+      "coint_rank": 1,
+      "beta": [
+        [
+          1.0
+        ],
+        [
+          -0.050932750174927224
+        ]
+      ],
+      "beta_normalized": [
+        1.0,
+        -0.050932750174927224
+      ],
+      "alpha": [
+        0.06102303223104397,
+        8.154165469074364
+      ],
+      "k_ar_diff": 1,
+      "col_names": [
+        "digital_economy_index",
+        "services_value_added_pct_gdp"
+      ],
+      "label": "mediation_link1"
+    },
+    {
+      "variables": [
+        "digital_economy_index",
+        "employment_services_pct",
+        "population_15_64_pct"
+      ],
+      "coint_rank": 2,
+      "beta": [
+        [
+          1.0000000000000002,
+          2.2050362442160513e-15
+        ],
+        [
+          -6.7851203264407734e-18,
+          0.9999999999999999
+        ],
+        [
+          2.120339663640863,
+          32.95874579501002
+        ]
+      ],
+      "beta_normalized": [
+        1.0,
+        2.205036244216051e-15,
+        -6.785120326440772e-18,
+        0.9999999999999997,
+        2.1203396636408627,
+        32.95874579501001
+      ],
+      "alpha": [
+        0.08068190762974728,
+        -0.005159785600242798,
+        1.7274563929249158,
+        -0.10810035040656486,
+        0.34790663203533706,
+        -0.02473461320294624
+      ],
+      "k_ar_diff": 1,
+      "col_names": [
+        "digital_economy_index",
+        "employment_services_pct",
+        "population_15_64_pct"
+      ],
+      "label": "creation_with_demo"
+    },
+    {
+      "variables": [
+        "digital_economy_index",
+        "employment_industry_pct",
+        "population_15_64_pct"
+      ],
+      "coint_rank": 2,
+      "beta": [
+        [
+          1.0000000000000007,
+          2.2179939250116504e-15
+        ],
+        [
+          5.5782678278951755e-18,
+          1.0000000000000007
+        ],
+        [
+          0.5344754362576292,
+          4.4097924716991805
+        ]
+      ],
+      "beta_normalized": [
+        1.0,
+        2.2179939250116488e-15,
+        5.5782678278951716e-18,
+        1.0,
+        0.5344754362576288,
+        4.409792471699178
+      ],
+      "alpha": [
+        -0.08543822327757326,
+        0.008952100313419182,
+        3.971889423956851,
+        -0.4100518624872316,
+        -0.3189174094028353,
+        0.019575049432952737
+      ],
+      "k_ar_diff": 1,
+      "col_names": [
+        "digital_economy_index",
+        "employment_industry_pct",
+        "population_15_64_pct"
+      ],
+      "label": "substitution_with_demo"
+    }
+  ],
+  "ardl": [
+    {
+      "dep": "employment_services_pct",
+      "indep": [
+        "digital_economy_index"
+      ],
+      "T": 24,
+      "nobs": 21,
+      "F_stat": 1.9217016763518593,
+      "bounds_5pct": [
+        4.94,
+        5.73
+      ],
+      "bounds_10pct": [
+        4.04,
+        4.78
+      ],
+      "conclusion": "NO COINTEGRATION (F < lower bound at 10%)",
+      "label": "creation"
+    },
+    {
+      "dep": "employment_industry_pct",
+      "indep": [
+        "digital_economy_index"
+      ],
+      "T": 24,
+      "nobs": 21,
+      "F_stat": 6.509485877220121,
+      "bounds_5pct": [
+        4.94,
+        5.73
+      ],
+      "bounds_10pct": [
+        4.04,
+        4.78
+      ],
+      "conclusion": "COINTEGRATED (F > upper bound at 5%)",
+      "label": "substitution"
+    },
+    {
+      "dep": "services_value_added_pct_gdp",
+      "indep": [
+        "digital_economy_index"
+      ],
+      "T": 24,
+      "nobs": 21,
+      "F_stat": 8.587058209690198,
+      "bounds_5pct": [
+        4.94,
+        5.73
+      ],
+      "bounds_10pct": [
+        4.04,
+        4.78
+      ],
+      "conclusion": "COINTEGRATED (F > upper bound at 5%)",
+      "label": "mediation_link1"
+    },
+    {
+      "dep": "employment_services_pct",
+      "indep": [
+        "digital_economy_index",
+        "population_15_64_pct"
+      ],
+      "T": 24,
+      "nobs": 21,
+      "F_stat": 2.316357695625132,
+      "bounds_5pct": [
+        3.79,
+        4.85
+      ],
+      "bounds_10pct": [
+        3.17,
+        4.14
+      ],
+      "conclusion": "NO COINTEGRATION (F < lower bound at 10%)",
+      "label": "creation_with_demo"
+    },
+    {
+      "dep": "employment_industry_pct",
+      "indep": [
+        "digital_economy_index",
+        "population_15_64_pct"
+      ],
+      "T": 24,
+      "nobs": 21,
+      "F_stat": 5.8543410495816435,
+      "bounds_5pct": [
+        3.79,
+        4.85
+      ],
+      "bounds_10pct": [
+        3.17,
+        4.14
+      ],
+      "conclusion": "COINTEGRATED (F > upper bound at 5%)",
+      "label": "substitution_with_demo"
+    }
+  ]
+}

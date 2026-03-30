@@ -1,0 +1,133 @@
+methodology:
+- id: M_auto_1
+  choice: Toda-Yamamoto over standard Granger
+  justification: T=24 violates T>=30 convention; mixed I(0)/I(1) integration orders
+  alternatives_considered:
+  - Standard Granger
+  - ARDL bounds test
+  phase: Phase 1
+- id: M_auto_2
+  choice: ARDL bounds test alongside Johansen cointegration
+  justification: Valid regardless of I(0)/I(1) mix; ambiguous stationarity at T=24
+  alternatives_considered:
+  - Johansen only
+  - Engle-Granger two-step
+  phase: Phase 1
+- id: M_auto_3
+  choice: Structural break analysis as DID substitute
+  justification: No city-level outcome data for true DID; smart city dates as break points
+  alternatives_considered:
+  - True DID
+  - Synthetic control
+  - RDD
+  phase: Phase 1
+- id: M_auto_4
+  choice: VAR impulse response for mediation (not Baron-Kenny)
+  justification: Time series violates i.i.d. assumption required by Baron-Kenny
+  alternatives_considered:
+  - Baron-Kenny
+  - SEM
+  phase: Phase 1
+- id: M_auto_5
+  choice: Block bootstrap for confidence intervals
+  justification: T=24 may violate asymptotic assumptions
+  alternatives_considered:
+  - Analytical SE only
+  - Wild bootstrap
+  phase: Phase 3
+- id: M_auto_6
+  choice: Lag order p=1 for Toda-Yamamoto VAR
+  justification: AIC/BIC minimized at lag 1; each additional lag consumes ~4% of degrees of freedom at T=24
+  alternatives_considered:
+  - Lag 2 (marginal significance, p=0.052)
+  - Lag 3 (non-significant, excessive df consumption)
+  phase: Phase 3
+- id: M_auto_7
+  choice: Cholesky ordering DE first in VAR impulse responses
+  justification: DE is treated as weakly exogenous based on economic theory (technology drives employment, not reverse); alpha_DE near zero in VECM confirms weak exogeneity
+  alternatives_considered:
+  - Employment first (rejected; reverse causality not detected)
+  - Generalized IRF (considered but Cholesky standard in macro-labor literature)
+  phase: Phase 3
+- id: M_auto_8
+  choice: Break year window 2013-2015 for structural break analysis
+  justification: Aligns with three smart city pilot batch announcement dates (MOHURD 2013, 2014, 2015)
+  alternatives_considered:
+  - Single break at 2013 (first batch only)
+  - Single break at 2015 (supply-side reform)
+  - Endogenous break detection (Bai-Perron; rejected due to T=24 power concerns)
+  phase: Phase 3
+- id: M_auto_9
+  choice: EP decay multiplier 2x for CORRELATION edges
+  justification: CORRELATION classification indicates weaker causal identification than DATA_SUPPORTED; faster decay reflects lower confidence in projecting associations forward
+  alternatives_considered:
+  - Standard 1x decay (rejected; overstates confidence for non-causal findings)
+  - 3x decay (considered overly aggressive)
+  phase: Phase 4
+- id: M_auto_10
+  choice: DE composite index construction (4-component min-max normalized, equal weights)
+  justification: PKU-DFIIC unavailable; four World Bank indicators (internet users, mobile subscriptions, broadband, R&D expenditure) are the best available proxies for ICT infrastructure penetration
+  alternatives_considered:
+  - PCA-weighted index (rejected; T=24 insufficient for stable PCA)
+  - Single indicator (rejected; no single indicator captures digital economy breadth)
+  - PKU-DFIIC (unavailable; registration-gated)
+  phase: Phase 0
+- id: M_auto_11
+  choice: COVID years (2020-2021) included in main analysis with sensitivity check excluding them
+  justification: Dropping 2 of 24 observations is costly; sensitivity analysis shows 1.81 pp shift, within systematic uncertainty budget
+  alternatives_considered:
+  - Exclude COVID years from all models (rejected; unacceptable df loss)
+  - COVID dummy variable (considered; similar results to inclusion)
+  phase: Phase 3
+- id: M_auto_12
+  choice: Bootstrap method is block bootstrap with block size 3
+  justification: Block bootstrap preserves serial correlation structure; block size ~T^(1/3) = 2.88, rounded to 3
+  alternatives_considered:
+  - i.i.d. bootstrap (rejected; destroys temporal dependence)
+  - Stationary bootstrap (considered; block bootstrap simpler and standard)
+  - Wild bootstrap (used for DID robustness only)
+  phase: Phase 3
+- id: M_auto_13
+  choice: Power analysis via simulation at T=24 with medium effect size
+  justification: Analytical power formulas assume asymptotics that may not hold at T=24; simulation provides finite-sample power estimate
+  alternatives_considered:
+  - Analytical power calculation (yields 43% vs simulated 35%; difference due to df specification)
+  - Skip power analysis (rejected; essential for interpreting null results)
+  phase: Phase 3
+- id: M_auto_14
+  choice: National time series after DID proved infeasible
+  justification: EPS commercial database, PKU-DFIIC registration-gated, NBS provincial data requires JavaScript rendering -- all city/province-level data sources inaccessible
+  alternatives_considered:
+  - True DID with smart city pilots (preferred but data unavailable)
+  - Synthetic control (requires cross-sectional units)
+  - Provincial panel (NBS data acquisition failed)
+  phase: Phase 0
+- id: M_auto_15
+  choice: Newey-West HAC standard errors with maxlags=2 for DID-inspired regressions
+  justification: First-differenced time series may exhibit residual autocorrelation; maxlags=floor(T^(1/3))=2
+  alternatives_considered:
+  - OLS standard errors (rejected; ignores serial correlation)
+  - HC3 heteroskedasticity-robust (insufficient; does not address autocorrelation)
+  phase: Phase 3
+- id: M_auto_16
+  choice: Monte Carlo simulation with 10,000 iterations per scenario
+  justification: Standard convergence for percentile-based confidence intervals; verified by CV of endpoint distribution < 0.05
+  alternatives_considered:
+  - Analytical projection (rejected; nonlinear ceiling constraint on DE index)
+  - 1,000 iterations (insufficient for 90% CI stability)
+  phase: Phase 4
+- id: M_auto_17
+  choice: Three scenarios (Trend Continuation, Digital Acceleration, Digital Stagnation)
+  justification: Standard scenario framework covering baseline plus two directional alternatives; fork conditions aligned with policy-relevant uncertainties
+  alternatives_considered:
+  - Five scenarios with policy variants (rejected; DE proxy saturation makes additional scenarios redundant)
+  - Two scenarios only (rejected; misses stagnation possibility)
+  phase: Phase 4
+- id: M_auto_18
+  choice: Digital economy proxy index equal weighting across four components
+  justification: No empirical basis for differential weighting at national level; PCA rejected due to T=24; equal weighting is transparent and reproducible
+  alternatives_considered:
+  - PCA-derived weights (rejected; unstable at T=24)
+  - Expert-elicited weights (rejected; introduces subjective judgment without empirical grounding)
+  - GDP-share weighting (rejected; conflates outcome with predictor)
+  phase: Phase 0

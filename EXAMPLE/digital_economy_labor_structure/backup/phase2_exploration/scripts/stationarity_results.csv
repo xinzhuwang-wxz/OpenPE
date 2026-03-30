@@ -1,0 +1,13 @@
+variable,adf_stat_level,adf_p_level,kpss_stat_level,kpss_p_level,level_verdict,adf_p_diff,kpss_p_diff,diff_verdict,integration_order
+digital_economy_index,1.144,0.9956,0.12,0.099,Ambiguous (ADF/KPSS disagree),0.728,0.0777,Likely I(1),1
+employment_services_pct,-1.827,0.3672,0.085,0.1,Ambiguous (ADF/KPSS disagree),0.0033,0.1,I(1) confirmed,1
+employment_industry_pct,-0.927,0.7789,0.134,0.0731,Ambiguous (ADF/KPSS disagree),0.2922,0.1,Likely I(1),1
+employment_agriculture_pct,-1.174,0.6849,0.157,0.0409,Non-stationary (both agree),0.0305,0.1,I(1) confirmed,1
+services_value_added_pct_gdp,-0.045,0.9547,0.121,0.0971,Ambiguous (ADF/KPSS disagree),0.6651,0.1,Likely I(1),1
+population_15_64_pct,-4.149,0.0008,0.183,0.0225,Ambiguous (ADF/KPSS disagree),0.6969,0.0367,Possibly I(2) or ambiguous,ambiguous
+population_65plus_pct,1.626,0.9979,0.186,0.0211,Non-stationary (both agree),0.9981,0.024,Possibly I(2) or ambiguous,ambiguous
+urban_population_pct,-1.871,0.3456,0.142,0.0573,Ambiguous (ADF/KPSS disagree),0.0105,0.0952,I(1) confirmed,1
+log_gdp_pc,-2.586,0.096,0.177,0.0248,Non-stationary (both agree),0.8264,0.0447,Possibly I(2) or ambiguous,ambiguous
+internet_users_pct,1.117,0.9954,0.087,0.1,Ambiguous (ADF/KPSS disagree),0.084,0.0879,Likely I(1),1
+mobile_subscriptions_per100,-9.653,0.0,0.132,0.0763,I(0) - Stationary,0.8497,0.1,Likely I(1),0
+fixed_broadband_per100,1.41,0.9972,0.193,0.0188,Non-stationary (both agree),0.0323,0.0215,Likely I(1),1
