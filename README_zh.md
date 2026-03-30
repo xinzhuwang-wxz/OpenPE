@@ -267,7 +267,7 @@ analyses/my_analysis/           # 独立 git 仓库
 
 ## 致谢
 
-OpenPE 源于 [slop-X](https://github.com/jfc-mit/slop-X)，一个面向高能物理的结构化分析框架。OpenPE 将其推广到任意领域。
+OpenPE 源于 [slop-X](https://github.com/jfc-mit/slop-X)，并将其推广到任意领域。
 
 我们还从以下开源项目中汲取灵感并适配模式：
 

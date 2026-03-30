@@ -267,7 +267,7 @@ analyses/my_analysis/           # Independent git repo
 
 ## Acknowledgments
 
-OpenPE originated from [slop-X](https://github.com/jfc-mit/slop-X), a structured analysis framework for high-energy physics. OpenPE generalizes this to any domain.
+OpenPE originated from [slop-X](https://github.com/jfc-mit/slop-X) and generalizes it to any domain.
 
 We also draw inspiration and adapt patterns from these open-source projects:
 

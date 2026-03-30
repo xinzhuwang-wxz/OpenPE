@@ -267,7 +267,7 @@ analyses/my_analysis/           # 독립 git 저장소
 
 ## 감사의 말
 
-OpenPE는 [slop-X](https://github.com/jfc-mit/slop-X)에서 시작되었습니다. 고에너지 물리학을 위한 구조화된 분석 프레임워크입니다. OpenPE는 이를 모든 도메인으로 일반화합니다.
+OpenPE는 [slop-X](https://github.com/jfc-mit/slop-X)에서 시작되었으며 이를 모든 도메인으로 일반화합니다.
 
 다음 오픈소스 프로젝트에서도 영감을 받고 패턴을 적용했습니다:
 
