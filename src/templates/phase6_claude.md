@@ -324,12 +324,17 @@ the report to its evidence basis.
    auditable claims indicate either missing evidence or summary prose that
    should cite evidence.
 
-5. **Create `scripts/generate_audit.py`.** This script must be able to
+5. **Create `audit_trail/audit_trail_section.md`.** A human-readable
+   narrative summarizing the audit trail: how many claims are audited,
+   how many data sources are verified, and any gaps or flags. This is
+   included verbatim in the final report's Audit appendix.
+
+6. **Create `scripts/generate_audit.py`.** This script must be able to
    regenerate the audit trail from upstream artifacts (registry.yaml,
    ANALYSIS_NOTE.md, VERIFICATION.md). It is the reproducibility guarantee
    for the audit trail.
 
-**Output:** Populated `audit_trail/` directory AND `scripts/generate_audit.py`.
+**Output:** Populated `audit_trail/` directory (including `audit_trail_section.md`) AND `scripts/generate_audit.py`.
 
 > **WARNING:** Skipping Step 6.3 is a Category A violation. The audit trail
 > is not optional — it is a core deliverable that makes every claim in

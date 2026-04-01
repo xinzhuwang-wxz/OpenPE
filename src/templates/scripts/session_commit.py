@@ -610,7 +610,7 @@ def main() -> None:
         store = MemoryStore(local_memory)
         entries = store.load_for_analysis(args.domain)
         if not entries:
-            print("# Prior Experience\n(none)")
+            print("## Prior Experience\n\n(none)")
         else:
             print("## Prior Experience\n")
             print(store.to_context_string(entries))

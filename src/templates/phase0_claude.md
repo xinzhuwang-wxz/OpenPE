@@ -162,7 +162,7 @@ alternatives.
    ```mermaid
    graph LR
      A[Urbanization] -->|LITERATURE_SUPPORTED<br>EP=0.47| B[Birth Rate Decline]
-     C[Housing Cost] -->|CORRELATION<br>EP=0.21| B
+     C[Housing Cost] -->|THEORIZED<br>EP=0.21| B
    ```
 
 6. **Cross-reference competing DAGs.** Identify where they agree (shared

@@ -28,6 +28,14 @@ structure will be. Execute after the plan is set.
 causal test results with classifications, EP propagation graph, statistical
 model specification, and uncertainty quantification.
 
+> **Parallel edge agent mode:** If the orchestrator spawned you for a specific
+> causal edge (your context includes an `assigned_edge` and `output_path`),
+> write your Steps 3.1–3.5 results to the path provided (e.g.
+> `exec/edge_{edge_name}/ANALYSIS_PARTIAL.md`) instead of `exec/ANALYSIS.md`.
+> Cover only your assigned edge. The verifier sub-agent (Steps 3.6–3.7) will
+> merge all `exec/edge_*/ANALYSIS_PARTIAL.md` files into the final
+> `exec/ANALYSIS.md`.
+
 ## Methodology references
 
 - Phase requirements: `methodology/03-phases.md` (for gate protocol)

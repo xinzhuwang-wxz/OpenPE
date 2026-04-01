@@ -170,7 +170,7 @@ throughout the analysis chain.
 1. **Recompute all EP values.** For every edge in the final DAG:
    - Verify EP = truth × relevance using the reported values
    - Verify that post-refutation EP updates follow the documented rules
-   - Check that DATA_SUPPORTED edges have truth ≥ 0.7
+   - Check that DATA_SUPPORTED edges have truth ≥ 0.8
 
 2. **Recompute all Joint_EP chains.** For every causal chain reported:
    - Verify Joint_EP = product of individual EPs along the chain

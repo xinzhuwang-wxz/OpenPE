@@ -135,7 +135,7 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
 | 3: Causal Analysis | `analyst` (single or split by edge count — see below) | Causal testing, refutation, statistical modeling |
 | 4: Projection | `projector-agent` | Forward projection, scenario analysis |
 | 5: Verification | `verifier` | Cross-validation, sensitivity analysis, EP reconciliation |
-| 6: Documentation | `report-writer` (AN + REPORT in parallel) + `plot-validator` | Final report, parallel PDF compilation |
+| 6: Documentation | `report-writer` (ANALYSIS_NOTE first, then REPORT) + `plot-validator` | Final report, sequential AN→REPORT then PDF |
 
 **Dynamic context splitting — Phase 3:** The orchestrator counts primary
 causal edges (those marked "full analysis" in STRATEGY.md).
@@ -414,11 +414,11 @@ The arbiter must not PASS with unresolved A or B items.
 
 | Role | Agent | Purpose |
 |------|-------|---------|
-| Domain reviewer | `domain_reviewer` | Domain expertise, factual accuracy, literature grounding |
-| Logic reviewer | `logic_reviewer` | Causal reasoning validity, DAG consistency, EP arithmetic |
-| Methods reviewer | `methods_reviewer` | Statistical methodology, test selection, uncertainty quantification |
+| Domain reviewer | `domain-reviewer` | Domain expertise, factual accuracy, literature grounding |
+| Logic reviewer | `logic-reviewer` | Causal reasoning validity, DAG consistency, EP arithmetic |
+| Methods reviewer | `methods-reviewer` | Statistical methodology, test selection, uncertainty quantification |
 | Arbiter | `arbiter` | Synthesizes all reviews, makes PASS/FAIL decision |
-| Rendering reviewer | `rendering_reviewer` | Document formatting, figure quality, pandoc compatibility |
+| Rendering reviewer | `rendering-reviewer` | Document formatting, figure quality, pandoc compatibility |
 
 **Review tiers by phase:**
 
@@ -570,7 +570,7 @@ is NEVER a symlink or copy of ANALYSIS_NOTE.md.
 - `verification.yaml` — Phase 5 results summary
 - `audit_trail_section.md` — human-readable audit narrative
 
-**`scripts/generate_audit.py`** must exist and be capable of regenerating
+**`phase6_documentation/scripts/generate_audit.py`** must exist and be capable of regenerating
 the audit trail from upstream artifacts.
 
 **`REPORT.pdf`** is compiled from REPORT.md and placed at the analysis root.

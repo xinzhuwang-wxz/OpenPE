@@ -6,7 +6,7 @@ tools:
   - Bash
   - Grep
   - Glob
-model: opus
+model: sonnet
 ---
 
 # Logic Reviewer Agent

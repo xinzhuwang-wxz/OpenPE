@@ -8,7 +8,7 @@ tools:
   - Bash
   - Grep
   - Glob
-model: opus
+model: sonnet
 ---
 
 # Plot Validator Agent
