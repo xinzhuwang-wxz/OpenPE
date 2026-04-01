@@ -14,9 +14,11 @@ Reference: OpenPE spec — Memory System Design, Session Commit
 """
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import shutil
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from datetime import datetime
@@ -85,14 +87,35 @@ def _extract_from_discovery(analysis_dir: Path, domain: str, out: list[Experienc
         return
     text = path.read_text()
 
-    # Extract data source experiences from discovery
-    if "data" in text.lower() and ("source" in text.lower() or "api" in text.lower()):
+    # Extract named data sources (lines with URL, API, or dataset name patterns)
+    source_lines = []
+    for line in text.split("\n"):
+        l = line.strip()
+        if any(kw in l.lower() for kw in ["fred", "world bank", "wbgapi", "fredapi",
+                                            "census", "oecd", "eurostat", "kaggle",
+                                            "api", "dataset", "registry"]):
+            if len(l) > 10 and not l.startswith("#"):
+                source_lines.append(l[:120])
+    if source_lines:
         out.append(Experience(
             experience_type="data_source",
-            content=f"Data sources identified during discovery phase for {domain} analysis",
+            content=f"[{domain}] Data sources: " + " | ".join(source_lines[:3]),
             domain=domain,
             source_phase="phase0_discovery",
-            confidence=0.5,
+            confidence=0.55,
+        ))
+
+    # Extract initial EP values for primary edges
+    ep_pattern = re.compile(r"([\w\s]+?)\s*[→\->]+\s*([\w\s]+?)\s*[:\|]\s*EP\s*[=:]\s*(0\.\d+)", re.IGNORECASE)
+    ep_matches = ep_pattern.findall(text)
+    if ep_matches:
+        ep_summary = "; ".join(f"{s.strip()}→{t.strip()} EP={v}" for s, t, v in ep_matches[:4])
+        out.append(Experience(
+            experience_type="domain",
+            content=f"[{domain}] Prior EP estimates from discovery: {ep_summary}",
+            domain=domain,
+            source_phase="phase0_discovery",
+            confidence=0.55,
         ))
 
 
@@ -102,15 +125,30 @@ def _extract_from_data_quality(analysis_dir: Path, domain: str, out: list[Experi
         return
     text = path.read_text()
 
-    # Extract quality findings
-    low_quality = "LOW" in text.upper() and "quality" in text.lower()
-    if low_quality:
+    # Extract specific dataset quality verdicts
+    low_lines, medium_lines = [], []
+    for line in text.split("\n"):
+        l = line.strip()
+        if "low" in l.lower() and ("quality" in l.lower() or "|" in l):
+            low_lines.append(l[:100])
+        elif "medium" in l.lower() and ("quality" in l.lower() or "|" in l):
+            medium_lines.append(l[:100])
+
+    if low_lines:
         out.append(Experience(
             experience_type="failure",
-            content=f"Data quality issues encountered in {domain}: some datasets rated LOW quality",
+            content=f"[{domain}] LOW quality datasets: " + " | ".join(low_lines[:3]),
             domain=domain,
             source_phase="phase0_discovery",
-            confidence=0.6,
+            confidence=0.65,
+        ))
+    if medium_lines:
+        out.append(Experience(
+            experience_type="data_source",
+            content=f"[{domain}] MEDIUM quality datasets (usable with caveats): " + " | ".join(medium_lines[:2]),
+            domain=domain,
+            source_phase="phase0_discovery",
+            confidence=0.55,
         ))
 
 
@@ -120,20 +158,53 @@ def _extract_from_strategy(analysis_dir: Path, domain: str, out: list[Experience
         return
     text = path.read_text()
 
-    # Extract method choices
-    methods = []
-    for method in ["propensity_score", "instrumental_variable", "diff_in_diff",
-                   "regression_discontinuity", "synthetic_control", "granger"]:
-        if method.replace("_", " ") in text.lower() or method in text.lower():
-            methods.append(method)
+    # Extract method choices with context (which edge uses which method)
+    method_map: dict[str, list[str]] = {}
+    edge_pattern = re.compile(
+        r"([\w][\w\s\-]+?)\s*[→\->]+\s*([\w][\w\s\-]+?).*?"
+        r"(DiD|diff.in.diff|IV|instrumental.variable|RDD|regression.discontinuity|"
+        r"synthetic.control|ITS|interrupted.time|propensity|granger|Bayesian|bayesian)",
+        re.IGNORECASE,
+    )
+    for m in edge_pattern.finditer(text):
+        method = m.group(3).strip().lower()
+        edge = f"{m.group(1).strip()}→{m.group(2).strip()}"
+        method_map.setdefault(method, []).append(edge)
 
-    if methods:
+    if method_map:
+        summary = "; ".join(f"{meth}: {', '.join(edges[:2])}" for meth, edges in list(method_map.items())[:4])
         out.append(Experience(
             experience_type="method",
-            content=f"Causal methods used in {domain}: {', '.join(methods)}",
+            content=f"[{domain}] Causal methods selected — {summary}",
             domain=domain,
             source_phase="phase1_strategy",
-            confidence=0.6,
+            confidence=0.65,
+        ))
+    else:
+        # Fallback: keyword scan
+        found = [m for m in ["DiD", "IV", "RDD", "synthetic control", "ITS", "granger", "propensity score"]
+                 if m.lower() in text.lower()]
+        if found:
+            out.append(Experience(
+                experience_type="method",
+                content=f"[{domain}] Causal methods used: {', '.join(found)}",
+                domain=domain,
+                source_phase="phase1_strategy",
+                confidence=0.60,
+            ))
+
+    # Extract primary edge EP values from strategy
+    ep_pattern = re.compile(r"([\w\s\-]+?)\s*[→\->]+\s*([\w\s\-]+?)\s*[:\|].*?EP\s*[=:]\s*(0\.\d+)", re.IGNORECASE)
+    ep_hits = ep_pattern.findall(text)
+    high_ep = [(s.strip(), t.strip(), v) for s, t, v in ep_hits if float(v) >= 0.30]
+    if high_ep:
+        ep_summary = "; ".join(f"{s}→{t} EP={v}" for s, t, v in high_ep[:4])
+        out.append(Experience(
+            experience_type="domain",
+            content=f"[{domain}] High-EP edges (≥0.30) in strategy: {ep_summary}",
+            domain=domain,
+            source_phase="phase1_strategy",
+            confidence=0.65,
         ))
 
 
@@ -143,23 +214,51 @@ def _extract_from_analysis(analysis_dir: Path, domain: str, out: list[Experience
         return
     text = path.read_text()
 
-    # Extract causal findings as domain experiences
-    if "DATA_SUPPORTED" in text:
-        out.append(Experience(
-            experience_type="domain",
-            content=f"Data-supported causal relationships found in {domain} analysis",
-            domain=domain,
-            source_phase="phase3_analysis",
-            confidence=0.7,
-        ))
+    # Extract specific edge classifications with effect sizes
+    class_pattern = re.compile(
+        r"\|\s*([\w][\w\s\-]+?)\s*\|\s*([\w][\w\s\-]+?)\s*\|.*?"
+        r"(DATA_SUPPORTED|CORRELATION|HYPOTHESIZED|DISPUTED)",
+        re.IGNORECASE,
+    )
+    classified: dict[str, list[str]] = {"DATA_SUPPORTED": [], "CORRELATION": [],
+                                         "HYPOTHESIZED": [], "DISPUTED": []}
+    for m in class_pattern.finditer(text):
+        label = m.group(3).upper()
+        edge = f"{m.group(1).strip()}→{m.group(2).strip()}"
+        classified.setdefault(label, []).append(edge)
 
-    if "CORRELATION" in text and "not causal" in text.lower():
+    for label, edges in classified.items():
+        if edges:
+            conf = {"DATA_SUPPORTED": 0.75, "CORRELATION": 0.65,
+                    "HYPOTHESIZED": 0.55, "DISPUTED": 0.60}.get(label, 0.60)
+            out.append(Experience(
+                experience_type="domain",
+                content=f"[{domain}] {label}: {', '.join(edges[:4])}",
+                domain=domain,
+                source_phase="phase3_analysis",
+                confidence=conf,
+            ))
+
+    # Extract effect sizes for DATA_SUPPORTED edges
+    effect_pattern = re.compile(
+        r"([\w][\w\s\-]+?)\s*[→\->]+\s*([\w][\w\s\-]+?).*?"
+        r"(?:effect|estimate|coefficient)[:\s]+([+-]?[0-9]+\.?[0-9]*)\s*"
+        r"(?:\(.*?CI[:\s]+\[?([+-]?[0-9.]+)[,\s]+([+-]?[0-9.]+)\]?\))?",
+        re.IGNORECASE,
+    )
+    effect_hits = effect_pattern.findall(text)
+    if effect_hits:
+        effects = "; ".join(
+            f"{s.strip()}→{t.strip()} β={est}"
+            + (f" CI=[{lo},{hi}]" if lo and hi else "")
+            for s, t, est, lo, hi in effect_hits[:3]
+        )
         out.append(Experience(
             experience_type="domain",
-            content=f"Some hypothesized causal links in {domain} were only correlational",
+            content=f"[{domain}] Effect estimates: {effects}",
             domain=domain,
             source_phase="phase3_analysis",
-            confidence=0.6,
+            confidence=0.70,
         ))
 
 
@@ -169,13 +268,39 @@ def _extract_from_verification(analysis_dir: Path, domain: str, out: list[Experi
         return
     text = path.read_text()
 
-    if "FAIL" in text.upper():
+    # Extract specific failure descriptions (lines near FAIL keyword)
+    lines = text.split("\n")
+    fail_contexts = []
+    for i, line in enumerate(lines):
+        if "fail" in line.lower() and len(line.strip()) > 10:
+            context = line.strip()
+            # grab next non-empty line for more context
+            for j in range(i + 1, min(i + 3, len(lines))):
+                if lines[j].strip():
+                    context += " | " + lines[j].strip()[:80]
+                    break
+            fail_contexts.append(context[:150])
+
+    if fail_contexts:
         out.append(Experience(
             experience_type="failure",
-            content=f"Verification failures detected in {domain} analysis — review methodology",
+            content=f"[{domain}] Verification failures: " + " || ".join(fail_contexts[:2]),
             domain=domain,
             source_phase="phase5_verification",
-            confidence=0.7,
+            confidence=0.70,
+        ))
+
+    # Extract reproduction success/failure for specific findings
+    repro_pattern = re.compile(r"(reproduced?|replicated?|confirmed?)[:\s]+([\w\s\-→]+)", re.IGNORECASE)
+    repro_hits = repro_pattern.findall(text)
+    if repro_hits:
+        repro_summary = "; ".join(f"{verb} {target[:60]}" for verb, target in repro_hits[:3])
+        out.append(Experience(
+            experience_type="domain",
+            content=f"[{domain}] Verification reproduction: {repro_summary}",
+            domain=domain,
+            source_phase="phase5_verification",
+            confidence=0.70,
         ))
 
 
@@ -218,7 +343,7 @@ def _generate_l2_summary(
         domain=domain,
         memory_type="domain",
         tier="L2",
-        confidence=0.5,
+        confidence=0.6,  # must be >= GLOBAL_PROMOTION_THRESHOLD to reach global memory
         source_analysis=analysis_id,
     )
 
@@ -286,6 +411,9 @@ def commit_session(
     if l2_entry:
         memory_store.add(l2_entry)
         new_entries.append(l2_entry)
+
+    # Seed L0 universal principles on first commit (idempotent)
+    seed_l0_principles(memory_store)
 
     # Tier transitions: promote well-corroborated L1→L0, demote contradicted L0→L1, forget stale
     memory_store.load_all()
@@ -455,3 +583,174 @@ def promote_to_global(
         global_graph.save()
 
     return stats
+
+
+# --- CLI ---
+
+def _build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(description="OpenPE session commit / memory load")
+    p.add_argument("--analysis-id", default="", help="Analysis identifier (e.g. my_analysis_20260402)")
+    p.add_argument("--global-memory", default="", help="Path to spec-root memory/ directory")
+    p.add_argument("--load-only", action="store_true",
+                   help="Only load and print memory context (no commit)")
+    p.add_argument("--domain", default="general", help="Domain for --load-only mode")
+    p.add_argument("--analysis-dir", default=".", help="Analysis root directory (default: cwd)")
+    return p
+
+
+def main() -> None:
+    args = _build_parser().parse_args()
+    analysis_dir = Path(args.analysis_dir).resolve()
+    local_memory = analysis_dir / "memory"
+
+    if args.load_only:
+        # Print memory context string for injection into phase_context_N.md
+        store = MemoryStore(local_memory)
+        entries = store.load_for_analysis(args.domain)
+        if not entries:
+            print("# Prior Experience\n(none)")
+        else:
+            print("## Prior Experience\n")
+            print(store.to_context_string(entries))
+        return
+
+    # Full commit flow
+    if not args.analysis_id:
+        print("ERROR: --analysis-id required for commit mode", file=sys.stderr)
+        sys.exit(1)
+
+    store = MemoryStore(local_memory)
+    graph_path = local_memory / "causal_graph" / "graph.json"
+    from causal_knowledge_graph import CausalKnowledgeGraph
+    graph = CausalKnowledgeGraph(graph_path)
+    if graph_path.exists():
+        graph.load()
+
+    new_entries = commit_session(analysis_dir, store, graph, args.analysis_id)
+    print(f"Committed {len(new_entries)} memory entries for {args.analysis_id}")
+
+    if args.global_memory:
+        stats = promote_to_global(analysis_dir, Path(args.global_memory))
+        print(f"Promoted to global: {stats['memories_promoted']} memories, "
+              f"{stats['graph_edges_promoted']} graph edges")
+
+
+if __name__ == "__main__":
+    main()
+
+
+# --- L0 Seed Principles ---
+
+L0_PRINCIPLES: list[dict] = [
+    {
+        "memory_id": "openpe_principle_refutation_battery",
+        "content": (
+            "Every full-analysis causal edge requires exactly 3 refutation tests: "
+            "(1) placebo treatment at correct time/place, (2) random common cause "
+            "(truly random variable), (3) data subset (drop 20-30% at random). "
+            "DATA_SUPPORTED requires 3/3 PASS. No exceptions."
+        ),
+        "memory_type": "principle",
+        "confidence": 0.95,
+    },
+    {
+        "memory_id": "openpe_principle_ep_arithmetic",
+        "content": (
+            "EP updates must be applied mechanically from the classification→truth table: "
+            "DATA_SUPPORTED → truth=min(1.0,max(0.8,prior+0.2)); "
+            "CORRELATION → truth unchanged; "
+            "HYPOTHESIZED → truth=min(0.3,prior-0.1); "
+            "DISPUTED → truth=0.1. No subjective overrides."
+        ),
+        "memory_type": "principle",
+        "confidence": 0.95,
+    },
+    {
+        "memory_id": "openpe_principle_four_numbers",
+        "content": (
+            "Every result must carry exactly 4 numbers: central value, statistical "
+            "uncertainty, systematic uncertainty, total uncertainty. A result without "
+            "all four is incomplete regardless of how clear the signal is."
+        ),
+        "memory_type": "principle",
+        "confidence": 0.95,
+    },
+    {
+        "memory_id": "openpe_principle_dowhy_required",
+        "content": (
+            "Causal inference must use DoWhy — not ad-hoc regression. DoWhy enforces "
+            "explicit DAG specification, estimand derivation, and refutation testing. "
+            "Pure regression without backdoor/frontdoor identification is not causal."
+        ),
+        "memory_type": "principle",
+        "confidence": 0.92,
+    },
+    {
+        "memory_id": "openpe_principle_two_methods",
+        "content": (
+            "Every primary causal edge requires at least 2 independent estimation methods. "
+            "If methods disagree by >50% in point estimate or differ in sign, the edge "
+            "cannot be classified higher than CORRELATION regardless of refutation results."
+        ),
+        "memory_type": "principle",
+        "confidence": 0.92,
+    },
+    {
+        "memory_id": "openpe_principle_ep_threshold",
+        "content": (
+            "EP thresholds: Joint_EP >= 0.30 → full analysis with refutation battery. "
+            "0.15 <= Joint_EP < 0.30 → lightweight assessment (primary method only). "
+            "0.05 <= Joint_EP < 0.15 → soft truncation, no analysis. "
+            "Joint_EP < 0.05 → hard truncation, mark chain as resolved."
+        ),
+        "memory_type": "principle",
+        "confidence": 0.95,
+    },
+    {
+        "memory_id": "openpe_principle_data_callback_limit",
+        "content": (
+            "Data callbacks are capped at 2 per analysis. LOW quality callback data "
+            "on a high-EP edge (EP > 0.30) must escalate to human — do not proceed "
+            "automatically. LOW quality on EP <= 0.30 → auto-downgrade to lightweight."
+        ),
+        "memory_type": "principle",
+        "confidence": 0.90,
+    },
+    {
+        "memory_id": "openpe_principle_carry_forward_warnings",
+        "content": (
+            "All warnings from upstream phases must be explicitly carried forward: "
+            "data quality warnings from Phase 0, assumption concerns from Phase 2, "
+            "method caveats from Phase 1. Nothing is silently dropped. Each downstream "
+            "artifact must have a section acknowledging prior-phase warnings."
+        ),
+        "memory_type": "principle",
+        "confidence": 0.90,
+    },
+]
+
+
+def seed_l0_principles(memory_store: MemoryStore) -> list[str]:
+    """Write universal OpenPE principles to L0 if not already present.
+
+    Safe to call multiple times — skips entries that already exist.
+    Returns list of memory_ids written.
+    """
+    memory_store.load_all()
+    written = []
+    for spec in L0_PRINCIPLES:
+        mid = spec["memory_id"]
+        if mid in memory_store.entries:
+            continue  # already seeded
+        entry = MemoryEntry(
+            memory_id=mid,
+            content=spec["content"],
+            domain="general",
+            memory_type=spec["memory_type"],  # type: ignore[arg-type]
+            tier="L0",
+            confidence=spec["confidence"],
+            source_analysis="openpe_spec",
+        )
+        memory_store.add(entry)
+        written.append(mid)
+    return written

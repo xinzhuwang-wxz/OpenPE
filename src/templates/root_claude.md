@@ -25,12 +25,31 @@ it will produce, what the artifact structure will be. The subagent executes
 only after the plan is set. This prevents agents from diving into code
 without thinking.
 
-**Memory loading at analysis start.** If a global `memory/` directory exists
-(at the spec root or a configured path), copy its contents into the
-analysis-local `memory/` directory before beginning Phase 0. Each phase
-agent reads L0 (global conventions) and L1 (analysis-specific context) from
-`memory/` at the start of its invocation. This ensures accumulated domain
-knowledge persists across analyses.
+**Memory loading at analysis start.** Before Phase 0, copy the global
+`memory/` directory (at the spec root) into the analysis-local `memory/`
+directory. Pass the memory context string to each phase executor:
+
+```bash
+cd analyses/{name}
+pixi run py scripts/session_commit.py --load-only --domain {domain}
+# outputs memory context to include in phase_context_N.md
+```
+
+Each phase agent receives L0 (universal principles, always loaded) and
+L1 entries matching the analysis domain in its phase_context_N.md under
+a `## Prior Experience` section.
+
+**Memory commit at analysis end.** After Phase 6 completes and is committed,
+run the session commit to extract experiences and promote to global memory:
+
+```bash
+cd analyses/{name}
+pixi run py scripts/session_commit.py --analysis-id {name} --global-memory {spec_root}/memory
+```
+
+This writes L1 experiences, an L2 summary, seeds L0 universal principles
+(idempotent), and promotes high-confidence entries (≥0.6) to global memory.
+Run this once per completed analysis — the commit marker prevents double-decay.
 
 **The orchestrator loop for each phase:**
 
