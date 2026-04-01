@@ -219,7 +219,7 @@ and edge in the DAG.
 
    | Classification | Truth update |
    |---------------|-------------|
-   | DATA_SUPPORTED | truth = max(0.8, Phase 1 truth + 0.2) |
+   | DATA_SUPPORTED | truth = min(1.0, max(0.8, Phase 1 truth + 0.2)) |
    | CORRELATION | truth = Phase 1 truth (unchanged) |
    | HYPOTHESIZED | truth = min(0.3, Phase 1 truth - 0.1) |
    | DISPUTED | truth = 0.1 |

@@ -71,7 +71,8 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
             continuing the original via SendMessage; pass the same scoped
             context PLUS all prior REVIEW_NOTES.md files (in chronological
             order) as "prior iteration history."
-          - **B-only** (`b_only: true` in REVIEW_NOTES.md, a_count=0):
+          - **B-only** (`b_only: true` in REVIEW_NOTES.md, a_count=0) — this
+            path applies regardless of iteration count (including 3rd+):
             Apply all B fixes (exact fixes via Edit tool; reasoning fixes inline).
             Write `phase*/review/B_SELF_VERIFY.md` with one line per fix:
               - B{id} [{description}]: APPLIED — {file}:{section}, "{old_snippet}" → "{new_snippet}"

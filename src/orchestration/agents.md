@@ -345,7 +345,8 @@ or citations (`references.bib`).
 
 - If YES: Run `pixi run build-pdf` and perform the full inspection above.
 - If NO (prose-only changes, caption rewording, non-rendering B fixes):
-  Output a `{NAME}_RENDERING_REVIEW_PASS.md` file with:
+  Output `{NAME}_RENDERING_REVIEW.md` (same filename convention as a full
+  review) with content:
     rendering_recompile: skipped
     reason: "No rendering-affecting files changed since last compilation"
     prior_pdf_status: PASS
