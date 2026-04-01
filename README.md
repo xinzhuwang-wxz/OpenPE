@@ -14,7 +14,7 @@
 
 ---
 
-You ask a causal question. OpenPE returns: a causal DAG with quantified confidence on every edge, a three-way refutation test on every causal claim, a forward projection classified as Robust / Fork-dependent / Equilibrium / Unstable, and a machine-verifiable audit trail linking every finding to its data source.
+You pose a question or a prediction. OpenPE traces it from first principles to endgame — building a causal chain, testing every link against refutation, and projecting forward until the evidence runs dry. What comes back: a causal DAG with quantified confidence on every edge, a three-way refutation test on every causal claim, scenario projections classified as Robust / Fork-dependent / Equilibrium / Unstable, and a machine-verifiable audit trail from every claim to its data source.
 
 The whole pipeline — hypothesis generation, data acquisition, causal testing, projection, report — runs autonomously. The underlying principle: explanatory power degrades multiplicatively along causal chains, and the framework uses that degradation to decide what's worth investigating and when to stop.
 
