@@ -183,7 +183,7 @@ reviewer a scoped slice containing only what their role requires:
 
 | Reviewer | Artifact sections to pass | Context sections to pass |
 |----------|--------------------------|--------------------------|
-| Domain reviewer | Physics interpretation, results summary, figures list | Bird's-eye framing only |
+| Domain reviewer | Domain interpretation, causal findings, results summary, figures list | Bird's-eye framing only |
 | Logic reviewer | EP propagation table, causal test results, DAG | Bird's-eye framing + EP methodology |
 | Methods reviewer | Statistical model, UQ section, method selection | Bird's-eye framing + methods methodology |
 | Plot-validator | Figures directory path, plotting scripts | Plotting appendix excerpt |

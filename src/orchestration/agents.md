@@ -20,29 +20,26 @@ those CLAUDE.md files.
 
 | Agent | Model | Primary phases | Description |
 |-------|-------|----------------|-------------|
-| `lead-analyst` | opus | 1, 2 (consolidation) | Strategy development, Phase 2 consolidation |
-| `hypothesis-agent` | sonnet | 2 | Literature, hypotheses, model generators |
-| `data-acquisition-agent` | haiku | 2 | Fast sample inventory, data quality |
-| `data-quality-agent` | sonnet | 2 | Object definitions, data validation |
-| `projector-agent` | sonnet | 3 | Selection optimization, signal projection |
-| `signal-lead` | sonnet | 3 | Event selection (5-step philosophy) |
-| `ml-specialist` | opus | 3 (if MVA) | BDT/DNN/ME discriminants |
-| `background-estimator` | sonnet | 3 | Background estimation, CR/VR design |
-| `systematic-source-evaluator` | sonnet | 4a | Per-source systematic (×N parallel) |
-| `systematics-fitter` | opus | 4a, 4b, 4c | Likelihood, fits, diagnostics |
-| `cross-checker` | sonnet | 4c | Independent validation |
-| `note-writer` | sonnet | 4b, 5 | Analysis note drafting |
+| `hypothesis-agent` | opus | 0 | Question decomposition, causal DAG construction, EP priors |
+| `data-acquisition-agent` | opus | 0 | Data sourcing, API acquisition, registry.yaml |
+| `data-quality-agent` | opus | 0 | Quality gate: completeness, consistency, bias, granularity |
+| `lead-analyst` | opus | 1 | Analysis strategy, method selection, EP assessment plan |
+| `data-explorer` | opus | 2 | Exploratory analysis, distribution checks, data readiness |
+| `analyst` | opus | 3 (Steps 3.1–3.5) | Signal extraction, causal testing, refutation, EP update |
+| `verifier` | opus | 3 (Steps 3.6–3.7), 5 | Statistical model, uncertainty quantification, verification |
+| `projector-agent` | opus | 4 | Forward projection, Monte Carlo scenarios, EP decay |
+| `report-writer` | opus | 6 | ANALYSIS_NOTE.md and REPORT.md (spawned in parallel) |
 
 #### Review Agents
 
 | Agent | Model | Review tiers | Description |
 |-------|-------|-------------|-------------|
-| `physics-reviewer` | opus | 4-bot, 5-bot | Senior physicist review (no methodology) |
-| `critical-reviewer` | opus | All tiers | Find flaws (bad cop) |
-| `constructive-reviewer` | opus | 4-bot, 5-bot | Strengthen analysis (good cop) |
-| `rendering-reviewer` | sonnet | 5-bot only | PDF compilation and rendering QA |
-| `plot-validator` | opus | All tiers | Programmatic + physics sanity checks on figures |
-| `arbiter` | opus | 4-bot, 5-bot | Adjudicate, issue PASS/ITERATE/ESCALATE |
+| `domain-reviewer` | opus | 4-bot, 3-bot | Domain expertise, factual accuracy, causal plausibility |
+| `logic-reviewer` | opus | 2-bot, 4-bot | Causal reasoning validity, DAG consistency, EP arithmetic |
+| `methods-reviewer` | opus | 4-bot | Statistical methodology, test selection, uncertainty quantification |
+| `rendering-reviewer` | opus | 3-bot (Phase 6 only) | PDF compilation, figure quality, pandoc compatibility |
+| `plot-validator` | opus | All tiers | Programmatic data sanity and code compliance checks on figures |
+| `arbiter` | opus | All tiers | Synthesizes reviews, issues PASS/ITERATE/ESCALATE |
 
 #### Support Agents
 
@@ -56,40 +53,36 @@ those CLAUDE.md files.
 
 | Phase | Executors | Review tier | Review agents |
 |-------|-----------|-------------|---------------|
-| **1: Strategy** | `lead-analyst` | 4-bot | physics + critical + constructive + plot-validator → arbiter |
-| **2: Exploration** | `data-acquisition-agent` + `data-quality-agent` + `hypothesis-agent` (parallel) → `lead-analyst` (consolidation) | Self-review | (none) |
-| **3: Selection** | `signal-lead` + `background-estimator` (per channel); `ml-specialist` if MVA | 1-bot | critical + plot-validator |
-| **4a: Expected** | `systematic-source-evaluator` (×N parallel) → `systematics-fitter` | 4-bot | physics + critical + constructive + plot-validator → arbiter |
-| **4b: Partial** | `systematics-fitter` + `note-writer` | 4-bot → human gate | physics + critical + constructive + plot-validator → arbiter |
-| **4c: Observed** | `systematics-fitter` + `cross-checker` | 1-bot | critical + plot-validator |
-| **5: Documentation** | `note-writer` | 5-bot | physics + critical + constructive + rendering + plot-validator → arbiter |
+| **0: Discovery** | `hypothesis-agent` → `data-acquisition-agent` (parallel by source) → `data-quality-agent` | 2-bot | logic → arbiter |
+| **1: Strategy** | `lead-analyst` | 2-bot | logic → arbiter |
+| **2: Exploration** | `data-explorer` | Self-review | (none) |
+| **3: Causal Analysis** | `analyst` (edge-parallel for N≥3, Steps 3.1–3.5) → `verifier` (Steps 3.6–3.7) | 4-bot | domain + logic + methods + plot-validator → arbiter |
+| **4: Projection** | `projector-agent` | 4-bot | domain + logic + methods + plot-validator → arbiter |
+| **5: Verification** | `verifier` | 4-bot + Human Gate | domain + logic + methods + plot-validator → arbiter |
+| **6: Documentation** | `report-writer` × 2 (AN + REPORT in parallel) | 3-bot | domain + rendering + plot-validator → arbiter |
 
 ---
 
 ### Model Tiering
 
-Read `model_tier` from `analysis_config.yaml`:
+All subagents default to `model: "opus"` per root_claude.md. Override only
+via `model_tier` in `analysis_config.yaml`:
 
-| Role | `auto` (default) | `uniform_high` | `uniform_mid` |
-|------|-------------------|----------------|----------------|
-| Phase 1 executor | opus | opus | sonnet |
-| Phase 2 executors | haiku/sonnet | opus | sonnet |
-| Phase 3 executors | sonnet | opus | sonnet |
-| Phase 4 executors | opus (fitter), sonnet (others) | opus | sonnet |
-| Phase 5 executor | sonnet | opus | sonnet |
-| 4/5-bot reviewers | opus | opus | sonnet |
-| 1-bot reviewer | opus | opus | sonnet |
-| Plot-validator | opus | opus | sonnet |
-| Arbiter | opus | opus | sonnet |
-| Investigator | opus | opus | sonnet |
+| Role | `uniform_high` (default) | `uniform_mid` (cost-saving) |
+|------|--------------------------|------------------------------|
+| All executors | opus | sonnet |
+| Logic / domain / methods reviewers | opus | sonnet |
+| Plot-validator | opus | opus (never downgrade) |
+| Arbiter | opus | opus (never downgrade) |
+| Investigator | opus | opus (never downgrade) |
+| Rendering reviewer | opus | sonnet |
 
 ---
 
 ### Execution Agent Launch Template
 
-**Context:** Bird's-eye framing, relevant methodology sections (per §3a.4.2
-table), physics prompt, upstream artifacts, experiment log (if exists),
-experiment corpus (via RAG), phase CLAUDE.md
+**Context:** phase_context_N.md (assembled by orchestrator — see root_claude.md
+§Pre-generated phase context), upstream artifact paths, experiment log path
 
 **Writes:** `plan.md`, primary artifact (in `exec/`), `scripts/` and `figures/`
 (at phase level), appends to `experiment_log.md`
@@ -100,63 +93,61 @@ Execute Phase N of this analysis. Your detailed role instructions are in
 .claude/agents/{agent-name}.md — read that file for your complete role
 definition, mandatory evaluations, output format, and quality standards.
 
-Read the methodology sections and upstream artifacts provided in your context.
-Read the applicable conventions/ file for technique-specific requirements.
-Query the retrieval corpus as needed.
+Your context includes phase_context_N.md with bird's-eye framing, relevant
+methodology sections, and upstream artifact summaries. Read upstream artifacts
+from disk at the paths provided. Read the applicable conventions/ file for
+technique-specific requirements.
 
 Before writing code, produce plan.md. As you work:
-- Write analysis code to ../scripts/, figures to ../figures/ (phase level)
+- Write analysis code to scripts/, figures to figures/ (at phase level)
 - All code runs through pixi: `pixi run py path/to/script.py`
-- Follow the plotting template in methodology/appendix-plotting.md for ALL figures
+- Follow methodology/appendix-plotting.md for ALL figures
 - Commit frequently with conventional commit messages
 - Append to experiment_log.md: what you tried, what worked, what didn't
-- Produce your primary artifact as {ARTIFACT_NAME}.md
+- Produce your primary artifact as {ARTIFACT_NAME}.md in exec/
 
 When complete, state what you produced and any open issues.
 ```
 
 ---
 
-### Physics Reviewer Launch Template
+### Domain Reviewer Launch Template
 
-**Context:** Bird's-eye framing, physics prompt, artifact under review.
-**Does NOT receive:** Methodology spec, conventions files, review criteria.
-The physics reviewer evaluates the work purely as a senior collaboration
-member (ARC/L2 convener) would.
+**Context:** Phase_context_N.md (scoped slice: bird's-eye framing + domain
+interpretation sections of the artifact). Does NOT receive methodology spec
+or conventions — evaluates domain reasoning on its merits.
 
-**Writes:** `{NAME}_PHYSICS_REVIEW.md`
+**Writes:** `{NAME}_DOMAIN_REVIEW.md`
 
 **Instruction core:**
 ```
-You are a senior collaboration member reviewing this analysis for physics
-approval. Your detailed role instructions are in .claude/agents/physics-reviewer.md.
+You are a domain expert reviewer for this causal analysis. Your detailed role
+instructions are in .claude/agents/domain-reviewer.md.
 
-You have NOT read the methodology spec or conventions — you are
-reviewing the physics on its merits.
+You are evaluating the domain reasoning on its merits — not the methodology.
 
-Read the artifact. Read all figures produced by this phase.
+Read the artifact and all figures produced by this phase.
 
 Evaluate:
-- Is the physics motivation sound and complete?
-- Are the backgrounds correctly identified and estimated?
-- Is the systematic treatment appropriate for this measurement?
-- Are the cross-checks adequate?
-- Do the plots and numbers make physical sense?
-- Are yields in the expected ballpark?
-- Do distributions have the right shapes?
-- Would you approve this analysis for publication?
+- Is the research question decomposed correctly into causal claims?
+- Are the identified causal mechanisms plausible given domain knowledge?
+- Are the data sources appropriate for the claimed causal relationships?
+- Are the effect estimates reasonable in sign, magnitude, and direction?
+- Do the findings make sense given what is known about this domain?
+- Are there important confounders or alternative explanations not addressed?
+- Would a domain expert find the conclusions credible and well-grounded?
 
 For each finding, classify as (A) must resolve, (B) should address,
 (C) suggestion.
 
 For every Category A and B finding, you MUST include a structured fix
-instruction using this YAML format (from methodology/06-review.md §6.5):
+instruction using this YAML format:
 
   - id: A1
     category: A
     description: "One-sentence description of the issue"
     fix:
-      type: exact          # use this when you can specify the precise text change
+      type: exact          # use when you can specify the precise text change
       file: "path/to/file.md"
       old: "exact text to replace"
       new: "replacement text"
@@ -166,7 +157,7 @@ instruction using this YAML format (from methodology/06-review.md §6.5):
     category: B
     description: "One-sentence description"
     fix:
-      type: requires_reasoning   # use this when the fix needs computation or judgment
+      type: requires_reasoning   # use when the fix needs computation or judgment
       file: "path/to/file.md"
       section: "Section name where fix applies"
       instruction: "What the fix agent must compute or decide"
@@ -178,39 +169,46 @@ Category C findings do not require fix instructions.
 
 ---
 
-### Critical Reviewer Launch Template
+### Logic Reviewer Launch Template
 
-**Context:** Bird's-eye framing, review methodology (§6), applicable phase
-section from §3, artifact under review, upstream artifacts, experiment log,
-experiment corpus (via RAG)
+**Context:** Phase_context_N.md (scoped slice: bird's-eye framing + EP
+propagation tables + causal test results + DAG sections of the artifact),
+methodology/06-review.md §6.3–6.4, experiment log
 
-**Writes:** `{NAME}_CRITICAL_REVIEW.md`
+**Writes:** `{NAME}_LOGIC_REVIEW.md`
 
 **Instruction core:**
 ```
-You are a critical reviewer for a physics analysis that will be submitted
-for journal publication. Your detailed role instructions are in
-.claude/agents/critical-reviewer.md.
+You are the logic reviewer for this causal analysis. Your detailed role
+instructions are in .claude/agents/logic-reviewer.md.
 
-Your job is to find flaws — both in what is present (correctness) and in
-what is absent (completeness).
+Your job is to find flaws in causal reasoning — both in what is present
+(correctness) and in what is absent (completeness).
 
 Read the artifact and the experiment log (to understand what was tried).
 Read methodology/06-review.md §6.3 (reviewer framing) and §6.4 (review
 focus for this phase) — these define what you must check.
 Read the applicable conventions/ file and verify coverage row-by-row.
 Read methodology/appendix-plotting.md §6.4.2 for the figure checklist —
-apply it to every figure.
+apply it to every figure in scope.
 
-Before concluding, answer: "If a competing group published a measurement of
-the same quantity next month, what would they have that we don't?" If the
-answer is non-empty and unjustified, those are Category A findings.
+Before concluding, answer: "If a competing team published an analysis of
+the same causal question next month, what would they have that we don't?"
+If the answer is non-empty and unjustified, those are Category A findings.
+
+Check specifically:
+- Are DAG edges justified? Are backdoor/frontdoor criteria correctly applied?
+- Is EP arithmetic correct and mechanically applied (no subjective overrides)?
+- Are causal estimands precisely stated and identified from the DAG?
+- Are refutation tests correctly implemented (placebo at right time/place,
+  random cause truly random, data subset truly random)?
+- Are edge classifications consistent with refutation test outcomes?
 
 Classify every issue as (A) must resolve, (B) should address, (C) suggestion.
 Err on the side of strictness.
 
 For every Category A and B finding, you MUST include a structured fix
-instruction using this YAML format (from methodology/06-review.md §6.5):
+instruction using this YAML format:
 
   - id: A1
     category: A
@@ -238,29 +236,36 @@ require fix instructions.
 
 ---
 
-### Constructive Reviewer Launch Template
+### Methods Reviewer Launch Template
 
-**Context:** same as critical reviewer
+**Context:** Phase_context_N.md (scoped slice: bird's-eye framing + statistical
+model + uncertainty quantification + method selection sections), methodology
+§6, experiment log
 
-**Writes:** `{NAME}_CONSTRUCTIVE_REVIEW.md`
+**Writes:** `{NAME}_METHODS_REVIEW.md`
 
 **Instruction core:**
 ```
-You are a constructive reviewer for a physics analysis targeting journal
-publication. Your detailed role instructions are in
-.claude/agents/constructive-reviewer.md.
+You are the methods reviewer for this causal analysis. Your detailed role
+instructions are in .claude/agents/methods-reviewer.md.
 
-Your job is to strengthen the analysis.
+Your job is to strengthen the analysis by evaluating statistical methodology
+and uncertainty quantification.
 
 Read the artifact and experiment log.
 
-Identify where the argument could be clearer, where additional validation
-would build confidence, and where the presentation could be improved.
-Focus on Category B and C issues, but escalate to A if you find genuine
-errors.
+Evaluate:
+- Are the selected causal inference methods appropriate for the data structure?
+- Is the statistical model well-specified? Do signal injection tests pass?
+- Is uncertainty quantification complete (stat + syst + total for every result)?
+- Are confidence intervals correctly computed and interpreted?
+- Are sensitivity analyses adequate? Are dominant uncertainties identified?
+- Is there a better method that would be more robust or efficient?
+
+Focus on Category B and C issues, but escalate to A if you find genuine errors.
 
 For every Category A and B finding, you MUST include a structured fix
-instruction using this YAML format (from methodology/06-review.md §6.5):
+instruction using this YAML format:
 
   - id: B1
     category: B
@@ -290,9 +295,9 @@ require fix instructions.
 
 ### Plot Validator Launch Template
 
-**Context:** Bird's-eye framing, plotting template (appendix-plotting.md),
-scripts and figures produced by the phase, upstream artifacts for yield
-cross-checks
+**Context:** Phase_context_N.md (bird's-eye framing), plotting template
+(methodology/appendix-plotting.md), scripts and figures produced by the phase,
+upstream artifacts for data cross-checks
 
 **Writes:** `{NAME}_PLOT_VALIDATION.md`
 
@@ -301,22 +306,26 @@ cross-checks
 You are the plot validation agent. Your detailed role instructions are in
 .claude/agents/plot-validator.md.
 
-Run programmatic and physics sanity checks on ALL figures and plotting
-scripts produced by this phase. You do NOT rely on visual inspection —
-you examine the code, the data, and the output programmatically.
+Run programmatic checks on ALL figures and plotting scripts produced by this
+phase. You do NOT rely on visual inspection — you examine the code, the data,
+and the output programmatically.
 
 Check:
-1. Plotting code compliance (matplotlib styling, figure size, no titles, etc.)
-2. Physics sanity (yields reasonable, distributions physical, ratios sensible)
-3. Consistency (same yields across plots, cutflow monotonic, normalization correct)
-4. Red flags (negative yields, efficiency > 1, chi2/ndf > 5, NP pull > 3σ)
+1. Code compliance: no ax.set_title(), correct figsize, PDF+PNG both saved,
+   bbox_inches="tight", dpi=200, no absolute font sizes
+2. Data sanity: no NaN or Inf in plotted data, no negative values where
+   physically impossible, axis ranges sensible for the variable
+3. Consistency: same values across multiple plots that show the same quantity,
+   trend directions match the reported causal findings
+4. Red flags (automatic Category A): empty figures, all-zero data,
+   correlation > 1.0 or < -1.0, probability values outside [0, 1]
 
 Every failed check is a Category A finding. Produce a PLOT_VALIDATION report.
 ```
 
 ---
 
-### Rendering Reviewer Launch Template (Phase 5 only)
+### Rendering Reviewer Launch Template (Phase 6 only)
 
 **Context:** Bird's-eye framing, the analysis note, pixi environment
 
@@ -357,8 +366,8 @@ or citations (`references.bib`).
 
 ### Arbiter Launch Template
 
-**Context:** Bird's-eye framing, review methodology (§6), artifact, all
-reviews (physics, critical, constructive, plot-validation, rendering if Phase 5)
+**Context:** Phase_context_N.md (full), artifact, all reviewer outputs
+(domain, logic, methods, plot-validation, rendering if Phase 6)
 
 **Writes:** `{NAME}_ARBITER.md`
 
@@ -367,8 +376,8 @@ reviews (physics, critical, constructive, plot-validation, rendering if Phase 5)
 You are the arbiter. Your detailed role instructions are in
 .claude/agents/arbiter.md.
 
-Read the artifact and ALL reviews (physics, critical, constructive,
-plot-validation, and rendering if Phase 5). For each issue:
+Read the artifact and ALL reviewer outputs (domain, logic, methods,
+plot-validation, and rendering if Phase 6). For each issue:
 - If reviewers agree: accept the classification
 - If they disagree: assess independently with justification
 - If they all missed something: raise it yourself
@@ -400,10 +409,10 @@ b_count: N
 b_only: true   # set to true when a_count == 0 AND b_count > 0
 ---
 
-The orchestrator uses `b_only: true` to skip full arbiter re-review and proceed
-with a self-verify checklist (per §6.6.2). A `decision: PASS` requires
-a_count=0 AND b_count=0. Resolve reviewer disagreements, adjudicate conflicts,
-and do not issue PASS if any A or B items remain.
+A `decision: PASS` requires a_count=0 AND b_count=0. The orchestrator uses
+`b_only: true` to apply fixes via self-verify checklist without re-spawning
+the arbiter. Resolve reviewer disagreements, adjudicate conflicts, and do not
+issue PASS if any A or B items remain.
 
 End with: PASS / ITERATE / ESCALATE.
 

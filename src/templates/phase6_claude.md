@@ -375,7 +375,7 @@ Also generate `exec/REPORT.pdf` and `exec/ANALYSIS_NOTE.pdf` for archival.
 
 - Phase requirements: `methodology/03-phases.md` (for gate protocol)
 - Artifacts: `methodology/05-artifacts.md`
-- Review protocol: `methodology/06-review.md` Section 6.2 (5-bot review)
+- Review protocol: `methodology/06-review.md` Section 6.2 (3-bot review)
 
 ---
 
@@ -444,7 +444,7 @@ REPORT.pdf                    # At analysis root (copy of exec/REPORT.pdf)
 
 ## Review
 
-**5-bot review** (includes rendering reviewer) — see `methodology/06-review.md`
+**3-bot review** (domain + rendering → arbiter) — see `methodology/06-review.md`
 for protocol.
 
 Reviewers evaluate:
