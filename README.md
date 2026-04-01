@@ -106,7 +106,7 @@ Each phase follows the same loop:
 
 1. **EXECUTE** — Subagent produces artifact (starts in plan mode)
 2. **REVIEW** — Independent reviewers classify issues as A (blocking) / B (must fix) / C (suggestion)
-3. **CHECK** — Arbiter decides pass/iterate/regress
+3. **ITERATE** — Structured fixes applied, arbiter verifies via scoped diff (not full re-review)
 4. **COMMIT** — State tracked in STATE.md
 5. **HUMAN GATE** — After Phase 5, human approves before final report
 
@@ -114,10 +114,11 @@ Each phase follows the same loop:
 
 ## Three Core Innovations
 
-### 1. Explanatory Power (EP) — Quantified Reasoning Under Uncertainty
+### 1. Explanatory Power (EP) — Full Lifecycle from Prior to Posterior
 
-Most analysis frameworks treat confidence as a binary: "we believe this" or "we don't." OpenPE introduces **Explanatory Power** — a continuous, multiplicative measure that tracks how much explanatory value survives along a causal chain.
+Most analysis frameworks treat confidence as a binary: "we believe this" or "we don't." OpenPE introduces **Explanatory Power** — a continuous, multiplicative measure that tracks how much explanatory value survives along a causal chain, and evolves through the entire analysis lifecycle.
 
+**The formula:**
 ```
 EP = truth × relevance
 
@@ -125,82 +126,206 @@ truth:     How confident are we that this causal link is real? (0–1)
 relevance: How much of the outcome's variance does this link explain? (0–1)
 ```
 
-Along a causal chain A → B → C → D, **Joint EP decays multiplicatively**:
-
+**EP decays multiplicatively along causal chains.** For A → B → C → D:
 ```
 Joint_EP = EP(A→B) × EP(B→C) × EP(C→D)
 ```
 
-This has a profound consequence: long causal chains naturally lose explanatory power. A 5-link chain where each edge has EP=0.7 yields Joint_EP = 0.17 — barely above the soft truncation threshold. The framework enforces explicit stopping rules:
+A 5-link chain where each edge has EP=0.7 yields Joint_EP = 0.17 — barely above the soft truncation threshold. This is not a limitation of the framework; it is an honest representation of how explanatory power dissipates through indirect causation.
 
-| Threshold | Joint EP | Action |
-|-----------|----------|--------|
-| **Hard truncation** | < 0.05 | Stop exploring. This chain is beyond the analytical horizon. |
-| **Soft truncation** | < 0.15 | Lightweight assessment only. No sub-chain expansion. |
-| **Sub-chain expansion** | > 0.30 | Worth investigating in detail. Scaffold a sub-analysis. |
+**Truncation thresholds enforce stopping rules:**
 
-EP values evolve across the analysis lifecycle. Pre-analysis labels (`LITERATURE_SUPPORTED` → truth=0.70, `THEORIZED` → 0.40, `SPECULATIVE` → 0.15) are updated by Phase 3 refutation testing to post-analysis classifications (`DATA_SUPPORTED` → 0.85, `CORRELATION` → 0.50, `HYPOTHESIZED` → 0.15, `DISPUTED` → 0.30).
+| Joint EP | Action |
+|----------|--------|
+| < 0.05 | **Hard truncation** — stop. This chain is beyond the analytical horizon. |
+| 0.05–0.15 | **Soft truncation** — lightweight assessment only, no sub-chain expansion. |
+| > 0.30 | **Sub-chain expansion** — worth investigating. Scaffold a sub-analysis. |
 
-**Why this matters:** EP makes the decay of analytical confidence visible and quantifiable. Rather than burying uncertainty in prose hedging, every causal argument carries a number that the reader can trace and challenge.
+**EP evolves through the analysis.** Labels and truth values change as evidence accumulates:
 
-### 2. Placebo-Anchored Contradiction Detection (DISPUTED Classification)
+| Phase | Classification | truth | meaning |
+|-------|---------------|-------|---------|
+| Pre-analysis (prior) | `LITERATURE_SUPPORTED` | 0.70 | established in prior literature |
+| Pre-analysis (prior) | `THEORIZED` | 0.40 | plausible mechanism, untested |
+| Pre-analysis (prior) | `SPECULATIVE` | 0.15 | possible but weak basis |
+| Post Phase 3 (posterior) | `DATA_SUPPORTED` | 0.85 | survived 3-refutation battery |
+| Post Phase 3 (posterior) | `CORRELATION` | 0.50 | statistical signal, causation unestablished |
+| Post Phase 3 (posterior) | `HYPOTHESIZED` | 0.15 | not testable with available data |
+| Post Phase 3 (posterior) | `DISPUTED` | 0.30 | evidence internally contradictory |
 
-Standard causal inference treats refutation results as a scorecard: more tests pass → stronger evidence. OpenPE adds a semantic layer that detects **logical contradictions** in the evidence pattern.
+The prior-to-posterior transition is mechanical, not discretionary: the classification table maps directly to a `truth` value, and `truth` is capped at `min(1.0, max(0.8, prior_truth + 0.2))` for DATA_SUPPORTED edges. No analyst can override the arithmetic.
 
-Every causal edge undergoes three refutation tests:
-- **Placebo treatment** — Replace treatment with random variable; effect should vanish
-- **Random common cause** — Add random confounder; estimate should remain stable
-- **Data subset** — Estimate on random 80% subsets; should be consistent
+**The DISPUTED classification detects internal contradictions in the refutation battery.** Every causal edge undergoes three tests: placebo treatment (replace treatment with random variable; effect should vanish), random common cause (add random confounder; estimate should stay stable), and data subset (estimate on 80% subsets; should be consistent). The placebo result serves as the causal anchor:
 
-The classification uses **placebo as the causal anchor**:
-
-- If placebo **passes** (effect is treatment-specific / "real"), then subset and common_cause failures are contradictory — a real effect should be stable and robust to confounders
+- If placebo **passes** (effect is treatment-specific), then subset or common_cause failures are contradictory — a real effect should be stable
 - If placebo **fails** (effect is not treatment-specific), then subset passing is contradictory — a non-real effect cannot be perfectly stable
 
-When these contradictions are detected, the edge is classified as `DISPUTED` — not DATA_SUPPORTED, not CORRELATION, but a flag for human review. The framework refuses to auto-classify contradictory evidence.
-
 ```python
-# Contradiction detection logic (Scheme C)
+# Contradiction detection (Scheme C)
 if placebo_passed and (not subset_passed or not cc_passed):
-    return "DISPUTED"   # Real but unstable/confounded — contradictory
+    return "DISPUTED"   # Real but unstable — contradictory
 if not placebo_passed and subset_passed:
     return "DISPUTED"   # Not real but perfectly stable — contradictory
 ```
 
-**Why this matters:** Most frameworks force a classification even when the evidence disagrees with itself. DISPUTED acknowledges that some patterns don't have a clean answer — and routes them to human judgment rather than algorithmic guessing.
+DISPUTED edges go to human review rather than algorithmic guessing. The framework refuses to auto-classify contradictory evidence.
+
+**Why EP matters:** Rather than burying uncertainty in prose hedging, every causal argument carries a number that the reader can trace and challenge. The EP decay chart — the core figure of every OpenPE report — visualizes this propagation from established findings through forward projection, making epistemic honesty visible.
+
+---
+
+### 2. Structured ITERATE Loop — Deterministic Quality Gates for LLM Agents
+
+Standard LLM review loops are vague: reviewers produce text, agents try to fix things, and the cycle continues until someone decides it's "good enough." OpenPE replaces this with a **deterministic quality gate** built around machine-readable fix instructions, scoped re-verification, and explicit routing logic.
+
+**Review tiers scale to stakes:**
+
+| Phase | Review tier | Agents |
+|-------|------------|--------|
+| Phase 0, 1 | 2-bot | logic-reviewer → arbiter |
+| Phase 3, 4, 5 | 4-bot | domain + logic + methods + plot-validator → arbiter |
+| Phase 6 | 3-bot | domain + rendering-reviewer + plot-validator → arbiter |
+
+All reviewers run in parallel and cannot see each other's work. The arbiter reads all reviews, adjudicates disagreements, and issues a single verdict.
+
+**Every finding carries a machine-readable fix instruction.** Reviewers don't just identify problems — they specify how to fix them in YAML:
+
+```yaml
+fixes:
+  - id: A1
+    category: A       # must resolve — blocks PASS
+    description: "EP formula exceeds 1.0 when truth=0.9"
+    fix:
+      type: exact
+      file: "exec/ANALYSIS.md"
+      old: "truth = max(0.8, prior_truth + 0.2)"
+      new: "truth = min(1.0, max(0.8, prior_truth + 0.2))"
+      reason: "Prior truth of 0.9 produces 1.1 without the cap"
+
+  - id: B1
+    category: B       # should address — tracked, resolved before finalization
+    description: "Missing uncertainty range on effect size estimate"
+    fix:
+      type: requires_reasoning
+      file: "exec/ANALYSIS.md"
+      section: "3.2 Urbanization → Fertility"
+      instruction: "Compute 95% CI from bootstrap results and add after β estimate"
+      reason: "Bare point estimates without CI violate the four-numbers rule"
+
+decision: ITERATE
+a_count: 1
+b_count: 1
+```
+
+**The ITERATE loop has explicit routing:**
+
+```
+Arbiter verdict
+│
+├── PASS (a=0, b=0) → proceed to next phase
+│
+├── b_only=true (a=0, b>0)
+│   ├── Apply exact fixes directly (Edit tool, no re-spawn)
+│   ├── Launch parallel agents for requires_reasoning fixes
+│   ├── Orchestrator spot-checks B_SELF_VERIFY.md
+│   └── Proceed without re-spawning arbiter
+│
+└── a_count > 0
+    ├── Apply all exact fixes (A + B) directly
+    ├── Launch parallel agents for requires_reasoning fixes
+    ├── Scoped re-verify: arbiter receives git diff + prior REVIEW_NOTES
+    │   (not full artifact re-review — avoids re-raising resolved issues)
+    └── On 3rd+ iteration: fresh arbiter with prior_iteration_history
+        (prevents churn on already-resolved findings)
+```
+
+**Scoped re-verify is the key efficiency mechanism.** On the second+ iteration, the arbiter does not re-read the full artifact — it reads only the `git diff` since the last review and the prior `REVIEW_NOTES.md`. This eliminates the pattern where a fresh arbiter re-raises issues that were already fixed, creating infinite loops.
+
+**Why this matters:** A well-specified fix format makes the repair loop deterministic. The orchestrator applies `type: exact` fixes itself with the Edit tool (zero latency). `type: requires_reasoning` fixes spawn parallel agents. The arbiter only re-enters on Category A issues, not B-only ones. This design cuts review-loop wall time by 25–40% compared to naive re-spawn-everything approaches, while maintaining strong correctness guarantees.
+
+---
 
 ### 3. Cross-Analysis Memory with Evidence-Driven Tier Transitions
 
-OpenPE analyses don't start from zero. A tiered memory system accumulates domain knowledge across analyses, with confidence-driven lifecycle management:
+OpenPE analyses don't start from zero. A tiered memory system accumulates domain knowledge across analyses, with confidence-driven lifecycle management that promotes reliable findings and forgets stale ones.
+
+**Three tiers with distinct loading semantics:**
 
 | Tier | Scope | Loading | Content |
 |------|-------|---------|---------|
-| **L0** | Universal | Always loaded | Cross-domain principles validated by ≥3 analyses |
-| **L1** | Domain | Loaded for matching domain | Domain-specific experiences (methods, data sources, failures) |
-| **L2** | Detail | On-demand | Full analysis summaries (auto-generated) |
+| **L0** | Universal | Always loaded | Cross-domain principles validated by ≥3 independent analyses |
+| **L1** | Domain | Loaded for matching domain | Domain-specific experiences — methods that worked, data sources, failure patterns |
+| **L2** | Detail | On-demand | Full analysis summaries: edge classifications, effect sizes, data sources used |
 
-Memories aren't static. They evolve:
+**L0 is seeded with universal OpenPE principles** at every session commit. These don't come from analysis results — they are the invariants of the methodology itself:
+
+```python
+L0_PRINCIPLES = [
+    "refutation_battery: DATA_SUPPORTED requires all 3 tests: "
+        "placebo + random_cause + data_subset",
+    "ep_arithmetic: Joint_EP = product of all edge EPs; "
+        "never average, never override mechanically",
+    "four_numbers_rule: every quantitative result needs "
+        "point_estimate, stat_unc, syst_unc, total_unc",
+    "dowhy_required: every causal claim needs DoWhy "
+        "refutation before DATA_SUPPORTED classification",
+    "two_methods_rule: primary + cross-check method for every edge",
+    "ep_thresholds: hard_truncate<0.05, soft_truncate<0.15, "
+        "expand>0.30",
+    "data_callback_limit: max 2 data callback cycles; "
+        "escalate to human on 3rd LOW-quality block",
+    "carry_forward_warnings: every data quality warning and "
+        "DISPUTED edge must appear in the final report",
+]
+```
+
+**Memory entries evolve through their lifecycle:**
 
 ```
-Created (L1, conf=0.50)
-  → Corroborated by 2nd analysis (+0.15 → 0.65)
-  → Corroborated by 3rd analysis (+0.15 → 0.80) → PROMOTED to L0
-  → Contradicted by 4th analysis (-0.25 → 0.55)
-  → Contradicted by 5th analysis (-0.25 → 0.30) → DEMOTED back to L1
-  → Decays over time (-0.01 per analysis)
-  → Eventually: conf < 0.05 AND hotness < 0.01 → FORGOTTEN (deleted)
+Created (L1, conf=0.60)
+  → Corroborated by 2nd analysis (+0.15 → 0.75)
+  → Corroborated by 3rd analysis (+0.15 → 0.90) → PROMOTED to L0
+  → Contradicted by 4th analysis (-0.25 → 0.65)
+  → Contradicted by 5th analysis (-0.25 → 0.40) → DEMOTED back to L1
+  → Decays over time (-0.01 per analysis, -0.005 per month elapsed)
+  → Eventually: conf < 0.05 AND hotness < 0.01 → FORGOTTEN (file deleted)
 ```
 
-The lifecycle is fully automated in `commit_session()`:
-- **Promotion** (L1→L0): ≥2 independent corroborations
+The lifecycle is fully automated in `scripts/session_commit.py`:
+
+- **Promotion** (L1→L0): `≥2` independent corroborations AND `conf ≥ GLOBAL_PROMOTION_THRESHOLD` (0.60)
 - **Demotion** (L0→L1): confidence drops below 0.30
-- **Forgetting**: confidence ≤ 0.05 AND hotness < 0.01 → file deleted
-- **Archival**: cold L2 entries (hotness < 0.1) moved to `_archive/`
+- **Forgetting**: `conf ≤ 0.05` AND `hotness < 0.01` → file deleted
+- **Archival**: cold L2 entries (`hotness < 0.1`) moved to `_archive/`
 - **Idempotent commit**: marker file prevents double-decay on crash+restart
+
+**Content extraction is regex-driven, not template-driven.** After each analysis, `session_commit.py` parses the actual artifacts to extract meaningful memory:
+
+```python
+# L1 extraction from ANALYSIS.md: actual edge classifications and effect sizes
+# "| urbanization → fertility | DATA_SUPPORTED | β=-0.34 (p<0.01) |"
+# → stores "urbanization→fertility: DATA_SUPPORTED, β=-0.34"
+
+# L2 extraction from DATA_QUALITY.md: specific LOW/MEDIUM quality datasets
+# "| world_bank_gdp | LOW | missing 2008-2012 | ..."
+# → stores "world_bank_gdp: LOW — missing 2008-2012"
+```
+
+**Memory is used at both ends of the pipeline:**
+
+```bash
+# Load at analysis start (before Phase 0)
+pixi run py scripts/session_commit.py --load-only --domain economics
+
+# Commit and promote at analysis end (after Phase 6)
+pixi run py scripts/session_commit.py \
+  --analysis-id my_analysis \
+  --global-memory /path/to/OpenPE/memory
+```
 
 Global memory lives at the repo root (`memory/`). Each new analysis inherits a snapshot via scaffolding and promotes high-confidence findings back after completion.
 
-**Why this matters:** The 3rd analysis in a domain is better than the 1st — not because the code improved, but because the memory system learned what works and what doesn't.
+**Why this matters:** The 3rd causal analysis in a domain starts with the knowledge that Granger causality failed on this data type, that the World Bank GDP series has a gap in 2008–2012, and that Instrument Variable estimates in this domain consistently drift by +0.1 from OLS. That's not code improvement — it's accumulated experience that would otherwise be re-discovered, re-forgotten, and re-discovered again.
 
 ---
 
