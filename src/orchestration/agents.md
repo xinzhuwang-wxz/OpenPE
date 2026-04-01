@@ -405,4 +405,25 @@ a_count=0 AND b_count=0. Resolve reviewer disagreements, adjudicate conflicts,
 and do not issue PASS if any A or B items remain.
 
 End with: PASS / ITERATE / ESCALATE.
+
+**Re-verify mode** (when you receive a `git diff` and previous REVIEW_NOTES.md
+instead of full artifact + full reviews):
+- Read the diff carefully. Verify that each fix listed in the prior
+  REVIEW_NOTES.md has been correctly applied (the `new` text is present,
+  the `old` text is gone).
+- Scan the diff for any new issues introduced by the edits.
+- Issue PASS only if all prior A/B items are resolved and the diff is clean.
+- Issue ITERATE if any prior A/B item is unresolved or the diff introduces
+  a new A/B issue.
+
+**Fresh arbiter mode** (spawned on 3rd+ iteration — you will receive
+`prior_iteration_history` containing all previous REVIEW_NOTES.md files in
+chronological order):
+- Before raising any finding, check whether the issue appears in prior history.
+- If YES and the diff shows the fix was applied: mark it resolved, do NOT
+  re-raise it.
+- If YES and the diff does NOT show the fix applied: raise it as a carry-over
+  A item with note "not resolved from iteration N."
+- If NO (genuinely new issue): raise it normally.
+This prevents churning on already-resolved items across fresh spawns.
 ```

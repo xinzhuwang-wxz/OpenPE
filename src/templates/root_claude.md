@@ -55,16 +55,32 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
      If regression trigger: → Phase Regression protocol (see below).
      If ITERATE:
        a. Apply `exact` fixes (old→new text) directly via Edit tool.
-       b. Spawn fix agent for `requires_reasoning` fixes only.
+       b. Spawn one fix agent **per** `requires_reasoning` fix, all in parallel.
+          Each agent receives: the fix's `file`, `section`, `instruction`, and
+          `reason` fields from REVIEW_NOTES.md. Fixes target different
+          file+section pairs and are independent — do not serialize them.
+          Wait for all parallel fix agents to complete before re-verify.
        c. Re-verify:
-          - **A-present:** Continue the original arbiter via SendMessage
-            (fresh arbiter spawn on 3rd+ iteration — see §6.6.2).
+          - **A-present:** Continue the original arbiter via SendMessage with
+            scoped context: pass (1) the previous REVIEW_NOTES.md, (2) the
+            `git diff HEAD` of the artifact file(s) that were edited, and
+            (3) a one-line summary: "Fixes applied for: A1, A2, B3. Verify
+            these are resolved and check the diff for new issues."
+            Do NOT re-pass the full artifact — the arbiter already has it.
+            Fresh arbiter spawn on 3rd+ iteration (see §6.6.2): pass the
+            same scoped context PLUS all prior REVIEW_NOTES.md files as
+            "prior iteration history."
           - **B-only** (`b_only: true` in REVIEW_NOTES.md, a_count=0):
             Apply all B fixes (exact fixes via Edit tool; reasoning fixes inline).
             Write `phase*/review/B_SELF_VERIFY.md` with one line per fix:
               - B{id} [{description}]: APPLIED — {file}:{section}, "{old_snippet}" → "{new_snippet}"
             If ANY fix cannot be written as APPLIED, escalate to full arbiter.
-            If ALL lines are APPLIED → proceed directly to COMMIT. No arbiter spawn.
+            **Orchestrator spot-check (mandatory before COMMIT):** For every
+            `type: exact` fix listed as APPLIED, use the Read tool to read the
+            target file section and confirm the `new` text is present and the
+            `old` text is absent. If any spot-check fails: do NOT commit —
+            escalate to full arbiter with the failing fix id(s) noted.
+            If ALL spot-checks pass → proceed directly to COMMIT. No arbiter spawn.
      If only Category C or no issues: proceed.
 
   4. COMMIT — commit the phase's work.
@@ -94,12 +110,26 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
 | 5: Verification | `verifier` | Cross-validation, sensitivity analysis, EP reconciliation |
 | 6: Documentation | `report_writer` (AN + REPORT in parallel) + `plot_validator` | Final report, parallel PDF compilation |
 
-**Dynamic context splitting — Phase 3:** The orchestrator counts causal
-edges from the STRATEGY artifact. If ≤5 edges, run Phase 3 as a single
-subagent (avoids startup overhead). If >5 edges, split into steps 1-5
-(causal testing, refutation, EP updates) and steps 6-7 (statistical model
-fitting, uncertainty quantification) as separate subagent invocations. The
-step 6-7 subagent reads the causal testing artifact from disk.
+**Dynamic context splitting — Phase 3:** The orchestrator counts primary
+causal edges (those marked "full analysis" in STRATEGY.md).
+
+- **1–2 edges:** Run Phase 3 as a single subagent (Steps 3.1–3.7 together).
+- **3–5 edges:** Split by edge: spawn one analyst sub-agent per edge for
+  Steps 3.1–3.5 (signal extraction, baseline, causal testing, EP update,
+  sub-chain decision) in **parallel**. Each sub-agent receives
+  `phase_context_3.md` plus its assigned edge name and the STRATEGY.md
+  entries for that edge only. After all parallel edge agents complete, spawn
+  a single verifier sub-agent for Steps 3.6–3.7 (statistical model +
+  uncertainty quantification) that reads all per-edge outputs from disk and
+  produces the unified ANALYSIS.md.
+- **>5 edges:** Same parallel pattern as 3–5 edges, but group edges into
+  pairs to cap concurrent spawns at 3. The verifier sub-agent merges all
+  outputs in a final pass.
+
+The verifier sub-agent (Steps 3.6–3.7) always runs as a single invocation
+after all edge agents complete — it reads the per-edge causal test artifacts
+from disk and constructs the statistical model and uncertainty quantification
+across all edges jointly.
 
 **Pre-generated phase context.** Before spawning ANY subagent for Phase N,
 assemble `phase*/context/phase_context_N.md` using the Read tool. Structure:
@@ -138,8 +168,22 @@ invoke a data callback:
 1. Spawn `data_acquisition_agent` with the specific variable request
 2. The agent runs Steps 0.3-0.4 for the requested variable only
 3. Spawn `data_quality_agent` for the new data (Step 0.5)
-4. Append results to `phase0_discovery/data/registry.yaml`
-5. Resume the requesting phase with the new data available
+4. **Quality gate decision (mandatory before proceeding):**
+   Read the DATA_QUALITY verdict for the new data:
+   - **HIGH quality:** proceed normally — append to registry.yaml and resume.
+   - **MEDIUM quality:** proceed with caveat — append to registry.yaml,
+     resume, and add a data quality warning to the requesting phase's
+     artifact for the affected edge. The edge's Classification must note
+     "medium-quality callback data" in its caveats.
+   - **LOW quality on a high-EP edge (EP > 0.30):** DO NOT resume
+     automatically. Present to the human: show the quality verdict, the
+     affected edge, and its EP value. Await human approval to either proceed
+     or downgrade the edge to lightweight assessment (treat EP as 0.15–0.30
+     range). Log the decision in `experiment_log.md`.
+   - **LOW quality on a low-EP edge (EP ≤ 0.30):** downgrade the edge to
+     lightweight assessment automatically. Log as a limitation. Resume.
+5. Append results to `phase0_discovery/data/registry.yaml`
+6. Resume the requesting phase with the new data available (subject to step 4)
 
 **Guards:** Maximum 2 callbacks per analysis. Each callback gets logged
 in `experiment_log.md` with justification. If 2 callbacks have already
