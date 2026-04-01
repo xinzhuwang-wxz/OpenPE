@@ -112,7 +112,8 @@ Loop until PASS, ESCALATE, or max iterations:
    - Write output to: `review/constructive/` with session-named filename
 
    Plot-validator instructions (if figures exist):
-   - Read: all figures in this phase's `figures/` directory
+   - **First iteration:** Read all figures in this phase's `figures/` directory
+   - **Subsequent iterations:** Read only figures affected by the latest fixes (listed in arbiter's fix instructions) plus any newly created figures. Unmodified figures retain prior validation status.
    - Read: `conventions/` plotting standards (axis labels, font sizes, color schemes, legend placement, ratio panels, domain style requirements)
    - Validate each figure against the conventions
    - Check: axis labels and units, legend completeness, ratio panel presence where required, color accessibility, resolution and format, statistical uncertainty display, verification compliance (no signal region data shown before approval)

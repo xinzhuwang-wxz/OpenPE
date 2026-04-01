@@ -80,19 +80,26 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
 
 | Phase | Executor agent(s) | Role |
 |-------|-------------------|------|
-| 0: Discovery | `hypothesis_agent` → `data_acquisition_agent` → `data_quality_agent` | Question decomposition, DAG construction, data acquisition, quality gate |
+| 0: Discovery | `hypothesis_agent` → `data_acquisition_agent` (parallel by source) → `data_quality_agent` | Question decomposition, DAG construction, parallel data acquisition, quality gate |
 | 1: Strategy | `lead_analyst` | Analysis strategy from DAGs and data |
 | 2: Exploration | `data_explorer` | Exploratory data analysis, distribution checks |
-| 3: Causal Analysis | `analyst` (steps 1-5), `analyst` (steps 6-7, context split) | Causal testing, refutation, statistical modeling |
+| 3: Causal Analysis | `analyst` (single or split by edge count — see below) | Causal testing, refutation, statistical modeling |
 | 4: Projection | `projector_agent` | Forward projection, scenario analysis |
 | 5: Verification | `verifier` | Cross-validation, sensitivity analysis, EP reconciliation |
-| 6: Documentation | `report_writer` + `plot_validator` | Final report, all figures validated |
+| 6: Documentation | `report_writer` (AN + REPORT in parallel) + `plot_validator` | Final report, parallel PDF compilation |
 
-**Context splitting — Phase 3:** Steps 1-5 (causal testing, refutation,
-EP updates) and steps 6-7 (statistical model fitting, uncertainty
-quantification) should be split into separate subagent invocations. The
-step 6-7 subagent reads the causal testing artifact from disk. This prevents
-context exhaustion during the most compute-intensive phase.
+**Dynamic context splitting — Phase 3:** The orchestrator counts causal
+edges from the STRATEGY artifact. If ≤5 edges, run Phase 3 as a single
+subagent (avoids startup overhead). If >5 edges, split into steps 1-5
+(causal testing, refutation, EP updates) and steps 6-7 (statistical model
+fitting, uncertainty quantification) as separate subagent invocations. The
+step 6-7 subagent reads the causal testing artifact from disk.
+
+**Pre-generated phase context.** Before spawning subagents for Phase N,
+the orchestrator assembles `phase_context_N.md` — a single file containing
+all methodology sections, conventions, and bird's-eye framing needed by
+that phase. All subagents (executor, reviewers, arbiter) read this one file
+instead of 5-6 separate reads. Written to `phase*/context/`.
 
 **Data callbacks.** If Phase 2 or 3 agents report that a high-EP edge
 (EP > 0.30) cannot be tested due to missing data, the orchestrator MAY

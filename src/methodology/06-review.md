@@ -35,11 +35,17 @@ All reviews — regardless of intensity — use the same classification:
 
 **Plot-validator** is spawned alongside all other reviewers (in parallel) for
 every phase that produces figures (all phases except Phase 1 strategy-only).
-The plot-validator runs programmatic checks (not visual inspection) on all
+The plot-validator runs programmatic checks (not visual inspection) on
 plotting code and output data. Its findings are passed to the arbiter as
 additional review input. Plot-validator red flags are automatic Category A —
 the arbiter must not downgrade them. See `.claude/agents/plot-validator.md`
 for the complete validation protocol.
+
+**Incremental plot validation.** On the first review iteration, the
+plot-validator checks all figures. On subsequent iterations (ITERATE cycles),
+the arbiter's fix instructions identify which figures were affected by the
+fixes. The plot-validator then checks **only those figures** plus any newly
+created figures. Unmodified figures retain their prior validation status.
 
 **4-bot review** = physics reviewer + critical reviewer ("bad cop") +
 constructive reviewer ("good cop") + arbiter. The **physics reviewer**

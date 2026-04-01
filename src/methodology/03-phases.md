@@ -107,7 +107,11 @@ data.
 
 *Data acquisition (Mode A) or inventory (Mode B/C):*
 - **Mode A:** Identify data sources, acquire programmatically (APIs,
-  web scraping, public databases), document provenance for each dataset
+  web scraping, public databases), document provenance for each dataset.
+  **Parallelize by source type** — group datasets by API/source (e.g.,
+  FRED, World Bank, web scrape) and acquire each group in a separate
+  sub-agent running concurrently. Merge results into `registry.yaml`
+  after all sub-agents complete.
 - **Mode B/C:** Inventory user-provided data — schema, completeness,
   quality, coverage
 - For all modes: assess data sufficiency for each sub-question. If
@@ -335,6 +339,15 @@ the core findings.
    diagnostic plots, residual patterns, sensitivity outcomes. This is
    where modeling issues must be caught before they propagate to Phase 4.
 
+**Dynamic context splitting.** The orchestrator decides at runtime whether
+to split Phase 3 into two sub-agent invocations:
+- **≤5 causal edges:** Run as a single sub-agent (startup overhead exceeds
+  the context savings from splitting).
+- **>5 causal edges:** Split into steps 1-5 (causal testing, refutation,
+  EP updates) and steps 6-7 (statistical model fitting, uncertainty
+  quantification). The step 6-7 sub-agent reads the causal testing
+  artifact from disk.
+
 **Output artifact:** `ANALYSIS.md` — primary findings with EP assessment,
 robustness results across specifications, sensitivity analysis outcomes,
 validation test results, updated EP vector, and all supporting
@@ -511,7 +524,9 @@ finalizes.
     sub-question
   - `registry.yaml` — complete artifact registry mapping every artifact
     to its phase, commit hash, and review status
-- Compile the report to PDF via pandoc
+- Compile both documents to PDF via pandoc **in parallel** (two
+  independent `pixi run build-pdf` invocations). On review iteration,
+  only recompile the document that was modified.
 - Perform a final completeness check: every sub-question from Phase 0
   has a finding (even if the finding is "insufficient data, EP below
   threshold"), every finding has an EP, every EP has a justification

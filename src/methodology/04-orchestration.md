@@ -128,6 +128,14 @@ starts from artifacts and instructions, not from prior conversations.
 
 #### 3a.4.2 What Each Agent Receives
 
+**Pre-generated phase context.** Before spawning any subagent for Phase N,
+the orchestrator generates `phase_context_N.md` — a single file containing
+all methodology sections, conventions, and framing that Phase N agents need.
+This is assembled once per phase and passed to every subagent (executor,
+reviewers, arbiter) as a single read, replacing 5-6 separate file reads.
+The file is written to `phase*/context/phase_context_N.md` and regenerated
+only if upstream methodology files change.
+
 Every agent — executor, reviewer, arbiter — receives a curated context
 assembled by the orchestrating agent or the human launching the session. The
 context has three layers:
