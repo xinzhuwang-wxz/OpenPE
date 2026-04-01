@@ -21,13 +21,14 @@ The argument is optionally a phase identifier: `1`, `2`, `3`, `4a`, `4b`, `4c`, 
 
 | Phase | Review tier | Plot-validator |
 |-------|------------|----------------|
-| 1 | 4-bot (physics + critical + constructive, then arbiter) | Yes (if figures produced) |
+| 0 | 2-bot (logic, then arbiter) | Yes (if figures produced) |
+| 1 | 2-bot (logic, then arbiter) | Yes (if figures produced) |
 | 2 | self (no action needed -- return immediately) | No |
 | 3 | 1-bot (critical only) per channel | Yes |
-| 4a | 4-bot | Yes |
+| 4a | 4-bot (physics + critical + constructive, then arbiter) | Yes |
 | 4b | 4-bot | Yes |
 | 4c | 1-bot | Yes |
-| 5 | 5-bot (physics + critical + constructive + rendering, then arbiter) | Yes |
+| 5 | 3-bot (domain + rendering, then arbiter) | Yes |
 
 If phase is 2, report "Phase 2 uses self-review. No external review required." and return.
 
@@ -56,7 +57,31 @@ Update STATE.md: `status: reviewing`, timestamp.
 
 Initialize iteration counter: `iteration = 0`.
 
-### 4-bot Review (Phases 1, 4a, 4b)
+### 2-bot Review (Phases 0, 1)
+
+Loop until PASS, ESCALATE, or max iterations:
+
+1. Increment iteration counter. Check cost controls (same thresholds as 4-bot).
+
+2. **Spawn logic-reviewer in parallel with plot-validator** (if figures exist):
+
+   Logic reviewer instructions:
+   - Read: methodology spec (review focus for this phase), the artifact under review, upstream artifacts, experiment log
+   - Evaluate: reasoning validity, DAG consistency, EP arithmetic, logical completeness
+   - Classify every issue as (A) must resolve, (B) should address, (C) suggestion
+   - Include structured fix instructions (exact or requires_reasoning) for every A/B item
+   - Write output to: `review/logic/` with session-named filename
+
+   Plot-validator: same instructions as 4-bot below.
+
+3. **Spawn arbiter** via SendMessage:
+   - Read: the artifact, logic review, plot-validation report (if exists)
+   - Write output to: `review/arbiter/`
+   - Decision: **PASS**, **ITERATE**, or **ESCALATE**
+
+4-5. Handle decision same as 4-bot below.
+
+### 4-bot Review (Phases 4a, 4b)
 
 Loop until PASS, ESCALATE, or max iterations:
 
@@ -107,44 +132,45 @@ Loop until PASS, ESCALATE, or max iterations:
 
    - **PASS**: Check for regression triggers in the review output. If none found, update STATE.md (`status: passed`), record in Phase History table (including iteration count), and return the result.
 
-   - **ITERATE**: Re-spawn the phase executor via SendMessage with:
-     - All original inputs (prompt, methodology, upstream artifacts)
-     - The arbiter's feedback (Category A items to address, including plot fixes)
-     - The previous artifact version
-     - The experiment log
-     - Instruction: "Address the Category A issues identified by the arbiter. Produce an updated artifact."
-     - After executor completes, loop back to step 1 of the review.
+   - **ITERATE**: Apply fixes using the arbiter's structured instructions:
+     1. **Exact fixes** (`type: exact`): Apply directly via Edit tool — no subagent needed.
+     2. **Reasoning fixes** (`type: requires_reasoning`): Spawn fix agent with the section path, instruction, and previous artifact. Fix agent addresses only these items.
+     3. **Re-verify** based on remaining issue severity:
+        - **A-present**: Continue the arbiter via SendMessage with the updated artifact and fix diff. Arbiter re-checks only the fixed items. On 3rd+ iteration, spawn a fresh arbiter instead.
+        - **B-only remaining**: Executor self-verifies against a checklist of the B items. If all addressed → PASS. If any fail → full re-review.
+     4. Loop until PASS or iteration limit.
 
    - **ESCALATE**: Update STATE.md (`status: blocked`, record escalation reason). Report to user: "Phase {phase} review escalated. Reason: {reason}. Human intervention required." Stop.
 
-### 5-bot Review (Phase 5)
+### 3-bot Review (Phase 5 Documentation)
 
-Same structure as 4-bot, but with an additional reviewer:
+1. Increment iteration counter. Check cost controls (same thresholds).
 
-1. Increment iteration counter.
-2. Check cost controls (same thresholds).
+2. **Spawn domain-reviewer and rendering-reviewer in parallel**, plus **plot-validator** if figures exist:
 
-3. **Spawn physics-reviewer, critical-reviewer, constructive-reviewer, rendering-reviewer in parallel**, plus **plot-validator** if figures exist:
-
-   Physics reviewer, critical reviewer, constructive reviewer: same instructions as 4-bot above.
+   Domain reviewer instructions:
+   - Read: the artifact under review, upstream artifacts (ANALYSIS_NOTE, VERIFICATION, PROJECTION), experiment log
+   - Check factual accuracy: numbers match upstream sources, claims are supported, no fabricated references
+   - Classify issues as (A) must resolve, (B) should address, (C) suggestion
+   - Include structured fix instructions for every A/B item
+   - Write output to: `review/domain/` with session-named filename
 
    Rendering reviewer instructions:
    - Read: the final analysis note artifact, all figures, `conventions/` document formatting standards
    - Evaluate document quality: structure, readability, figure placement and referencing, table formatting, equation typesetting, abstract clarity, conclusion strength
    - Check cross-references between text and figures/tables
-   - Verify the narrative flow from motivation through results to conclusions
    - Classify issues as (A) must resolve, (B) should address, (C) suggestion
    - Write output to: `review/rendering/{REVIEW}.md`
 
    Plot-validator: same instructions as 4-bot above.
 
-4. **After all reviewers complete, spawn arbiter** via SendMessage:
-   - Read: the artifact, all five review files (physics, critical, constructive, rendering, plot-validation)
+3. **Spawn arbiter** via SendMessage:
+   - Read: the artifact, domain review, rendering review, plot-validation report
    - Synthesize all reviewer inputs; Category A issues from any reviewer are Category A overall
    - Write output to: `review/arbiter/`
    - Decision: **PASS**, **ITERATE**, or **ESCALATE**
 
-5-6. Handle decision same as 4-bot.
+4-5. Handle decision same as 4-bot.
 
 ### 1-bot Review (Phases 3, 4c)
 

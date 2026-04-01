@@ -25,13 +25,13 @@ All reviews — regardless of intensity — use the same classification:
 
 | Phase | Review type | Rationale |
 |-------|------------|-----------|
-| Phase 1: Strategy | **4-bot + plot-validator** (physics + critical + constructive + arbiter) | Sets direction for everything. Physics errors propagate. Cheap phase, so review cost is well spent. |
+| Phase 1: Strategy | **2-bot + plot-validator** (logic + arbiter) | Strategy is structural, not empirical. Logic reviewer catches reasoning and DAG errors; domain/methods reviewers add little value at this stage. |
 | Phase 2: Exploration | **Self-review** | Mostly mechanical (sample inventory, distributions). High execution iteration as the agent discovers data formats. Errors caught downstream in Phase 3. |
 | Phase 3: Processing | **1-bot + plot-validator** (single critical reviewer) | Physics mistakes become quantitative here. One external eye on closure tests and background/correction modeling. High execution iteration — don't bottleneck it. |
 | Phase 4a: Expected results | **4-bot + plot-validator** | Gates the 10% validation. The fit model, systematics, and expected results must be bulletproof. Full tribunal. |
 | Phase 4b: 10% validation | **4-bot + plot-validator** | The draft analysis note and 10% results must be polished before presenting to a human. The human should see a professional product, not a rough draft. |
 | Phase 4c: Full data | **1-bot + plot-validator** | Sanity check on post-fit diagnostics. Methodology already human-approved. |
-| Phase 5: Documentation | **5-bot + plot-validator** (physics + critical + constructive + rendering + arbiter) | The final product submitted for collaboration review. Worth the full treatment. |
+| Phase 5: Documentation | **3-bot + plot-validator** (domain + rendering + arbiter) | Documentation phase introduces no new methodology — domain reviewer checks factual accuracy, rendering reviewer checks PDF quality. Methods/critical reviewers add little value here. |
 
 **Plot-validator** is spawned alongside all other reviewers (in parallel) for
 every phase that produces figures (all phases except Phase 1 strategy-only).
@@ -53,10 +53,17 @@ Reviewers run in parallel (they cannot see each other's work); the arbiter
 reads all reviews (including the plot-validator report) and the original
 artifact, adjudicates disagreements, and issues PASS / ITERATE / ESCALATE.
 
-**5-bot review** (Phase 5 only) = physics + critical + constructive +
-rendering + plot-validator + arbiter. The rendering reviewer runs
-`pixi run build-pdf` and inspects the compiled PDF for figure rendering,
-math compilation, layout, and cross-references.
+**3-bot review** (Phase 5 Documentation only) = domain + rendering +
+plot-validator + arbiter. The domain reviewer checks factual accuracy; the
+rendering reviewer runs `pixi run build-pdf` and inspects the compiled PDF
+for figure rendering, math compilation, layout, and cross-references. No
+methods or critical reviewer — documentation introduces no new methodology.
+
+**2-bot review** (Phases 0, 1) = logic reviewer + plot-validator + arbiter.
+The logic reviewer checks reasoning validity, DAG consistency, and EP
+arithmetic. The arbiter reads the logic review and plot-validator report,
+then issues PASS / ITERATE / ESCALATE. Lighter than 4-bot but still
+independent.
 
 **1-bot review** = single critical reviewer + plot-validator. Issues
 classified A/B/C. Plot-validator red flags are automatic Category A.
@@ -379,7 +386,103 @@ author reviewing their own work misses both correctness and completeness
 failures. If the agent framework cannot spawn subagents, the analysis
 cannot proceed past Phase 2.
 
-### 6.5 Iteration and Escalation
+### 6.5 Structured Fix Instructions
+
+Every reviewer finding must include a **fix instruction** alongside the
+classification. This eliminates the costly read-locate-understand cycle
+that fix agents otherwise require. Two fix types:
+
+**Exact fix** — the reviewer can specify the precise text replacement:
+
+```yaml
+- id: A1
+  category: A
+  description: "Chain C OLS R² incorrect"
+  fix:
+    type: exact
+    file: "phase3_analysis/exec/ANALYSIS.md"
+    old: "R²=0.609"
+    new: "R²=0.489"
+    reason: "Verified value from results_chains_cd.json"
+```
+
+**Reasoning fix** — the reviewer identifies the location and direction but
+the correction requires computation or judgment:
+
+```yaml
+- id: A2
+  category: A
+  description: "Joint EP chain product not computed"
+  fix:
+    type: requires_reasoning
+    file: "phase0_discovery/exec/DISCOVERY.md"
+    section: "Joint EP Chain Summary"
+    instruction: "Multiply EP along primary chain: 0.49 × 0.56 × 0.49 × 0.42"
+    reason: "Phase 1 cannot apply truncation thresholds without chain products"
+```
+
+**How the orchestrator uses fix instructions:**
+
+- **Exact fixes** are applied directly by the orchestrator using the Edit
+  tool — no fix agent needed. This is a mechanical operation.
+- **Reasoning fixes** are batched and dispatched to a fix agent, which
+  receives the structured instructions (not just a prose review to
+  re-interpret).
+- If ALL fixes in an ITERATE cycle are exact, the orchestrator applies
+  them directly and proceeds to re-verification. No fix agent is spawned.
+- **Category C auto-apply:** Category C suggestions with exact fix
+  instructions are applied directly by the orchestrator before commit —
+  no review cycle needed. C items without fix instructions are logged and
+  skipped.
+
+**Reviewer responsibility:** Every Category A and B finding MUST include a
+fix instruction. A finding without a fix instruction is incomplete — the
+arbiter should flag it. Category C findings MAY include fix instructions
+but are not required to.
+
+The arbiter's REVIEW_NOTES.md consolidates all fix instructions from all
+reviewers into a single ordered list, resolving duplicates and conflicts.
+
+### 6.6 Iteration and Escalation
+
+#### 6.6.1 Fix application
+
+When the arbiter issues ITERATE, the orchestrator applies fixes using the
+structured instructions from §6.5:
+
+1. Apply all exact fixes directly (Edit tool).
+2. If reasoning fixes remain, spawn a fix agent with the structured
+   instruction list — not the raw review prose.
+3. The fix agent outputs a verification line per fix:
+   `- A1 [description]: APPLIED — [location and what changed]`
+
+#### 6.6.2 Re-verification
+
+Re-verification intensity depends on the ITERATE profile:
+
+**A-present ITERATE** (≥1 Category A issue):
+
+| Re-verify attempt | Method |
+|-------------------|--------|
+| 1st and 2nd | **Arbiter continuation** — SendMessage to the original arbiter with the list of applied fixes. The arbiter performs spot-check verification on each fix location. It does NOT re-scan the full artifact for new issues. |
+| 3rd and beyond | **Fresh arbiter** — spawn a new arbiter that reads the full artifact from scratch. This is the safety net against fix-introduced regressions that spot-checking would miss. |
+
+**B-only ITERATE** (0 Category A, ≥1 Category B):
+
+No independent re-verification. The fix agent (or orchestrator for exact
+fixes) produces a self-verification checklist confirming each B item was
+applied. The orchestrator reads the checklist and proceeds to PASS.
+
+Rationale: B items do not affect causal conclusions, EP values, or
+classifications. They strengthen the analysis but their application is
+verifiable by inspection. Spending a full arbiter cycle on B-only fixes
+has poor cost/benefit ratio.
+
+**Safety constraint:** If the fix agent's self-verification checklist reports
+ANY item as NOT APPLIED or UNCERTAIN, the orchestrator escalates to a
+full arbiter re-review regardless of the A/B profile.
+
+#### 6.6.3 Iteration limits
 
 For **4/5-bot reviews:** the cycle repeats until the arbiter issues PASS.
 Correctness is the termination condition. The orchestrator emits warnings
@@ -397,7 +500,7 @@ another iteration of the same fix cycle.
 For **self-review:** no formal iteration — the agent corrects issues as it
 finds them during execution.
 
-### 6.6 The Human Gate
+### 6.7 The Human Gate
 
 The human gate is the point where the analysis pauses for human review.
 For **both** measurement and search analyses, the gate is between Phase 4b
@@ -410,7 +513,7 @@ This is equivalent to a collaboration internal review. The human should
 receive a professional, publication-quality document — not a
 work-in-progress.
 
-### 6.7 Cost Controls
+### 6.8 Cost Controls
 
 To prevent runaway costs from pathological iteration:
 
@@ -424,7 +527,7 @@ default 10) forces escalation if reached. In interactive mode, the
 orchestrator surfaces warnings to the human for guidance. In batch mode,
 warnings are logged and the arbiter is prompted to consider ESCALATE.
 
-### 6.8 Phase Regression
+### 6.9 Phase Regression
 
 The pipeline is normally forward-only, but a reviewer or executor may discover
 that a fundamental assumption from an earlier phase is wrong — a major

@@ -51,11 +51,14 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
      - The conventions directory path
      - Instruction to write REVIEW_NOTES.md in the phase directory
 
-  3. CHECK — read the review findings (short).
-     If regression trigger (logic or methodology issue from earlier phase):
-       → enter Phase Regression protocol (see below).
-     If Category A or B issues: spawn a fix agent to address ALL of them,
-       then re-review with a fresh reviewer added to the panel.
+  3. CHECK — read the arbiter decision and structured fix instructions.
+     If regression trigger: → Phase Regression protocol (see below).
+     If ITERATE:
+       a. Apply `exact` fixes (old→new text) directly via Edit tool.
+       b. Spawn fix agent for `requires_reasoning` fixes only.
+       c. Re-verify: if any Category A items, continue the arbiter via
+          SendMessage (fresh arbiter on 3rd+ iteration). If B-only
+          remaining, executor self-verifies via checklist — PASS on green.
      If only Category C or no issues: proceed.
 
   4. COMMIT — commit the phase's work.
@@ -237,13 +240,13 @@ phase begins. No exceptions.
 
 | Phase | Required artifact | Review type |
 |-------|-------------------|-------------|
-| 0 | `phase0_discovery/exec/DISCOVERY.md` + `phase0_discovery/exec/DATA_QUALITY.md` + `data/registry.yaml` | 4-bot |
-| 1 | `phase1_strategy/exec/STRATEGY.md` | 4-bot |
+| 0 | `phase0_discovery/exec/DISCOVERY.md` + `phase0_discovery/exec/DATA_QUALITY.md` + `data/registry.yaml` | 2-bot (logic + arbiter) |
+| 1 | `phase1_strategy/exec/STRATEGY.md` | 2-bot (logic + arbiter) |
 | 2 | `phase2_exploration/exec/EXPLORATION.md` | Self |
 | 3 | `phase3_analysis/exec/ANALYSIS.md` | 4-bot |
 | 4 | `phase4_projection/exec/PROJECTION.md` | 4-bot |
 | 5 | `phase5_verification/exec/VERIFICATION.md` | 4-bot + Human Gate |
-| 6 | `phase6_documentation/exec/ANALYSIS_NOTE.md` + `phase6_documentation/exec/REPORT.md` + `phase6_documentation/audit_trail/` + `REPORT.pdf` | 5-bot (4 + rendering) |
+| 6 | `phase6_documentation/exec/ANALYSIS_NOTE.md` + `phase6_documentation/exec/REPORT.md` + `phase6_documentation/audit_trail/` + `REPORT.pdf` | 3-bot (domain + rendering + arbiter) |
 
 **Review before advancing.** After each artifact, spawn a reviewer subagent.
 Self-review is only acceptable for Phase 2 (exploration). All other phases
@@ -280,13 +283,13 @@ The arbiter must not PASS with unresolved A or B items.
 
 | Phase | Review type |
 |-------|-------------|
-| 0: Discovery | 4-bot (domain + logic + methods → arbiter) |
-| 1: Strategy | 4-bot (domain + logic + methods → arbiter) |
+| 0: Discovery | 2-bot (logic → arbiter) |
+| 1: Strategy | 2-bot (logic → arbiter) |
 | 2: Exploration | Self-review |
 | 3: Causal Analysis | 4-bot (domain + logic + methods → arbiter) |
 | 4: Projection | 4-bot (domain + logic + methods → arbiter) |
 | 5: Verification | 4-bot (domain + logic + methods → arbiter) + Human Gate |
-| 6: Documentation | 5-bot (domain + logic + methods + rendering → arbiter) |
+| 6: Documentation | 3-bot (domain + rendering → arbiter) |
 
 **Plot-validator** runs alongside all other reviewers in parallel. It performs
 programmatic (not visual) checks on plotting code and output data. Red flags
@@ -294,7 +297,7 @@ from the plot-validator are automatic Category A — the arbiter must not
 downgrade them. See `.claude/agents/plot-validator.md` and
 `methodology/06-review.md` §6.4.3 for the complete protocol.
 
-**Iteration limits:** 4/5-bot: warn at 3, strong warn at 5, hard cap at 10. 1-bot: warn at 2, escalate after 3. All subagents use `model: "opus"`.
+**Iteration limits:** 2/3/4-bot: warn at 3, strong warn at 5, hard cap at 10. 1-bot: warn at 2, escalate after 3. All subagents use `model: "opus"`.
 
 **Review iteration tracking:** Use `scripts/state_manager.py` to track iterations:
 - Call `state_manager.record_review_iteration(phase, issues_a, issues_b)` after each review cycle
