@@ -73,14 +73,28 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
   3. CHECK — read the arbiter decision and structured fix instructions.
      If regression trigger: → Phase Regression protocol (see below).
      If ITERATE:
-       a. Apply `exact` fixes (old→new text) directly via Edit tool.
-       b. Spawn one fix agent **per** `requires_reasoning` fix, all in parallel.
-          Each agent receives: the fix's `file`, `section`, `instruction`, and
-          `reason` fields from REVIEW_NOTES.md. Fixes target different
-          file+section pairs and are independent — do not serialize them.
-          Wait for all parallel fix agents to complete before re-verify.
-       c. Re-verify:
-          - **A-present:** Continue the original arbiter via SendMessage with
+       **First, check routing before spawning anything:**
+       - **B-only** (`b_only: true` in REVIEW_NOTES.md, a_count=0) — this
+         path applies regardless of iteration count (including 3rd+):
+         Apply all B fixes: exact fixes via Edit tool; reasoning fixes inline
+         (orchestrator applies them directly without spawning fix agents).
+         Write `phase*/review/B_SELF_VERIFY.md` with one line per fix:
+           - B{id} [{description}]: APPLIED — {file}:{section}, "{old_snippet}" → "{new_snippet}"
+         If ANY fix cannot be written as APPLIED, escalate to full arbiter.
+         **Orchestrator spot-check (mandatory before COMMIT):** For every
+         `type: exact` fix listed as APPLIED, use the Read tool to read the
+         target file section and confirm the `new` text is present and the
+         `old` text is absent. If any spot-check fails: do NOT commit —
+         escalate to full arbiter with the failing fix id(s) noted.
+         If ALL spot-checks pass → proceed directly to COMMIT. No arbiter spawn.
+       - **A-present** (a_count > 0):
+         a. Apply `exact` fixes (old→new text) directly via Edit tool.
+         b. Spawn one fix agent **per** `requires_reasoning` fix, all in parallel.
+            Each agent receives: the fix's `file`, `section`, `instruction`, and
+            `reason` fields from REVIEW_NOTES.md. Fixes target different
+            file+section pairs and are independent — do not serialize them.
+            Wait for all parallel fix agents to complete before re-verify.
+         c. Re-verify: Continue the original arbiter via SendMessage with
             scoped context: pass (1) the previous REVIEW_NOTES.md, (2) the
             `git diff HEAD` of the artifact file(s) that were edited, and
             (3) a one-line summary: "Fixes applied for: A1, A2, B3. Verify
@@ -90,29 +104,19 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
             continuing the original via SendMessage; pass the same scoped
             context PLUS all prior REVIEW_NOTES.md files (in chronological
             order) as "prior iteration history."
-          - **B-only** (`b_only: true` in REVIEW_NOTES.md, a_count=0) — this
-            path applies regardless of iteration count (including 3rd+):
-            Apply all B fixes (exact fixes via Edit tool; reasoning fixes inline).
-            Write `phase*/review/B_SELF_VERIFY.md` with one line per fix:
-              - B{id} [{description}]: APPLIED — {file}:{section}, "{old_snippet}" → "{new_snippet}"
-            If ANY fix cannot be written as APPLIED, escalate to full arbiter.
-            **Orchestrator spot-check (mandatory before COMMIT):** For every
-            `type: exact` fix listed as APPLIED, use the Read tool to read the
-            target file section and confirm the `new` text is present and the
-            `old` text is absent. If any spot-check fails: do NOT commit —
-            escalate to full arbiter with the failing fix id(s) noted.
-            If ALL spot-checks pass → proceed directly to COMMIT. No arbiter spawn.
      If only Category C or no issues: apply all Category C `exact` fixes in
      parallel (multiple Edit tool calls in a single message — they target
      independent file+section pairs). Then proceed.
 
   4. COMMIT — commit the phase's work.
 
-  4b. STATE_UPDATE — Update STATE.md using `scripts/state_manager.py`:
-     - Call `state_manager.advance_phase(N, artifact=..., review=...)`
-     - This records the phase completion, review result, and iteration count
+  4b. STATE_UPDATE — Update STATE.md directly using the Edit tool:
+     - Set `current_phase` to N, `phase_{N}_status` to COMPLETE, record the
+       artifact path and review verdict (PASS/ITERATE count)
      - STATE.md is the single source of truth for pipeline progress
      - On resumption after interruption, read STATE.md to determine where to restart
+     - (`scripts/state_manager.py` is a library for analysis scripts — it has
+       no CLI; the orchestrator edits STATE.md directly)
 
   5. HUMAN GATE (after Phase 5 only):
      Present the verification report, key causal findings, EP propagation
@@ -125,13 +129,13 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
 
 | Phase | Executor agent(s) | Role |
 |-------|-------------------|------|
-| 0: Discovery | `hypothesis_agent` → `data_acquisition_agent` (parallel by source) → `data_quality_agent` | Question decomposition, DAG construction, parallel data acquisition, quality gate |
-| 1: Strategy | `lead_analyst` | Analysis strategy from DAGs and data |
-| 2: Exploration | `data_explorer` | Exploratory data analysis, distribution checks |
+| 0: Discovery | `hypothesis-agent` → `data-acquisition-agent` (parallel by source) → `data-quality-agent` | Question decomposition, DAG construction, parallel data acquisition, quality gate |
+| 1: Strategy | `lead-analyst` | Analysis strategy from DAGs and data |
+| 2: Exploration | `data-explorer` | Exploratory data analysis, distribution checks |
 | 3: Causal Analysis | `analyst` (single or split by edge count — see below) | Causal testing, refutation, statistical modeling |
-| 4: Projection | `projector_agent` | Forward projection, scenario analysis |
+| 4: Projection | `projector-agent` | Forward projection, scenario analysis |
 | 5: Verification | `verifier` | Cross-validation, sensitivity analysis, EP reconciliation |
-| 6: Documentation | `report_writer` (AN + REPORT in parallel) + `plot_validator` | Final report, parallel PDF compilation |
+| 6: Documentation | `report-writer` (AN + REPORT in parallel) + `plot-validator` | Final report, parallel PDF compilation |
 
 **Dynamic context splitting — Phase 3:** The orchestrator counts primary
 causal edges (those marked "full analysis" in STRATEGY.md).
@@ -149,9 +153,11 @@ causal edges (those marked "full analysis" in STRATEGY.md).
   for Steps 3.6–3.7 that globs `exec/edge_*/ANALYSIS_PARTIAL.md`, merges
   all per-edge results, and produces the unified `exec/ANALYSIS.md`.
 - **>5 edges:** Same parallel pattern as 3–5 edges. Run agents in waves of 3
-  concurrent spawns: spawn the first 3 edge agents, wait for all to complete,
-  spawn the next 3, and so on until all edges are processed. The verifier
-  sub-agent runs once after all waves complete.
+  concurrent spawns: spawn the first 3 edge agents, wait for all to complete
+  (use Read tool to confirm `exec/edge_{edge_name}/ANALYSIS_PARTIAL.md` exists
+  for each agent in the wave before proceeding), spawn the next 3, and so on
+  until all edges are processed. The verifier sub-agent runs once after all
+  waves complete.
 
 The verifier sub-agent (Steps 3.6–3.7) always runs as a single invocation
 after all edge agents complete — it reads `exec/edge_*/ANALYSIS_PARTIAL.md`
@@ -216,9 +222,9 @@ reviewer outputs (not a slice) — it needs the complete picture to synthesize.
 (EP > 0.30) cannot be tested due to missing data, the orchestrator MAY
 invoke a data callback:
 
-1. Spawn `data_acquisition_agent` with the specific variable request
+1. Spawn `data-acquisition-agent` with the specific variable request
 2. The agent runs Steps 0.3-0.4 for the requested variable only
-3. Spawn `data_quality_agent` for the new data (Step 0.5)
+3. Spawn `data-quality-agent` for the new data (Step 0.5)
 4. **Quality gate decision (mandatory before proceeding):**
    Read the DATA_QUALITY verdict for the new data:
    - **HIGH quality:** proceed normally — append to registry.yaml and resume.
@@ -434,11 +440,12 @@ downgrade them. See `.claude/agents/plot-validator.md` and
 
 **Iteration limits:** 2/3/4-bot: warn at 3, strong warn at 5, hard cap at 10. 1-bot: warn at 2, escalate after 3. All subagents use `model: "opus"`.
 
-**Review iteration tracking:** Use `scripts/state_manager.py` to track iterations:
-- Call `state_manager.record_review_iteration(phase, issues_a, issues_b)` after each review cycle
-- `state_manager.should_warn(phase)` returns True at 3 iterations
-- `state_manager.should_hard_stop(phase)` returns True at 10 iterations
-- If hard stop triggered, present current state to human for guidance
+**Review iteration tracking:** Record iteration counts in STATE.md directly (Edit tool):
+- After each review cycle, increment `phase_{N}_review_iterations` in STATE.md
+- Warn at 3 iterations (add a note in the commit message and experiment log)
+- Hard cap at 10 iterations — present current state to human for guidance
+- (`scripts/state_manager.py` thresholds: warn=3, hard_stop=10; it is a library,
+  not callable from the orchestrator directly)
 
 ---
 

@@ -25,6 +25,8 @@ from datetime import datetime
 
 import yaml
 
+# Ensure sibling scripts are importable when invoked as `pixi run py scripts/session_commit.py`
+sys.path.insert(0, str(Path(__file__).parent))
 from memory_store import MemoryEntry, MemoryStore
 from causal_knowledge_graph import CausalKnowledgeGraph
 
@@ -230,7 +232,7 @@ def _extract_from_analysis(analysis_dir: Path, domain: str, out: list[Experience
     for label, edges in classified.items():
         if edges:
             conf = {"DATA_SUPPORTED": 0.75, "CORRELATION": 0.65,
-                    "HYPOTHESIZED": 0.55, "DISPUTED": 0.60}.get(label, 0.60)
+                    "HYPOTHESIZED": 0.55, "DISPUTED": 0.40}.get(label, 0.60)
             out.append(Experience(
                 experience_type="domain",
                 content=f"[{domain}] {label}: {', '.join(edges[:4])}",

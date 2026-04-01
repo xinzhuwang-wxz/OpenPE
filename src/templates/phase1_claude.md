@@ -23,7 +23,7 @@ visualization.
 
 - Phase requirements: `methodology/03-phases.md` (for gate protocol)
 - Artifacts: `methodology/05-artifacts.md`
-- Review protocol: `methodology/06-review.md` Section 6.2 (4-bot review)
+- Review protocol: `methodology/06-review.md` Section 6.2 (2-bot review)
 
 ---
 
@@ -332,7 +332,7 @@ insufficient data for planned methods. Contingency plans.]
 
 ## Review
 
-**4-bot review** — see `methodology/06-review.md` for protocol.
+**2-bot review** — see `methodology/06-review.md` for protocol.
 
 Reviewers evaluate:
 - Are method selections appropriate for the data structure and causal

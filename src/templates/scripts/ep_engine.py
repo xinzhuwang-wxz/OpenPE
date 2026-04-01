@@ -58,7 +58,7 @@ def classify_truth(evidence_type: str) -> float:
         DATA_SUPPORTED → 0.85 (midpoint of [0.7, 1.0])
         CORRELATION    → 0.50 (midpoint of [0.3, 0.7])
         HYPOTHESIZED   → 0.15 (midpoint of [0.0, 0.3])
-        DISPUTED       → 0.30 (treated as weak correlation pending review)
+        DISPUTED       → 0.10 (evidence contradicts the hypothesis; lower than HYPOTHESIZED)
 
     Pre-analysis labels (Phase 0, hypothesis_agent):
         LITERATURE_SUPPORTED → 0.70 (published academic support)
@@ -70,7 +70,7 @@ def classify_truth(evidence_type: str) -> float:
         "DATA_SUPPORTED": 0.85,
         "CORRELATION": 0.50,
         "HYPOTHESIZED": 0.15,
-        "DISPUTED": 0.30,
+        "DISPUTED": 0.10,
         # Pre-analysis labels (spec Section 4.2)
         "LITERATURE_SUPPORTED": 0.70,
         "THEORIZED": 0.40,
