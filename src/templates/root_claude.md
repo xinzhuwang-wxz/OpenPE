@@ -82,7 +82,9 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
             `old` text is absent. If any spot-check fails: do NOT commit —
             escalate to full arbiter with the failing fix id(s) noted.
             If ALL spot-checks pass → proceed directly to COMMIT. No arbiter spawn.
-     If only Category C or no issues: proceed.
+     If only Category C or no issues: apply all Category C `exact` fixes in
+     parallel (multiple Edit tool calls in a single message — they target
+     independent file+section pairs). Then proceed.
 
   4. COMMIT — commit the phase's work.
 
@@ -165,6 +167,30 @@ Pass this single file to ALL subagents for Phase N (executor, all reviewers,
 arbiter). Do NOT ask each subagent to read methodology/ and upstream artifacts
 separately. Regenerate `phase_context_N.md` only if upstream methodology files
 or artifacts change between phases.
+
+**Phase context pre-assembly (pipeline parallelism).** While Phase N's
+executor is running, pre-assemble the static sections of `phase_context_{N+1}.md`:
+read and write the "Methodology Sections" and "Applicable Conventions Excerpt"
+blocks — these come from fixed methodology/ and conventions/ files that do not
+depend on Phase N's output. Leave the "Upstream Artifact Summaries" section
+as a placeholder. When Phase N completes, fill in the summaries and the file
+is ready immediately. This moves ~70% of context assembly off the critical path.
+
+**Reviewer context scoping.** When spawning reviewers, do NOT pass the full
+`phase_context_N.md` + full artifact to every reviewer. Instead, pass each
+reviewer a scoped slice containing only what their role requires:
+
+| Reviewer | Artifact sections to pass | Context sections to pass |
+|----------|--------------------------|--------------------------|
+| Domain reviewer | Physics interpretation, results summary, figures list | Bird's-eye framing only |
+| Logic reviewer | EP propagation table, causal test results, DAG | Bird's-eye framing + EP methodology |
+| Methods reviewer | Statistical model, UQ section, method selection | Bird's-eye framing + methods methodology |
+| Plot-validator | Figures directory path, plotting scripts | Plotting appendix excerpt |
+
+Assemble each reviewer's slice from `phase_context_N.md` and the artifact
+before spawning. This reduces reviewer input context by 40-60%, speeds up
+spawning, and improves focus. The arbiter receives the full artifact + all
+reviewer outputs (not a slice) — it needs the complete picture to synthesize.
 
 **Data callbacks.** If Phase 2 or 3 agents report that a high-EP edge
 (EP > 0.30) cannot be tested due to missing data, the orchestrator MAY
