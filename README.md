@@ -14,11 +14,9 @@
 
 ---
 
-Every event has a cause. Every cause has a cause. This forms a network — not a line, a network. Each node is the center of its own web of causes and consequences.
+You ask a causal question. OpenPE returns: a causal DAG with quantified confidence on every edge, a three-way refutation test on every causal claim, a forward projection classified as Robust / Fork-dependent / Equilibrium / Unstable, and a machine-verifiable audit trail linking every finding to its data source.
 
-But the network doesn't expand forever. The further you trace from the origin, the weaker the explanatory signal becomes — multiplicatively, not linearly. At some point the trail goes cold. That boundary isn't a flaw. It's the natural horizon of what can be understood from a given starting point.
-
-OpenPE works within that horizon. It builds causal graphs from first principles, tests every link against refutation, and projects forward only as far as the evidence can carry — from **principle** to **endgame**.
+The whole pipeline — hypothesis generation, data acquisition, causal testing, projection, report — runs autonomously. The underlying principle: explanatory power degrades multiplicatively along causal chains, and the framework uses that degradation to decide what's worth investigating and when to stop.
 
 ---
 
