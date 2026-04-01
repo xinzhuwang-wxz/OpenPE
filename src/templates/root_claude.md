@@ -67,9 +67,10 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
             (3) a one-line summary: "Fixes applied for: A1, A2, B3. Verify
             these are resolved and check the diff for new issues."
             Do NOT re-pass the full artifact — the arbiter already has it.
-            Fresh arbiter spawn on 3rd+ iteration (see §6.6.2): pass the
-            same scoped context PLUS all prior REVIEW_NOTES.md files as
-            "prior iteration history."
+            On 3rd+ iteration, spawn a new arbiter instance instead of
+            continuing the original via SendMessage; pass the same scoped
+            context PLUS all prior REVIEW_NOTES.md files (in chronological
+            order) as "prior iteration history."
           - **B-only** (`b_only: true` in REVIEW_NOTES.md, a_count=0):
             Apply all B fixes (exact fixes via Edit tool; reasoning fixes inline).
             Write `phase*/review/B_SELF_VERIFY.md` with one line per fix:
@@ -113,21 +114,25 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
 **Dynamic context splitting — Phase 3:** The orchestrator counts primary
 causal edges (those marked "full analysis" in STRATEGY.md).
 
+- **0 edges (all lightweight or no full-analysis edges):** Run Phase 3 as a
+  single subagent covering only lightweight assessments and sub-chain
+  expansion decisions. No refutation battery. Document all edges as
+  "lightweight assessment only" with justification.
 - **1–2 edges:** Run Phase 3 as a single subagent (Steps 3.1–3.7 together).
 - **3–5 edges:** Split by edge: spawn one analyst sub-agent per edge for
-  Steps 3.1–3.5 (signal extraction, baseline, causal testing, EP update,
-  sub-chain decision) in **parallel**. Each sub-agent receives
-  `phase_context_3.md` plus its assigned edge name and the STRATEGY.md
-  entries for that edge only. After all parallel edge agents complete, spawn
-  a single verifier sub-agent for Steps 3.6–3.7 (statistical model +
-  uncertainty quantification) that reads all per-edge outputs from disk and
-  produces the unified ANALYSIS.md.
-- **>5 edges:** Same parallel pattern as 3–5 edges, but group edges into
-  pairs to cap concurrent spawns at 3. The verifier sub-agent merges all
-  outputs in a final pass.
+  Steps 3.1–3.5 in **parallel**. Each sub-agent receives `phase_context_3.md`
+  plus its assigned edge name and the STRATEGY.md entries for that edge only.
+  Each sub-agent writes its partial results to `exec/edge_{edge_name}/ANALYSIS_PARTIAL.md`.
+  After all parallel edge agents complete, spawn a single verifier sub-agent
+  for Steps 3.6–3.7 that globs `exec/edge_*/ANALYSIS_PARTIAL.md`, merges
+  all per-edge results, and produces the unified `exec/ANALYSIS.md`.
+- **>5 edges:** Same parallel pattern as 3–5 edges. Run agents in waves of 3
+  concurrent spawns: spawn the first 3 edge agents, wait for all to complete,
+  spawn the next 3, and so on until all edges are processed. The verifier
+  sub-agent runs once after all waves complete.
 
 The verifier sub-agent (Steps 3.6–3.7) always runs as a single invocation
-after all edge agents complete — it reads the per-edge causal test artifacts
+after all edge agents complete — it reads `exec/edge_*/ANALYSIS_PARTIAL.md`
 from disk and constructs the statistical model and uncertainty quantification
 across all edges jointly.
 
@@ -174,14 +179,17 @@ invoke a data callback:
    - **MEDIUM quality:** proceed with caveat — append to registry.yaml,
      resume, and add a data quality warning to the requesting phase's
      artifact for the affected edge. The edge's Classification must note
-     "medium-quality callback data" in its caveats.
+     "medium-quality callback data" in its caveats. Append the DATA_QUALITY
+     verdict summary to `experiment_log.md`.
    - **LOW quality on a high-EP edge (EP > 0.30):** DO NOT resume
      automatically. Present to the human: show the quality verdict, the
      affected edge, and its EP value. Await human approval to either proceed
      or downgrade the edge to lightweight assessment (treat EP as 0.15–0.30
-     range). Log the decision in `experiment_log.md`.
+     range). Log the decision AND the DATA_QUALITY verdict summary in
+     `experiment_log.md`.
    - **LOW quality on a low-EP edge (EP ≤ 0.30):** downgrade the edge to
-     lightweight assessment automatically. Log as a limitation. Resume.
+     lightweight assessment automatically. Append the DATA_QUALITY verdict
+     summary to `experiment_log.md`. Log as a limitation. Resume.
 5. Append results to `phase0_discovery/data/registry.yaml`
 6. Resume the requesting phase with the new data available (subject to step 4)
 
