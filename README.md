@@ -112,7 +112,7 @@ Each phase follows the same loop:
 
 ---
 
-## Three Core Innovations
+## Four Core Innovations
 
 ### 1. Explanatory Power (EP) — Full Lifecycle from Prior to Posterior
 
@@ -174,180 +174,75 @@ DISPUTED edges go to human review rather than algorithmic guessing. The framewor
 
 ---
 
-### 2. Structured ITERATE Loop — Deterministic Quality Gates for LLM Agents
+### 2. The Analytical Horizon — EP Truncation as Autonomous Research Boundary
 
-Standard LLM review loops are vague: reviewers produce text, agents try to fix things, and the cycle continues until someone decides it's "good enough." OpenPE replaces this with a **deterministic quality gate** built around machine-readable fix instructions, scoped re-verification, and explicit routing logic.
+Most analytical frameworks compute confidence scores on whatever causal structure you hand them. OpenPE does something different: it uses EP to decide **what is worth investigating at all**. The analytical horizon is the point at which the multiplicative decay of Joint_EP makes further investigation epistemically unjustified.
 
-**Review tiers scale to stakes:**
+This distinction matters enormously in practice. An autonomous agent without stopping rules will chase causes indefinitely — every effect has a cause, every cause has a prior cause, and the chain never ends. The analytical horizon gives the agent a principled reason to stop that is grounded in the evidence structure, not an arbitrary depth limit.
 
-| Phase | Review tier | Agents |
-|-------|------------|--------|
-| Phase 0, 1 | 2-bot | logic-reviewer → arbiter |
-| Phase 3, 4, 5 | 4-bot | domain + logic + methods + plot-validator → arbiter |
-| Phase 6 | 3-bot | domain + rendering-reviewer + plot-validator → arbiter |
+**Three hard thresholds govern the research boundary:**
 
-All reviewers run in parallel and cannot see each other's work. The arbiter reads all reviews, adjudicates disagreements, and issues a single verdict.
+| Joint EP | Regime | Action |
+|----------|--------|--------|
+| > 0.30 | Worth investigating | Scaffold a sub-analysis; full causal testing required |
+| 0.15–0.30 | Marginal | Lightweight assessment only; document but don't expand |
+| 0.05–0.15 | Soft truncation | Brief notation; no sub-chain expansion permitted |
+| < 0.05 | Hard truncation | Stop. This chain is beyond the analytical horizon. |
 
-**Every finding carries a machine-readable fix instruction.** Reviewers don't just identify problems — they specify how to fix them in YAML:
+**The horizon is emergent, not prescribed.** It falls wherever the evidence runs out — not where a parameter says to stop. A causal chain with two strong edges (EP=0.85 each) extends further than a chain with five weak ones. The depth is a consequence of the evidence, not a configuration choice.
 
-```yaml
-fixes:
-  - id: A1
-    category: A       # must resolve — blocks PASS
-    description: "EP formula exceeds 1.0 when truth=0.9"
-    fix:
-      type: exact
-      file: "exec/ANALYSIS.md"
-      old: "truth = max(0.8, prior_truth + 0.2)"
-      new: "truth = min(1.0, max(0.8, prior_truth + 0.2))"
-      reason: "Prior truth of 0.9 produces 1.1 without the cap"
+**Why this design decision flows from the project's name.** "Principle to Endgame" is not a metaphor — it is a literal description of the analytical contract. The framework starts from first-principles causal hypotheses and projects forward until reaching either a terminal state (the endgame) or the analytical horizon (where the evidence runs dry). There is no human judgment required to decide when to stop; the EP arithmetic makes that decision.
 
-  - id: B1
-    category: B       # should address — tracked, resolved before finalization
-    description: "Missing uncertainty range on effect size estimate"
-    fix:
-      type: requires_reasoning
-      file: "exec/ANALYSIS.md"
-      section: "3.2 Urbanization → Fertility"
-      instruction: "Compute 95% CI from bootstrap results and add after β estimate"
-      reason: "Bare point estimates without CI violate the four-numbers rule"
+**The horizon interacts with data quality.** If a data source receives a LOW quality verdict, the edges it supports get a relevance penalty. This can pull a near-threshold chain across the soft truncation boundary — the analysis scope *contracts automatically* as data quality degrades. A LOW-quality dataset doesn't cause failure; it causes the framework to be honest about how far it can see.
 
-decision: ITERATE
-a_count: 1
-b_count: 1
-```
-
-**The ITERATE loop has explicit routing:**
-
-```
-Arbiter verdict
-│
-├── PASS (a=0, b=0) → proceed to next phase
-│
-├── b_only=true (a=0, b>0)
-│   ├── Apply exact fixes directly (Edit tool, no re-spawn)
-│   ├── Launch parallel agents for requires_reasoning fixes
-│   ├── Orchestrator spot-checks B_SELF_VERIFY.md
-│   └── Proceed without re-spawning arbiter
-│
-└── a_count > 0
-    ├── Apply all exact fixes (A + B) directly
-    ├── Launch parallel agents for requires_reasoning fixes
-    ├── Scoped re-verify: arbiter receives git diff + prior REVIEW_NOTES
-    │   (not full artifact re-review — avoids re-raising resolved issues)
-    └── On 3rd+ iteration: fresh arbiter with prior_iteration_history
-        (prevents churn on already-resolved findings)
-```
-
-**Scoped re-verify is the key efficiency mechanism.** On the second+ iteration, the arbiter does not re-read the full artifact — it reads only the `git diff` since the last review and the prior `REVIEW_NOTES.md`. This eliminates the pattern where a fresh arbiter re-raises issues that were already fixed, creating infinite loops.
-
-**Why this matters:** A well-specified fix format makes the repair loop deterministic. The orchestrator applies `type: exact` fixes itself with the Edit tool (zero latency). `type: requires_reasoning` fixes spawn parallel agents. The arbiter only re-enters on Category A issues, not B-only ones. This design cuts review-loop wall time by 25–40% compared to naive re-spawn-everything approaches, while maintaining strong correctness guarantees.
+**Why this matters:** An analysis system without a stopping rule is not an analysis system — it is a research generator that produces work indefinitely. The analytical horizon turns "what should we investigate?" from a human judgment call into a computable answer. This is what makes OpenPE suitable for autonomous operation: the agent knows where its own epistemic limits are.
 
 ---
 
-### 3. Cross-Analysis Memory with Evidence-Driven Tier Transitions
+### 3. Competing Causal DAGs with No Trust Privilege
 
-OpenPE analyses don't start from zero. A tiered memory system accumulates domain knowledge across analyses, with confidence-driven lifecycle management that promotes reliable findings and forgets stale ones.
+Most causal inference tools take the user's causal model as given and estimate parameters within it. OpenPE does not. Phase 0 generates **multiple competing first-principles DAGs** — and the user's own hypotheses, if provided, become just one candidate among others. They receive no special weight.
 
-**Three tiers with distinct loading semantics:**
+**Three input modes — same treatment:**
 
-| Tier | Scope | Loading | Content |
-|------|-------|---------|---------|
-| **L0** | Universal | Always loaded | Cross-domain principles validated by ≥3 independent analyses |
-| **L1** | Domain | Loaded for matching domain | Domain-specific experiences — methods that worked, data sources, failure patterns |
-| **L2** | Detail | On-demand | Full analysis summaries: edge classifications, effect sizes, data sources used |
+| Mode | What the user provides | How it's treated |
+|------|----------------------|-----------------|
+| **A** | Question only | Framework generates all candidate DAGs from first principles |
+| **B** | Question + data | Data informs structure discovery; user provides no causal model |
+| **C** | Question + hypotheses | User hypotheses become one candidate DAG — compete equally with framework-generated alternatives |
 
-**L0 is seeded with universal OpenPE principles** at every session commit. These don't come from analysis results — they are the invariants of the methodology itself:
+Mode C is the philosophically significant one. A user who says "I believe X causes Y" is not given the analysis that tests that belief — they are given an analysis that pits that belief against alternatives and reports which ones survived. This is deliberate: hypothesis confirmation is not the same as causal analysis.
 
-```python
-L0_PRINCIPLES = [
-    "refutation_battery: DATA_SUPPORTED requires all 3 tests: "
-        "placebo + random_cause + data_subset",
-    "ep_arithmetic: Joint_EP = product of all edge EPs; "
-        "never average, never override mechanically",
-    "four_numbers_rule: every quantitative result needs "
-        "point_estimate, stat_unc, syst_unc, total_unc",
-    "dowhy_required: every causal claim needs DoWhy "
-        "refutation before DATA_SUPPORTED classification",
-    "two_methods_rule: primary + cross-check method for every edge",
-    "ep_thresholds: hard_truncate<0.05, soft_truncate<0.15, "
-        "expand>0.30",
-    "data_callback_limit: max 2 data callback cycles; "
-        "escalate to human on 3rd LOW-quality block",
-    "carry_forward_warnings: every data quality warning and "
-        "DISPUTED edge must appear in the final report",
-]
-```
+**Competing DAGs are evaluated before data acquisition.** The hypothesis agent in Phase 0 produces multiple candidate DAG structures, each with a prior EP assessment. The data acquisition strategy is then designed to distinguish between them — not to confirm the leading hypothesis. Data that cannot distinguish between competing explanations is flagged as weak even if it superficially supports the primary hypothesis.
 
-**Memory entries evolve through their lifecycle:**
+**The adversarial hypothesis design has a concrete downstream benefit.** When Phase 3 testing supports edge A→B with DATA_SUPPORTED classification, the reader can ask: what alternative causal structures were considered and ruled out? The DISCOVERY.md artifact documents exactly this — every competing DAG, why it was ranked below the winning structure, and what evidence would revive it. A finding with documented alternatives is stronger than one produced by testing a single model in isolation.
 
-```
-Created (L1, conf=0.60)
-  → Corroborated by 2nd analysis (+0.15 → 0.75)
-  → Corroborated by 3rd analysis (+0.15 → 0.90) → PROMOTED to L0
-  → Contradicted by 4th analysis (-0.25 → 0.65)
-  → Contradicted by 5th analysis (-0.25 → 0.40) → DEMOTED back to L1
-  → Decays over time (-0.01 per analysis, -0.005 per month elapsed)
-  → Eventually: conf < 0.05 AND hotness < 0.01 → FORGOTTEN (file deleted)
-```
+**The no-trust-privilege rule applies recursively.** If the analysis discovers a new causal mechanism not in any of the original candidate DAGs, it can be added mid-analysis — but it still goes through the same hypothesis generation and refutation testing as any other edge. There is no fast path from "interesting finding" to "established result."
 
-The lifecycle is fully automated in `scripts/session_commit.py`:
-
-- **Promotion** (L1→L0): `≥2` independent corroborations AND `conf ≥ GLOBAL_PROMOTION_THRESHOLD` (0.60)
-- **Demotion** (L0→L1): confidence drops below 0.30
-- **Forgetting**: `conf ≤ 0.05` AND `hotness < 0.01` → file deleted
-- **Archival**: cold L2 entries (`hotness < 0.1`) moved to `_archive/`
-- **Idempotent commit**: marker file prevents double-decay on crash+restart
-
-**Content extraction is regex-driven, not template-driven.** After each analysis, `session_commit.py` parses the actual artifacts to extract meaningful memory:
-
-```python
-# L1 extraction from ANALYSIS.md: actual edge classifications and effect sizes
-# "| urbanization → fertility | DATA_SUPPORTED | β=-0.34 (p<0.01) |"
-# → stores "urbanization→fertility: DATA_SUPPORTED, β=-0.34"
-
-# L2 extraction from DATA_QUALITY.md: specific LOW/MEDIUM quality datasets
-# "| world_bank_gdp | LOW | missing 2008-2012 | ..."
-# → stores "world_bank_gdp: LOW — missing 2008-2012"
-```
-
-**Memory is used at both ends of the pipeline:**
-
-```bash
-# Load at analysis start (before Phase 0)
-pixi run py scripts/session_commit.py --load-only --domain economics
-
-# Commit and promote at analysis end (after Phase 6)
-pixi run py scripts/session_commit.py \
-  --analysis-id my_analysis \
-  --global-memory /path/to/OpenPE/memory
-```
-
-Global memory lives at the repo root (`memory/`). Each new analysis inherits a snapshot via scaffolding and promotes high-confidence findings back after completion.
-
-**Why this matters:** The 3rd causal analysis in a domain starts with the knowledge that Granger causality failed on this data type, that the World Bank GDP series has a gap in 2008–2012, and that Instrument Variable estimates in this domain consistently drift by +0.1 from OLS. That's not code improvement — it's accumulated experience that would otherwise be re-discovered, re-forgotten, and re-discovered again.
+**Why this matters:** The most common failure mode in causal research is confirmatory analysis — designing a study to find what you already believe. By treating user hypotheses as candidates rather than starting points, OpenPE structurally separates the act of proposing a causal explanation from the act of testing one.
 
 ---
 
-## Adapted Foundations
+### 4. Endgame Convergence Classification
 
-OpenPE builds on ideas from three notable projects, adapted to fit the first-principles analysis context:
+The name "Principle to Endgame" implies that every analysis terminates somewhere. Phase 4 makes this concrete: after Monte Carlo projection across the causal chain, the framework classifies the *shape* of the trajectory into one of four **endgame categories** and names it.
 
-### ACG Protocol → Audit Trail (IGM/SSR/VAR)
+**Four categories, each with a distinct intervention logic:**
 
-The [ACG Protocol](https://github.com/Kos-M/acg_protocol) introduced Inline Grounding Markers and source verification registries for fact-grounded text generation. OpenPE adapts this into a three-layer audit trail:
+| Category | Detection | Interpretation |
+|----------|-----------|----------------|
+| **Robust endgame** | Scenarios converge: CV < 0.15 at horizon; confidence bands narrow | Outcome largely independent of assumptions; high directional confidence |
+| **Fork-dependent outcome** | Scenarios diverge sharply: CV > 0.5; identifiable binary condition separates trajectories | Outcome hinges on a specific future event — name the fork, estimate its probability |
+| **Equilibrium endgame** | Rate of change approaches zero; scenarios oscillate around shared attractor | System reaches natural balance — identify equilibrium value and basin of attraction |
+| **Unstable trajectory** | Monotonically accelerating divergence; no bounding mechanism detected | Runaway behavior — search for physical, regulatory, or resource constraints that eventually bind |
 
-- **IGM** (Inline Grounding Markers): `[C1:a1b2c3d4e5:phase3/data.csv:row42]` — every claim embeds a hash linking to its source
-- **SSR** (Structured Source Registry): SHA-256 hashes, source types, verification status per dataset
-- **VAR** (Veracity Audit Registry): tracks inferential logic chains with `verify_logic()` for automated consistency checking
+**Classification is quantitative, not interpretive.** The coefficient of variation of scenario endpoints at the projection horizon determines which category applies. An analyst cannot reclassify a fork-dependent outcome as robust because the baseline scenario looks clean — the CV of the full scenario envelope controls.
 
-### Graphiti → Temporal Causal Knowledge Graph
+**Named scenarios make fork conditions actionable.** When a Fork-dependent outcome is detected, the framework requires each fork to be named as a scenario: not "Scenario 1 (parameters L=104, k=0.19)" but "The 'Early Regulation' scenario: government intervention constrains adoption before crossing the 40% penetration threshold." Named scenarios with estimated probabilities are decision inputs; parameter tables are not.
 
-[Graphiti](https://github.com/getzep/graphiti)'s temporal EntityEdge model inspired the validity-window pattern in OpenPE's causal knowledge graph. Relationships carry `valid_at`/`invalid_at`/`expired_at` timestamps, enabling the graph to record *when* a causal mechanism was true — not just *whether* it's true. Combined with confidence-driven reuse policies (SKIP / LIGHTWEIGHT_VERIFY / MUST_RETEST), this allows high-confidence relationships to skip re-testing in future analyses.
+**The endgame classification feeds the EP decay chart** — the core figure of every OpenPE report. The chart's x-axis is time from present, the y-axis is EP-weighted confidence, and the classification determines how the confidence bands behave at the right edge: converging bands for Robust endgame, diverging bands for Fork-dependent, asymptoting bands for Equilibrium.
 
-### OpenViking → Memory Hotness Scoring
-
-[OpenViking](https://github.com/volcengine/OpenViking)'s memory lifecycle system provided the hotness scoring formula: `sigmoid(frequency) × exponential_recency`. OpenPE uses this to distinguish actively-used memories from stale ones, driving the archival and forgetting mechanisms that keep the memory system bounded.
+**Why this matters:** Most projection frameworks produce distributions of outcomes without characterizing what *type* of future they are projecting. Two analyses can both produce wide uncertainty bands — but one has wide bands because the outcome is genuinely indeterminate (Fork-dependent), while the other has wide bands because of parameter uncertainty around a single attractor (Robust). These require completely different responses from a decision-maker. Endgame classification makes that distinction explicit and machine-verified.
 
 ## Input Modes
 
