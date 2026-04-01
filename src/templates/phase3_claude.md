@@ -430,6 +430,46 @@ uncertainty, systematic uncertainty, and total uncertainty.
 
 ---
 
+## Pre-Flight Checklist (complete before writing ANALYSIS.md)
+
+Before writing the final artifact, verify ALL items below. An unchecked box
+means the work is not done — complete the missing step first.
+
+**Causal testing completeness:**
+- [ ] Every "full analysis" edge from STRATEGY.md has refutation results (3 tests per edge: placebo, random cause, data subset)
+- [ ] Every "lightweight" edge (0.15 ≤ Joint_EP < 0.30) has at minimum a primary method result
+- [ ] Every primary edge has at least 2 estimation methods with agreement/disagreement documented
+- [ ] All refutation test implementations match Step 3.3.4 exactly: placebo at correct time/place, random cause truly random, subset truly random (20-30% dropped)
+- [ ] No edge is classified DATA_SUPPORTED without all 3/3 refutation tests passing
+
+**EP propagation completeness:**
+- [ ] EP updates use the classification→truth mapping table in Step 3.4 mechanically (no subjective overrides)
+- [ ] Joint_EP recomputed for all chains after EP updates
+- [ ] EP propagation table complete: Phase 0, Phase 1, Phase 3 columns present for every edge
+- [ ] Final Phase 3 DAG rendered in mermaid with classification labels on every edge
+
+**Statistical model:**
+- [ ] All 3 signal injection tests pass (at observed size, 2× size, and null)
+- [ ] Every result carries 4 numbers: central value, stat unc, syst unc, total unc
+
+**Required ANALYSIS.md sections:**
+- [ ] Section 1: Signal Extraction (all primary edges)
+- [ ] Section 2: Baseline Estimation (with comparison figures)
+- [ ] Section 3: Causal Testing Pipeline (per edge: DAG, estimand, estimates, refutation tests, classification)
+- [ ] Section 4: EP Propagation (table + mermaid DAG)
+- [ ] Section 5: Sub-Chain Expansion Decisions
+- [ ] Section 6: Statistical Model (likelihood, parameters, signal injection)
+- [ ] Section 7: Uncertainty Quantification (final results table + breakdown)
+- [ ] Section 8: Summary of Findings
+- [ ] All prior-phase warnings from DISCOVERY.md and EXPLORATION.md explicitly carried forward
+
+**Figure compliance (from §6.4.2 — Category A if wrong):**
+- [ ] No `ax.set_title()` calls in any plotting script
+- [ ] All figures have axis labels with units
+- [ ] Dataset labels in figures match actual dataset (not copied from template)
+- [ ] Legend entries match what is actually plotted
+- [ ] Both PDF and PNG saved for all figures (`bbox_inches="tight"`, `dpi=200`)
+
 ## ANALYSIS.md structure
 
 The final artifact must follow this structure:

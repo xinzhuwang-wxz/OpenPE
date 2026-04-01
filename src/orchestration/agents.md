@@ -148,6 +148,32 @@ Evaluate:
 
 For each finding, classify as (A) must resolve, (B) should address,
 (C) suggestion.
+
+For every Category A and B finding, you MUST include a structured fix
+instruction using this YAML format (from methodology/06-review.md §6.5):
+
+  - id: A1
+    category: A
+    description: "One-sentence description of the issue"
+    fix:
+      type: exact          # use this when you can specify the precise text change
+      file: "path/to/file.md"
+      old: "exact text to replace"
+      new: "replacement text"
+      reason: "Why this is the correct fix"
+
+  - id: B1
+    category: B
+    description: "One-sentence description"
+    fix:
+      type: requires_reasoning   # use this when the fix needs computation or judgment
+      file: "path/to/file.md"
+      section: "Section name where fix applies"
+      instruction: "What the fix agent must compute or decide"
+      reason: "Why this fix is needed"
+
+A finding without a fix instruction is incomplete and the arbiter will flag it.
+Category C findings do not require fix instructions.
 ```
 
 ---
@@ -182,6 +208,32 @@ answer is non-empty and unjustified, those are Category A findings.
 
 Classify every issue as (A) must resolve, (B) should address, (C) suggestion.
 Err on the side of strictness.
+
+For every Category A and B finding, you MUST include a structured fix
+instruction using this YAML format (from methodology/06-review.md §6.5):
+
+  - id: A1
+    category: A
+    description: "One-sentence description of the issue"
+    fix:
+      type: exact          # use when you can specify the precise text change
+      file: "path/to/file.md"
+      old: "exact text to replace"
+      new: "replacement text"
+      reason: "Why this is the correct fix"
+
+  - id: B1
+    category: B
+    description: "One-sentence description"
+    fix:
+      type: requires_reasoning   # use when the fix needs computation or judgment
+      file: "path/to/file.md"
+      section: "Section name where fix applies"
+      instruction: "What the fix agent must compute or decide"
+      reason: "Why this fix is needed"
+
+A finding without a fix instruction is incomplete. Category C findings do not
+require fix instructions.
 ```
 
 ---
@@ -206,6 +258,32 @@ Identify where the argument could be clearer, where additional validation
 would build confidence, and where the presentation could be improved.
 Focus on Category B and C issues, but escalate to A if you find genuine
 errors.
+
+For every Category A and B finding, you MUST include a structured fix
+instruction using this YAML format (from methodology/06-review.md §6.5):
+
+  - id: B1
+    category: B
+    description: "One-sentence description"
+    fix:
+      type: exact          # use when you can specify the precise text change
+      file: "path/to/file.md"
+      old: "exact text to replace"
+      new: "replacement text"
+      reason: "Why this strengthens the analysis"
+
+  - id: B2
+    category: B
+    description: "One-sentence description"
+    fix:
+      type: requires_reasoning
+      file: "path/to/file.md"
+      section: "Section name"
+      instruction: "What to add or improve"
+      reason: "Why this fix is needed"
+
+A finding without a fix instruction is incomplete. Category C findings do not
+require fix instructions.
 ```
 
 ---
@@ -258,6 +336,20 @@ Run `pixi run build-pdf` and inspect the compiled PDF for:
 - Page count (50-100 pages for full AN)
 
 Classify issues as (A) must resolve, (B) should address, (C) suggestion.
+
+**On re-verify cycles (when this is not the first review iteration):**
+Check whether the fixes applied since your last review touched any of:
+LaTeX source (ANALYSIS_NOTE.md, REPORT.md), figure files (`figures/`),
+cross-reference labels (`{#fig:`, `{#tbl:`, `{#eq:`), math blocks (`$`,`$$`),
+or citations (`references.bib`).
+
+- If YES: Run `pixi run build-pdf` and perform the full inspection above.
+- If NO (prose-only changes, caption rewording, non-rendering B fixes):
+  Output a `{NAME}_RENDERING_REVIEW_PASS.md` file with:
+    rendering_recompile: skipped
+    reason: "No rendering-affecting files changed since last compilation"
+    prior_pdf_status: PASS
+  This constitutes a valid rendering PASS — the arbiter must accept it.
 ```
 
 ---
@@ -282,5 +374,35 @@ plot-validation, and rendering if Phase 5). For each issue:
 
 Plot-validation red flags are automatic Category A — do not downgrade them.
 
-End with: PASS / ITERATE (list Category A items) / ESCALATE (document why).
+Your output file (`{NAME}_ARBITER.md`) must consolidate all reviewer findings
+into a single REVIEW_NOTES.md at `phase*/review/REVIEW_NOTES.md`. Structure it as:
+
+---
+fixes:
+  - id: A1
+    category: A
+    description: "..."
+    fix:
+      type: exact | requires_reasoning
+      file: "..."
+      old: "..."       # exact only
+      new: "..."       # exact only
+      section: "..."   # requires_reasoning only
+      instruction: "..." # requires_reasoning only
+      reason: "..."
+  - id: B1
+    ...
+
+decision: PASS | ITERATE | ESCALATE
+a_count: N
+b_count: N
+b_only: true   # set to true when a_count == 0 AND b_count > 0
+---
+
+The orchestrator uses `b_only: true` to skip full arbiter re-review and proceed
+with a self-verify checklist (per §6.6.2). A `decision: PASS` requires
+a_count=0 AND b_count=0. Resolve reviewer disagreements, adjudicate conflicts,
+and do not issue PASS if any A or B items remain.
+
+End with: PASS / ITERATE / ESCALATE.
 ```

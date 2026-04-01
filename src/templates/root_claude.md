@@ -56,9 +56,15 @@ for each phase in [0, 1, 2, 3, 4, 5, 6]:
      If ITERATE:
        a. Apply `exact` fixes (old→new text) directly via Edit tool.
        b. Spawn fix agent for `requires_reasoning` fixes only.
-       c. Re-verify: if any Category A items, continue the arbiter via
-          SendMessage (fresh arbiter on 3rd+ iteration). If B-only
-          remaining, executor self-verifies via checklist — PASS on green.
+       c. Re-verify:
+          - **A-present:** Continue the original arbiter via SendMessage
+            (fresh arbiter spawn on 3rd+ iteration — see §6.6.2).
+          - **B-only** (`b_only: true` in REVIEW_NOTES.md, a_count=0):
+            Apply all B fixes (exact fixes via Edit tool; reasoning fixes inline).
+            Write `phase*/review/B_SELF_VERIFY.md` with one line per fix:
+              - B{id} [{description}]: APPLIED — {file}:{section}, "{old_snippet}" → "{new_snippet}"
+            If ANY fix cannot be written as APPLIED, escalate to full arbiter.
+            If ALL lines are APPLIED → proceed directly to COMMIT. No arbiter spawn.
      If only Category C or no issues: proceed.
 
   4. COMMIT — commit the phase's work.
@@ -95,11 +101,35 @@ subagent (avoids startup overhead). If >5 edges, split into steps 1-5
 fitting, uncertainty quantification) as separate subagent invocations. The
 step 6-7 subagent reads the causal testing artifact from disk.
 
-**Pre-generated phase context.** Before spawning subagents for Phase N,
-the orchestrator assembles `phase_context_N.md` — a single file containing
-all methodology sections, conventions, and bird's-eye framing needed by
-that phase. All subagents (executor, reviewers, arbiter) read this one file
-instead of 5-6 separate reads. Written to `phase*/context/`.
+**Pre-generated phase context.** Before spawning ANY subagent for Phase N,
+assemble `phase*/context/phase_context_N.md` using the Read tool. Structure:
+
+  ```markdown
+  # [Analysis Name] — Phase N Context
+
+  ## Bird's-Eye Framing
+  - Physics/research question: [from analysis prompt]
+  - Analysis type: [from analysis_config.yaml]
+  - Phase N goal: [what this phase must deliver]
+  - End goal: publication-quality analysis note
+
+  ## Upstream Artifact Summaries (link to full files for agent reference)
+  - DISCOVERY.md summary: [3-5 bullets — key decomposition, data sources, EP priors]
+  - STRATEGY.md summary: [3-5 bullets — method selections, EP values for primary edges]
+  - EXPLORATION.md summary: [2-3 bullets — data quality findings]  ← Phase 3+ only
+  - ANALYSIS.md summary: [2-3 bullets — causal findings, classifications]  ← Phase 4+ only
+
+  ## Methodology Sections for Phase N
+  [Paste relevant sections from methodology/ per §3a.4.2 table]
+
+  ## Applicable Conventions Excerpt
+  [Paste the required-checks section from conventions/ for this analysis technique]
+  ```
+
+Pass this single file to ALL subagents for Phase N (executor, all reviewers,
+arbiter). Do NOT ask each subagent to read methodology/ and upstream artifacts
+separately. Regenerate `phase_context_N.md` only if upstream methodology files
+or artifacts change between phases.
 
 **Data callbacks.** If Phase 2 or 3 agents report that a high-EP edge
 (EP > 0.30) cannot be tested due to missing data, the orchestrator MAY
