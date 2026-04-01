@@ -145,11 +145,11 @@ A 5-link chain where each edge has EP=0.7 yields Joint_EP = 0.17 — barely abov
 |-------|---------------|-------|---------|
 | Pre-analysis (prior) | `LITERATURE_SUPPORTED` | 0.70 | established in prior literature |
 | Pre-analysis (prior) | `THEORIZED` | 0.40 | plausible mechanism, untested |
-| Pre-analysis (prior) | `SPECULATIVE` | 0.15 | possible but weak basis |
+| Pre-analysis (prior) | `SPECULATIVE` | 0.20 | possible but weak basis |
 | Post Phase 3 (posterior) | `DATA_SUPPORTED` | 0.85 | survived 3-refutation battery |
 | Post Phase 3 (posterior) | `CORRELATION` | 0.50 | statistical signal, causation unestablished |
 | Post Phase 3 (posterior) | `HYPOTHESIZED` | 0.15 | not testable with available data |
-| Post Phase 3 (posterior) | `DISPUTED` | 0.30 | evidence internally contradictory |
+| Post Phase 3 (posterior) | `DISPUTED` | 0.10 | evidence internally contradictory |
 
 The prior-to-posterior transition is mechanical, not discretionary: the classification table maps directly to a `truth` value, and `truth` is capped at `min(1.0, max(0.8, prior_truth + 0.2))` for DATA_SUPPORTED edges. No analyst can override the arithmetic.
 

@@ -63,7 +63,7 @@ def classify_truth(evidence_type: str) -> float:
     Pre-analysis labels (Phase 0, hypothesis_agent):
         LITERATURE_SUPPORTED → 0.70 (published academic support)
         THEORIZED            → 0.40 (domain theory, no direct empirical citation)
-        SPECULATIVE          → 0.15 (novel hypothesis, no basis)
+        SPECULATIVE          → 0.20 (novel hypothesis, no basis)
     """
     mapping = {
         # Post-analysis labels
@@ -74,7 +74,7 @@ def classify_truth(evidence_type: str) -> float:
         # Pre-analysis labels (spec Section 4.2)
         "LITERATURE_SUPPORTED": 0.70,
         "THEORIZED": 0.40,
-        "SPECULATIVE": 0.15,
+        "SPECULATIVE": 0.20,
     }
     return mapping.get(evidence_type, 0.15)
 
