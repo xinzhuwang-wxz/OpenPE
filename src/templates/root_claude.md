@@ -581,9 +581,12 @@ captions. Do not let upstream figures go to waste — if a figure was worth
 generating, it is worth referencing in the final deliverable.
 
 **`REPORT_ZH.pdf`** is a mandatory deliverable. After producing the English
-REPORT.pdf, write `exec/REPORT_ZH.md` in natural Chinese prose (not machine
-translation) and compile it to `REPORT_ZH.pdf` at both `exec/` and the
-analysis root.
+REPORT.pdf, produce `exec/REPORT_ZH.md` by **translating `exec/REPORT.md`
+into Chinese** — preserving every section, paragraph, figure, table, and
+citation. The Chinese version must match the English in structure, detail,
+and length; it is a faithful translation, NOT an independent rewrite or
+condensed summary. Figures may remain in English. Compile to `REPORT_ZH.pdf`
+at both `exec/` and the analysis root.
 
 ---
 

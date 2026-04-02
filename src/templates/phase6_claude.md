@@ -377,10 +377,14 @@ the report to its evidence basis.
    reproducible.
 
 5. **Produce REPORT_ZH.pdf (Chinese-language report).** After the English
-   REPORT.pdf is verified, write `exec/REPORT_ZH.md` in natural Chinese
-   prose (not machine translation) and compile it to `REPORT_ZH.pdf` at
-   both `exec/` and the analysis root. Use the same pandoc build pipeline
-   as the English report.
+   REPORT.pdf is verified, produce `exec/REPORT_ZH.md` by **translating
+   `exec/REPORT.md` into Chinese** — preserving every section, paragraph,
+   figure reference, table, and citation from the English version. The
+   Chinese version must match the English version in structure, detail, and
+   length; it is a faithful translation, NOT an independent rewrite or
+   condensed summary. Figures may remain in English (no need to re-render).
+   Compile to `REPORT_ZH.pdf` at both `exec/` and the analysis root using
+   the same pandoc build pipeline as the English report.
 
 **Output:** `REPORT.pdf` and `REPORT_ZH.pdf` at the analysis root (compiled
 from `exec/REPORT.md` and `exec/REPORT_ZH.md` respectively).
