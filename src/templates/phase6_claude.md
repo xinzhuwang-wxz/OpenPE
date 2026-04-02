@@ -465,17 +465,46 @@ REPORT_ZH.pdf                 # At analysis root (copy of exec/REPORT_ZH.pdf)
 
 ## Review
 
-**3-bot review** (domain + rendering → arbiter) — see `methodology/06-review.md`
-for protocol.
+**3-bot two-stage review** — see `methodology/06-review.md` for protocol.
 
-Reviewers evaluate:
+Phase 6 review is split into two stages to avoid wasting PDF compilation
+cycles on content that needs revision:
+
+### Stage 1: MD Content Review (before PDF compilation)
+
+After Steps 6.1–6.3 (markdown documents + audit trail written), spawn the
+**domain reviewer** and **plot-validator** in parallel. They evaluate the
+markdown source only — no PDFs exist yet.
+
+Domain reviewer evaluates:
 - Is the report self-contained and comprehensible to a non-specialist?
 - Does the executive summary accurately represent the full findings?
 - Are all causal findings labeled with classification and EP?
 - Is the EP decay chart prominent and correctly annotated?
 - Does the audit trail cover all factual claims?
 - Are data quality caveats and verification flags visible?
-- Does the PDF render correctly with all figures and cross-references?
 - Is the report honest about limitations and uncertainty?
+
+If Stage 1 issues require ITERATE: fix the markdown, re-review Stage 1.
+Do NOT compile PDFs until Stage 1 passes.
+
+### Stage 2: PDF Rendering Review (after PDF compilation)
+
+After Stage 1 passes and Step 6.4 compiles all PDFs, spawn the
+**rendering reviewer**. It evaluates compiled PDFs only:
+- Do all figures render correctly (no missing image placeholders)?
+- Are there unresolved cross-references ("??" in output)?
+- Is the table of contents complete?
+- Do tables render properly?
+- Is LaTeX math rendering correctly?
+- Are section numbers correct (no double-numbering)?
+- Is the Chinese PDF rendering CJK characters correctly?
+
+### Arbiter Synthesis
+
+After both stages complete, the **arbiter** synthesizes all findings
+(domain + plot-validator from Stage 1, rendering from Stage 2) and issues
+the final verdict. The arbiter receives all reviewer outputs but does NOT
+re-review the PDFs or markdown itself.
 
 Write findings to `review/REVIEW_NOTES.md`.

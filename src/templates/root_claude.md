@@ -387,7 +387,7 @@ phase begins. No exceptions.
 | 3 | `phase3_analysis/exec/ANALYSIS.md` | 4-bot |
 | 4 | `phase4_projection/exec/PROJECTION.md` | 4-bot |
 | 5 | `phase5_verification/exec/VERIFICATION.md` | 4-bot + Human Gate |
-| 6 | `phase6_documentation/exec/ANALYSIS_NOTE.md` + `phase6_documentation/exec/REPORT.md` + `phase6_documentation/audit_trail/` + `REPORT.pdf` | 3-bot (domain + rendering + arbiter) |
+| 6 | `phase6_documentation/exec/ANALYSIS_NOTE.md` + `phase6_documentation/exec/REPORT.md` + `phase6_documentation/audit_trail/` + `REPORT.pdf` | 3-bot two-stage (domain + plot-validator → compile → rendering + arbiter) |
 
 **Review before advancing.** After each artifact, spawn a reviewer subagent.
 Self-review is only acceptable for Phase 2 (exploration). All other phases
@@ -430,7 +430,7 @@ The arbiter must not PASS with unresolved A or B items.
 | 3: Causal Analysis | 4-bot (domain + logic + methods → arbiter) |
 | 4: Projection | 4-bot (domain + logic + methods → arbiter) |
 | 5: Verification | 4-bot (domain + logic + methods → arbiter) + Human Gate |
-| 6: Documentation | 3-bot (domain + rendering → arbiter) |
+| 6: Documentation | 3-bot two-stage (domain + plot-validator → compile → rendering → arbiter) |
 
 **Plot-validator** runs alongside all other reviewers in parallel. It performs
 programmatic (not visual) checks on plotting code and output data. Red flags
