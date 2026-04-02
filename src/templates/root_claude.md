@@ -575,6 +575,16 @@ the audit trail from upstream artifacts.
 
 **`REPORT.pdf`** is compiled from REPORT.md and placed at the analysis root.
 
+**Reuse upstream figures.** Figures generated in Phases 0–5 that help
+illustrate findings MUST be included in the Phase 6 report with proper
+captions. Do not let upstream figures go to waste — if a figure was worth
+generating, it is worth referencing in the final deliverable.
+
+**`REPORT_ZH.pdf`** is a mandatory deliverable. After producing the English
+REPORT.pdf, write `exec/REPORT_ZH.md` in natural Chinese prose (not machine
+translation) and compile it to `REPORT_ZH.pdf` at both `exec/` and the
+analysis root.
+
 ---
 
 ## Analysis Note Format

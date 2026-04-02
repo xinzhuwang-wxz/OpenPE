@@ -265,6 +265,11 @@ forward projection.
    ln -sf ../../figures/*.pdf exec/figures/
    ```
 
+5. **Reuse upstream figures.** Figures generated in Phases 0–5 that help
+   illustrate findings MUST be included in the report with proper captions.
+   Do not let upstream figures go to waste — review all files in `figures/`
+   and incorporate every figure that supports a finding or adds context.
+
 **Output:** Validated figures in `figures/` and symlinked into `exec/figures/`.
 
 ---
@@ -371,8 +376,16 @@ the report to its evidence basis.
    automatically. Manual LaTeX conversion introduces errors and is not
    reproducible.
 
-**Output:** `REPORT.pdf` at the analysis root (compiled from `exec/REPORT.md`).
-Also generate `exec/REPORT.pdf` and `exec/ANALYSIS_NOTE.pdf` for archival.
+5. **Produce REPORT_ZH.pdf (Chinese-language report).** After the English
+   REPORT.pdf is verified, write `exec/REPORT_ZH.md` in natural Chinese
+   prose (not machine translation) and compile it to `REPORT_ZH.pdf` at
+   both `exec/` and the analysis root. Use the same pandoc build pipeline
+   as the English report.
+
+**Output:** `REPORT.pdf` and `REPORT_ZH.pdf` at the analysis root (compiled
+from `exec/REPORT.md` and `exec/REPORT_ZH.md` respectively).
+Also generate `exec/REPORT.pdf`, `exec/REPORT_ZH.pdf`, and
+`exec/ANALYSIS_NOTE.pdf` for archival.
 
 ---
 
@@ -430,6 +443,8 @@ phase6_documentation/
     ANALYSIS_NOTE.pdf         # Compiled PDF of ANALYSIS_NOTE
     REPORT.md                 # Polished stakeholder deliverable (NOT a symlink)
     REPORT.pdf                # Compiled PDF of REPORT
+    REPORT_ZH.md              # Chinese-language stakeholder deliverable
+    REPORT_ZH.pdf             # Compiled PDF of REPORT_ZH
     references.bib            # Bibliography
     figures/                  # All referenced figures
   audit_trail/
@@ -441,6 +456,7 @@ phase6_documentation/
   scripts/
     generate_audit.py         # Reproducible audit trail generation
 REPORT.pdf                    # At analysis root (copy of exec/REPORT.pdf)
+REPORT_ZH.pdf                 # At analysis root (copy of exec/REPORT_ZH.pdf)
 ```
 
 **Missing any of these files is a Category A finding that blocks PASS.**
